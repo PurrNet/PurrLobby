@@ -11,6 +11,7 @@ namespace PurrLobby
     {
         readonly LobbyApiClient _api;
         readonly string _localPlayerId;
+        readonly string _playerToken;
         readonly float _pollInterval;
 
         readonly List<PurrPlayer> _playersList = new List<PurrPlayer>();
@@ -56,15 +57,17 @@ namespace PurrLobby
             LobbyApiClient api,
             string lobbyId,
             string localPlayerId,
+            string playerToken,
             JObject lobbyData,
             float pollInterval = 1.5f)
         {
             _api = api;
             id = lobbyId;
             _localPlayerId = localPlayerId;
+            _playerToken = playerToken;
             _pollInterval = pollInterval;
 
-            _chat = new PurrLobbyChat(api, lobbyId, ResolvePlayer);
+            _chat = new PurrLobbyChat(api, lobbyId, playerToken, ResolvePlayer);
 
             // Wire up metadata patching to server
             _lobbyMetadata.onPatchRequested = patch => PatchLobbyMetadataAsync(patch).Forget();
@@ -238,12 +241,12 @@ namespace PurrLobby
             await _api.PostAsync($"/api/lobby/{id}/kick", new Dictionary<string, object>
             {
                 { "playerId", player.id }
-            });
+            }, _playerToken);
         }
 
         async Task LeaveAsync()
         {
-            await _api.PostAsync($"/api/lobby/{id}/leave");
+            await _api.PostAsync($"/api/lobby/{id}/leave", playerToken: _playerToken);
         }
 
         // ── Metadata patching ────────────────────────────────────────
@@ -253,7 +256,7 @@ namespace PurrLobby
             await _api.PatchAsync($"/api/lobby/{id}/metadata", new Dictionary<string, object>
             {
                 { "metadata", patch }
-            });
+            }, _playerToken);
         }
 
         internal void WirePlayerMetadata(PurrPlayer player)
@@ -269,7 +272,7 @@ namespace PurrLobby
             await _api.PatchAsync($"/api/lobby/{id}/player", new Dictionary<string, object>
             {
                 { "metadata", patch }
-            });
+            }, _playerToken);
         }
 
         // ── Polling ──────────────────────────────────────────────────
@@ -289,7 +292,7 @@ namespace PurrLobby
                         { "chatAfterSeq", _chat.lastSeq.ToString() }
                     };
 
-                    string response = await _api.GetAsync($"/api/lobby/{id}", queryParams);
+                    string response = await _api.GetAsync($"/api/lobby/{id}", queryParams, _playerToken);
                     var snapshot = Json.ParseObject(response);
                     if (snapshot != null)
                         ApplySnapshot(snapshot);

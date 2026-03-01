@@ -6,6 +6,6 @@ namespace PurrLobby
     {
         void SendMessage(ArraySegment<byte> data);
 
-        event System.Action<IPlayer, ArraySegment<byte>> onMessageReceived;
+        event Action<IPlayer, ArraySegment<byte>> onMessageReceived;
     }
 }

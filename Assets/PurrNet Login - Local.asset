@@ -9,7 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16d4ffb0670b5cc4b8ef1d678aa1d73f, type: 3}
-  m_Name: PurrNet Lobbies - Local
-  m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.PurrLobbySettings
-  _session: {fileID: 11400000, guid: 7c4d48001b5049942ae9e1cc25938c5f, type: 2}
+  m_Script: {fileID: 11500000, guid: 9d52960fa5d3a4641ab7ef34348b64e4, type: 3}
+  m_Name: PurrNet Login - Local
+  m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.PurrLoginSettings

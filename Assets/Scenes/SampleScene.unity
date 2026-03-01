@@ -163,7 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09963e15f659fcb4980692fdd56214f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.PurrLobbyDebugPanel
-  settings: {fileID: 11400000, guid: 5e4360e8c2766cf448c192c7fff68c95, type: 2}
+  _orchestrator: {fileID: 11400000, guid: f02d169f427ffae46bdb5ee7f435a4ee, type: 2}
+  skin: {fileID: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0

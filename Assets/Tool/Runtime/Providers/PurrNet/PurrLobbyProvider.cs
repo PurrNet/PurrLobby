@@ -6,25 +6,22 @@ using PurrLobby.Internal;
 
 namespace PurrLobby
 {
-    public sealed class PurrLobbyProvider : ILobbyProvider
+    internal sealed class PurrLobbyClient
     {
         readonly LobbyApiClient _api;
-        readonly string _playerId;
-        readonly string _playerName;
+        readonly PurrSession _session;
 
-        public PurrLobbyProvider(string apiUrl, string apiKey, string gameId, string playerId, string playerName)
+        internal event Action<string, string> onPlayerTokenReceived;
+
+        public PurrLobbyClient(PurrSession session)
         {
-            if (string.IsNullOrEmpty(apiUrl)) throw new ArgumentException("apiUrl is required");
-            if (string.IsNullOrEmpty(playerId)) throw new ArgumentException("playerId is required");
-            if (string.IsNullOrEmpty(apiKey) && string.IsNullOrEmpty(gameId))
-                throw new ArgumentException("Either apiKey or gameId is required");
-
-            _playerId = playerId;
-            _playerName = string.IsNullOrEmpty(playerName) ? playerId : playerName;
-            _api = new LobbyApiClient(apiUrl, apiKey, gameId, playerId, _playerName);
+            if (string.IsNullOrEmpty(session.apiUrl)) throw new ArgumentException("apiUrl is required");
+            if (string.IsNullOrEmpty(session.playerId)) throw new ArgumentException("playerId is required");
+            if (string.IsNullOrEmpty(session.projectClientKey)) throw new ArgumentException("projectClientKey is required");
+            _api = new LobbyApiClient(session);
         }
 
-        public async Task<ILobby> CreateLobby(LobbySettings settings)
+        public async Task<ILobby> CreateLobbyAsync(LobbySettings settings)
         {
             var body = new Dictionary<string, object>
             {
@@ -36,23 +33,25 @@ namespace PurrLobby
             string response = await _api.PostAsync("/api/lobby", body);
             var lobbyData = Json.ParseObject(response);
             string lobbyId = lobbyData.GetString("id");
+            string playerToken = lobbyData.GetString("playerToken");
+            onPlayerTokenReceived?.Invoke(lobbyId, playerToken);
 
-            var lobby = new PurrLobby(_api, lobbyId, _playerId, lobbyData);
-
-            // Fetch full snapshot to populate players, metadata, chat
-            var snapshot = await FetchSnapshot(lobbyId);
+            var lobby = new PurrLobby(_api, lobbyId, _session.playerId, playerToken, lobbyData);
+            var snapshot = await FetchSnapshot(lobbyId, playerToken);
             lobby.ApplyInitialSnapshot(snapshot);
 
             return lobby;
         }
 
-        public async Task<ILobby> JoinLobby(string lobbyId)
+        public async Task<ILobby> JoinLobbyAsync(string lobbyId)
         {
-            await _api.PostAsync($"/api/lobby/{lobbyId}/join");
-            return await BuildLobbyFromPoll(lobbyId);
+            string response = await _api.PostAsync($"/api/lobby/{lobbyId}/join");
+            var result = Json.ParseObject(response);
+            string playerToken = result.GetString("playerToken");
+            return await BuildLobbyFromPoll(lobbyId, playerToken);
         }
 
-        public async Task<ILobby> JoinLobbyByCode(string code)
+        public async Task<ILobby> JoinLobbyByCodeAsync(string code)
         {
             string response = await _api.PostAsync("/api/lobby/join-by-code", new Dictionary<string, object>
             {
@@ -61,10 +60,11 @@ namespace PurrLobby
 
             var result = Json.ParseObject(response);
             string lobbyId = result.GetString("lobbyId");
-            return await BuildLobbyFromPoll(lobbyId);
+            string playerToken = result.GetString("playerToken");
+            return await BuildLobbyFromPoll(lobbyId, playerToken);
         }
 
-        public async Task<ILobby> JoinRandom(LobbyQuery query = default)
+        public async Task<ILobby> JoinRandomAsync(LobbyQuery query = default)
         {
             var body = new Dictionary<string, object>();
             if (query.dataFilters != null && query.dataFilters.Count > 0)
@@ -73,10 +73,11 @@ namespace PurrLobby
             string response = await _api.PostAsync("/api/lobby/quick-join", body.Count > 0 ? body : null);
             var result = Json.ParseObject(response);
             string lobbyId = result.GetString("lobbyId");
-            return await BuildLobbyFromPoll(lobbyId);
+            string playerToken = result.GetString("playerToken");
+            return await BuildLobbyFromPoll(lobbyId, playerToken);
         }
 
-        public async Task<IReadOnlyList<LobbyInfo>> QueryLobbies(LobbyQuery query = default)
+        public async Task<IReadOnlyList<LobbyInfo>> QueryLobbiesAsync(LobbyQuery query = default)
         {
             string response = await _api.GetAsync("/api/lobby");
             var data = Json.ParseObject(response);
@@ -108,18 +109,20 @@ namespace PurrLobby
             return result;
         }
 
-        async Task<JObject> FetchSnapshot(string lobbyId)
+        async Task<JObject> FetchSnapshot(string lobbyId, string playerToken)
         {
-            string response = await _api.GetAsync($"/api/lobby/{lobbyId}");
+            string response = await _api.GetAsync($"/api/lobby/{lobbyId}", playerToken: playerToken);
             return Json.ParseObject(response);
         }
 
-        async Task<ILobby> BuildLobbyFromPoll(string lobbyId)
+        async Task<ILobby> BuildLobbyFromPoll(string lobbyId, string playerToken)
         {
-            var snapshot = await FetchSnapshot(lobbyId);
+            onPlayerTokenReceived?.Invoke(lobbyId, playerToken);
+
+            var snapshot = await FetchSnapshot(lobbyId, playerToken);
             var lobbyObj = snapshot.GetObject("lobby");
 
-            var lobby = new PurrLobby(_api, lobbyId, _playerId, lobbyObj);
+            var lobby = new PurrLobby(_api, lobbyId, _session.playerId, playerToken, lobbyObj);
             lobby.ApplyInitialSnapshot(snapshot);
             return lobby;
         }

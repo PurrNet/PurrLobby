@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -10,45 +9,45 @@ namespace PurrLobby.Internal
 {
     internal sealed class LobbyApiClient
     {
-        readonly string _baseUrl;
-        readonly string _apiKey;
-        readonly string _gameId;
-        readonly string _playerId;
-        readonly string _playerName;
+        readonly PurrSession _session;
 
-        public LobbyApiClient(string baseUrl, string apiKey, string gameId, string playerId, string playerName)
+        string _baseUrl => _session.apiUrl.TrimEnd('/');
+
+        string _apiKey => _session.projectClientKey;
+
+        string _playerId => _session.playerId;
+
+        string _playerName => _session.playerName;
+
+        public LobbyApiClient(PurrSession session)
         {
-            _baseUrl = baseUrl.TrimEnd('/');
-            _apiKey = apiKey;
-            _gameId = gameId;
-            _playerId = playerId;
-            _playerName = playerName;
+            _session = session;
         }
 
-        public Task<string> GetAsync(string path, Dictionary<string, string> queryParams = null)
+        public Task<string> GetAsync(string path, Dictionary<string, string> queryParams = null, string playerToken = null)
         {
             string url = BuildUrl(path, queryParams);
-            return SendAsync("GET", url, null);
+            return SendAsync("GET", url, null, playerToken);
         }
 
-        public Task<string> PostAsync(string path, Dictionary<string, object> body = null)
+        public Task<string> PostAsync(string path, Dictionary<string, object> body = null, string playerToken = null)
         {
             string url = BuildUrl(path);
             string jsonBody = body != null ? Json.Serialize(body) : null;
-            return SendAsync("POST", url, jsonBody);
+            return SendAsync("POST", url, jsonBody, playerToken);
         }
 
-        public Task<string> PatchAsync(string path, Dictionary<string, object> body)
+        public Task<string> PatchAsync(string path, Dictionary<string, object> body, string playerToken = null)
         {
             string url = BuildUrl(path);
             string jsonBody = Json.Serialize(body);
-            return SendAsync("PATCH", url, jsonBody);
+            return SendAsync("PATCH", url, jsonBody, playerToken);
         }
 
-        public Task<string> DeleteAsync(string path)
+        public Task<string> DeleteAsync(string path, string playerToken = null)
         {
             string url = BuildUrl(path);
-            return SendAsync("DELETE", url, null);
+            return SendAsync("DELETE", url, null, playerToken);
         }
 
         string BuildUrl(string path, Dictionary<string, string> queryParams = null)
@@ -56,7 +55,7 @@ namespace PurrLobby.Internal
             var sb = new StringBuilder(_baseUrl);
             sb.Append(path);
 
-            if (queryParams != null && queryParams.Count > 0)
+            if (queryParams is { Count: > 0 })
             {
                 sb.Append('?');
                 bool first = true;
@@ -73,7 +72,7 @@ namespace PurrLobby.Internal
             return sb.ToString();
         }
 
-        async Task<string> SendAsync(string method, string url, string jsonBody)
+        async Task<string> SendAsync(string method, string url, string jsonBody, string playerToken = null)
         {
             using var request = new UnityWebRequest(url, method);
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -84,13 +83,18 @@ namespace PurrLobby.Internal
                 request.uploadHandler = new UploadHandlerRaw(bodyBytes);
                 request.SetRequestHeader("Content-Type", "application/json");
             }
+            else if (method is "POST" or "PATCH")
+            {
+                request.uploadHandler = new UploadHandlerRaw(Array.Empty<byte>());
+                request.SetRequestHeader("Content-Type", "application/json");
+            }
 
-            if (!string.IsNullOrEmpty(_apiKey))
-                request.SetRequestHeader("Authorization", $"Bearer {_apiKey}");
-            else if (!string.IsNullOrEmpty(_gameId))
-                request.SetRequestHeader("X-Game-Id", _gameId);
+            request.SetRequestHeader("Authorization", $"Bearer {_apiKey}");
             request.SetRequestHeader("X-Player-Id", _playerId);
             request.SetRequestHeader("X-Player-Name", _playerName);
+
+            if (!string.IsNullOrEmpty(playerToken))
+                request.SetRequestHeader("X-Player-Token", playerToken);
 
             await request.SendWebRequest();
 

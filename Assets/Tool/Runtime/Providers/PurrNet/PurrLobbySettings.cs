@@ -1,32 +1,83 @@
-using PurrLobby.Internal;
+using System;
 using UnityEngine;
 
 namespace PurrLobby
 {
-    [CreateAssetMenu(fileName = "PurrLobbySettings", menuName = "PurrNet/Lobby/PurrNet Settings")]
-    public sealed class PurrLobbySettings : ScriptableObject
+    [CreateAssetMenu(menuName = "PurrNet/Lobby/Providers/PurrNet/Lobby Provider")]
+    public sealed class PurrLobbyProvider : LobbyProvider
     {
-        [Header("Server")]
-        [Tooltip("Base URL of the PurrNet website API (e.g. https://purrnet.dev)")]
-        public string apiUrl = "https://purrnet.dev";
+        [SerializeField] PurrSession _session;
 
-        [Tooltip("Optional API key from the PurrNet dashboard. Leave empty for the free tier.")]
-        public string apiKey;
+        PurrLobbyClient _client;
 
-        [Tooltip("Game identifier used for free-tier lobby namespacing. Required when no API key is set.")]
-        public string gameId;
-
-        public PurrLobbyProvider CreateProvider(string playerId, string playerName = null)
+        PurrLobbyClient GetClient()
         {
-            string pname = playerName ?? SystemInfo.deviceName;
-            return new PurrLobbyProvider(apiUrl, apiKey, gameId, playerId, pname);
+            return _client ??= new PurrLobbyClient(_session);
         }
 
-        public PurrGameStarter CreateGameStarter(string playerId, string playerName = null)
+        public override async void CreateLobby(LobbySettings settings, Action<LobbyResponse> onComplete)
         {
-            string pname = playerName ?? SystemInfo.deviceName;
-            var api = new LobbyApiClient(apiUrl, apiKey, gameId, playerId, pname);
-            return new PurrGameStarter(api);
+            try
+            {
+                var lobby = await GetClient().CreateLobbyAsync(settings);
+                onComplete?.Invoke(LobbyResponse.Success(lobby));
+            }
+            catch (Exception ex)
+            {
+                onComplete?.Invoke(LobbyResponse.Failure(ex.Message));
+            }
+        }
+
+        public override async void JoinLobby(string lobbyId, Action<LobbyResponse> onComplete)
+        {
+            try
+            {
+                var lobby = await GetClient().JoinLobbyAsync(lobbyId);
+                onComplete?.Invoke(LobbyResponse.Success(lobby));
+            }
+            catch (Exception ex)
+            {
+                onComplete?.Invoke(LobbyResponse.Failure(ex.Message));
+            }
+        }
+
+        public override async void JoinLobbyByCode(string code, Action<LobbyResponse> onComplete)
+        {
+            try
+            {
+                var lobby = await GetClient().JoinLobbyByCodeAsync(code);
+                onComplete?.Invoke(LobbyResponse.Success(lobby));
+            }
+            catch (Exception ex)
+            {
+                onComplete?.Invoke(LobbyResponse.Failure(ex.Message));
+            }
+        }
+
+        public override async void JoinRandom(Action<LobbyResponse> onComplete, LobbyQuery query = default)
+        {
+            try
+            {
+                var lobby = await GetClient().JoinRandomAsync(query);
+                onComplete?.Invoke(LobbyResponse.Success(lobby));
+            }
+            catch (Exception ex)
+            {
+                onComplete?.Invoke(LobbyResponse.Failure(ex.Message));
+            }
+        }
+
+        public override async void QueryLobbies(Action<LobbyCollectionResponse> onComplete, LobbyQuery query = default)
+        {
+            try
+            {
+                var lobbies = await GetClient().QueryLobbiesAsync(query);
+                onComplete?.Invoke(LobbyCollectionResponse.Success(lobbies));
+            }
+            catch (Exception ex)
+            {
+                onComplete?.Invoke(LobbyCollectionResponse.Failure(ex.Message));
+            }
         }
     }
 }

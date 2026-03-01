@@ -11,16 +11,18 @@ namespace PurrLobby
     {
         readonly LobbyApiClient _api;
         readonly string _lobbyId;
+        readonly string _playerToken;
         readonly Func<string, IPlayer> _resolvePlayer;
 
         internal int lastSeq;
 
         public event Action<IPlayer, ArraySegment<byte>> onMessageReceived;
 
-        public PurrLobbyChat(LobbyApiClient api, string lobbyId, Func<string, IPlayer> resolvePlayer)
+        public PurrLobbyChat(LobbyApiClient api, string lobbyId, string playerToken, Func<string, IPlayer> resolvePlayer)
         {
             _api = api;
             _lobbyId = lobbyId;
+            _playerToken = playerToken;
             _resolvePlayer = resolvePlayer;
         }
 
@@ -46,7 +48,7 @@ namespace PurrLobby
             await _api.PostAsync($"/api/lobby/{_lobbyId}/chat", new Dictionary<string, object>
             {
                 { "data", base64 }
-            });
+            }, _playerToken);
         }
 
         /// <summary>
