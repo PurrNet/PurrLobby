@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace PurrLobby
 {
-    public sealed class PurrLobbyDebugPanel : MonoBehaviour
+    public sealed class PurrLobbyImgui : MonoBehaviour
     {
         enum MenuState
         {
@@ -29,7 +29,7 @@ namespace PurrLobby
         private float _errorTimer;
 
         // Connection state
-        private string _playerId = System.Guid.NewGuid().ToString("N")[..8];
+        private string _playerId = Guid.NewGuid().ToString("N")[..8];
         private string _playerName = Environment.MachineName;
         private ILobbyProvider _provider;
         private IGameStarter _gameStarter;
@@ -98,21 +98,28 @@ namespace PurrLobby
 
         private async void RunAsync(Func<Task> action, MenuState? successState = null)
         {
-            if (_loading) return;
-            _loading = true;
             try
             {
-                await action();
-                if (successState.HasValue)
-                    _state = successState.Value;
+                if (_loading) return;
+                _loading = true;
+                try
+                {
+                    await action();
+                    if (successState.HasValue)
+                        _state = successState.Value;
+                }
+                catch (Exception ex)
+                {
+                    ShowError(ex.Message);
+                }
+                finally
+                {
+                    _loading = false;
+                }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                ShowError(ex.Message);
-            }
-            finally
-            {
-                _loading = false;
+                ShowError(e.Message);
             }
         }
 
@@ -130,8 +137,11 @@ namespace PurrLobby
             {
                 lobby.chat.onMessageReceived += (player, data) =>
                 {
-                    var text = Encoding.UTF8.GetString(data.Array, data.Offset, data.Count);
-                    _chatMessages.Add($"[{DateTime.Now:HH:mm:ss}] {player.displayName}: {text}");
+                    if (data.Array != null)
+                    {
+                        var text = Encoding.UTF8.GetString(data.Array, data.Offset, data.Count);
+                        _chatMessages.Add($"[{DateTime.Now:HH:mm:ss}] {player.displayName}: {text}");
+                    }
                 };
             }
         }
