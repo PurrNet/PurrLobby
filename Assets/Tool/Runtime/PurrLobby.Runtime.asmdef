@@ -1,0 +1,19 @@
+{
+    "name": "PurrLobby.Runtime",
+    "rootNamespace": "PurrLobby",
+    "references": [
+        "GUID:20ee313e09faec446a26ffa1daf5636b",
+        "GUID:fed1b9451fde4474bbc2aad5bda39aca"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
