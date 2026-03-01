@@ -10,7 +10,8 @@
       "Bash(npm run:*)",
       "WebFetch(domain:discussions.unity.com)",
       "WebFetch(domain:docs.unity3d.com)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(xargs:*)"
     ]
   }
 }
