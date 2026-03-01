@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using ImGuiNET;
-using ImGuiNET.Unity;
 using UnityEngine;
 
 namespace PurrLobby
@@ -55,30 +53,22 @@ namespace PurrLobby
         // Chat
         private string _chatInput = "";
         private readonly List<string> _chatMessages = new();
+        private Vector2 _chatScroll;
 
         // Game starter result
         private ConnectionInfo? _lastConnectionInfo;
 
-        // Layout constants
-        const float BUTTON_HEIGHT = 36f;
-        const float SPACING = 8f;
+        // Layout
+        const float CARD_PAD = 20f;
+        const float BTN_H = 32f;
 
-        private void OnEnable()
-        {
-            DearImGui.AddDrawRequest(OnShouldRender);
-            ImGuiUn.Layout += OnImGUI;
-        }
+        // Styles
+        private bool _stylesReady;
+        private GUIStyle _box, _title, _subtitle, _btn, _field, _pill, _pillLabel;
+        private GUIStyle _errorBox, _errorLabel, _headerLabel, _rowEven, _rowOdd;
+        private Texture2D _cardTex, _pillTex, _errorTex, _rowEvenTex, _rowOddTex;
 
-        private void OnDisable()
-        {
-            DearImGui.RemoveDrawRequest(OnShouldRender);
-            ImGuiUn.Layout -= OnImGUI;
-        }
-
-        private bool OnShouldRender()
-        {
-            return enabled && gameObject.activeInHierarchy;
-        }
+        // ─────────────────────────────────────────
 
         private void ShowError(string message)
         {
@@ -98,28 +88,21 @@ namespace PurrLobby
 
         private async void RunAsync(Func<Task> action, MenuState? successState = null)
         {
+            if (_loading) return;
+            _loading = true;
             try
             {
-                if (_loading) return;
-                _loading = true;
-                try
-                {
-                    await action();
-                    if (successState.HasValue)
-                        _state = successState.Value;
-                }
-                catch (Exception ex)
-                {
-                    ShowError(ex.Message);
-                }
-                finally
-                {
-                    _loading = false;
-                }
+                await action();
+                if (successState.HasValue)
+                    _state = successState.Value;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                ShowError(e.Message);
+                ShowError(ex.Message);
+            }
+            finally
+            {
+                _loading = false;
             }
         }
 
@@ -147,33 +130,118 @@ namespace PurrLobby
         }
 
         // ─────────────────────────────────────────
-        // Main render entry
+        // Styles
         // ─────────────────────────────────────────
 
-        private void OnImGUI()
+        private static Texture2D MakeTex(Color col)
         {
-            var viewport = ImGui.GetMainViewport();
-            ImGui.SetNextWindowPos(viewport.Pos, ImGuiCond.Always);
-            ImGui.SetNextWindowSize(viewport.Size, ImGuiCond.Always);
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false) { hideFlags = HideFlags.DontSave };
+            var pixels = new[] { col, col, col, col };
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return tex;
+        }
 
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(8, 6));
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(8, 5));
+        private void InitStyles()
+        {
+            if (_stylesReady) return;
+            _stylesReady = true;
 
-            var flags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove
-                      | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoSavedSettings
-                      | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoBackground;
+            _cardTex = MakeTex(new Color(0.14f, 0.14f, 0.18f, 0.95f));
+            _pillTex = MakeTex(new Color(0.12f, 0.12f, 0.15f, 0.88f));
+            _errorTex = MakeTex(new Color(0.55f, 0.08f, 0.08f, 0.92f));
+            _rowEvenTex = MakeTex(new Color(0.18f, 0.18f, 0.22f, 0.7f));
+            _rowOddTex = MakeTex(new Color(0.15f, 0.15f, 0.19f, 0.7f));
 
-            if (!ImGui.Begin("PurrLobby##Fullscreen", flags))
+            _box = new GUIStyle(GUI.skin.box)
             {
-                ImGui.End();
-                ImGui.PopStyleVar(2);
-                return;
-            }
+                normal = { background = _cardTex },
+                padding = new RectOffset(0, 0, 0, 0),
+                margin = new RectOffset(0, 0, 0, 0)
+            };
 
-            DrawStatusBar();
+            _title = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 20,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = Color.white }
+            };
 
-            GetCardSize(out float cardW, out float cardH);
-            BeginCenteredCard(cardW, cardH);
+            _subtitle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 12,
+                alignment = TextAnchor.MiddleLeft,
+                normal = { textColor = new Color(0.6f, 0.6f, 0.6f) }
+            };
+
+            _headerLabel = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 14,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = new Color(0.85f, 0.85f, 0.85f) }
+            };
+
+            _btn = new GUIStyle(GUI.skin.button)
+            {
+                fontSize = 14,
+                fixedHeight = BTN_H,
+                normal = { textColor = Color.white },
+                hover = { textColor = Color.white }
+            };
+
+            _field = new GUIStyle(GUI.skin.textField)
+            {
+                fontSize = 14,
+                fixedHeight = 26
+            };
+
+            _pill = new GUIStyle(GUI.skin.box)
+            {
+                normal = { background = _pillTex },
+                padding = new RectOffset(10, 10, 4, 4)
+            };
+
+            _pillLabel = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 12,
+                normal = { textColor = new Color(0.7f, 0.7f, 0.7f) }
+            };
+
+            _errorBox = new GUIStyle(GUI.skin.box)
+            {
+                normal = { background = _errorTex },
+                padding = new RectOffset(12, 12, 6, 6)
+            };
+
+            _errorLabel = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 13,
+                wordWrap = true,
+                normal = { textColor = new Color(1f, 0.45f, 0.45f) }
+            };
+
+            _rowEven = new GUIStyle { normal = { background = _rowEvenTex }, padding = new RectOffset(6, 6, 3, 3) };
+            _rowOdd = new GUIStyle { normal = { background = _rowOddTex }, padding = new RectOffset(6, 6, 3, 3) };
+        }
+
+        // ─────────────────────────────────────────
+        // Main render
+        // ─────────────────────────────────────────
+
+        private void OnGUI()
+        {
+            InitStyles();
+
+            DrawStatusPill();
+
+            GetCardSize(out float cw, out float ch);
+            var card = new Rect((Screen.width - cw) / 2f, (Screen.height - ch) / 2f, cw, ch);
+            GUI.Box(card, "", _box);
+
+            var inner = new Rect(card.x + CARD_PAD, card.y + CARD_PAD,
+                                 card.width - CARD_PAD * 2, card.height - CARD_PAD * 2);
+            GUILayout.BeginArea(inner);
 
             switch (_state)
             {
@@ -185,19 +253,16 @@ namespace PurrLobby
                 case MenuState.InLobby:      DrawInLobby(); break;
             }
 
-            EndCenteredCard();
+            GUILayout.EndArea();
 
             DrawErrorToast();
-
-            ImGui.End();
-            ImGui.PopStyleVar(2);
         }
 
         // ─────────────────────────────────────────
-        // Status bar (always visible)
+        // Status pill
         // ─────────────────────────────────────────
 
-        private void DrawStatusBar()
+        private void DrawStatusPill()
         {
             var stateLabel = _state switch
             {
@@ -210,119 +275,100 @@ namespace PurrLobby
                 _ => ""
             };
 
-            // Measure width for the background pill
-            float contentW = ImGui.CalcTextSize(stateLabel).x;
-            if (_provider != null)
-                contentW += ImGui.CalcTextSize(_playerName).x + ImGui.CalcTextSize(" | ").x;
-            if (_loading)
-                contentW += ImGui.CalcTextSize(" | Working...").x;
-
-            float pillH = ImGui.GetTextLineHeightWithSpacing() + 10;
-            float pillW = contentW + 24;
-
-            ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.1f, 0.1f, 0.12f, 0.85f));
-            ImGui.BeginChild("StatusBar", new Vector2(pillW, pillH), true);
-
-            // Player name + state
-            if (_provider != null)
-            {
-                ImGui.TextColored(new Vector4(0.6f, 1f, 0.6f, 1f), _playerName);
-                ImGui.SameLine();
-                ImGui.TextDisabled("|");
-                ImGui.SameLine();
-            }
-
-            ImGui.TextDisabled(stateLabel);
-
-            // Loading spinner
+            string text = _provider != null ? $"{_playerName}  |  {stateLabel}" : stateLabel;
             if (_loading)
             {
-                ImGui.SameLine();
-                ImGui.TextDisabled("|");
-                ImGui.SameLine();
-                float t = (float)ImGui.GetTime();
-                int dots = ((int)(t * 3f)) % 4;
-                ImGui.TextColored(new Vector4(1f, 0.8f, 0.2f, 1f), "Working" + new string('.', dots));
+                int dots = ((int)(Time.unscaledTime * 3f)) % 4;
+                text += $"  |  Working{new string('.', dots)}";
             }
 
-            ImGui.EndChild();
-            ImGui.PopStyleColor();
+            var content = new GUIContent(text);
+            var size = _pillLabel.CalcSize(content);
+            var rect = new Rect(10, 10, size.x + 20, size.y + 8);
+            GUI.Box(rect, "", _pill);
+            GUI.Label(new Rect(rect.x + 10, rect.y + 4, size.x, size.y), content, _pillLabel);
         }
 
         // ─────────────────────────────────────────
-        // Error toast (bottom-right, fades out)
+        // Error toast
         // ─────────────────────────────────────────
 
         private void DrawErrorToast()
         {
             if (string.IsNullOrEmpty(_errorMessage)) return;
 
-            const float TOAST_WIDTH = 350f;
-            const float TOAST_PAD = 16f;
-
             float alpha = Mathf.Clamp01(_errorTimer / 0.5f);
-            var windowSize = ImGui.GetWindowSize();
-            float toastH = ImGui.GetTextLineHeightWithSpacing() + 16;
+            var prev = GUI.color;
+            GUI.color = new Color(1, 1, 1, alpha);
 
-            float x = windowSize.x - TOAST_WIDTH - TOAST_PAD;
-            float y = windowSize.y - toastH - TOAST_PAD;
-            ImGui.SetCursorPos(new Vector2(x, y));
+            float tw = 350, th = 40, pad = 16;
+            var rect = new Rect(Screen.width - tw - pad, Screen.height - th - pad, tw, th);
+            GUI.Box(rect, "", _errorBox);
+            GUI.Label(new Rect(rect.x + 12, rect.y + 6, rect.width - 24, rect.height - 12), _errorMessage, _errorLabel);
 
-            ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.6f, 0.1f, 0.1f, 0.9f * alpha));
-            if (ImGui.BeginChild("ErrorToast", new Vector2(TOAST_WIDTH, toastH), true))
-            {
-                ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, alpha), _errorMessage);
-            }
-            ImGui.EndChild();
-            ImGui.PopStyleColor();
+            GUI.color = prev;
         }
 
         // ─────────────────────────────────────────
-        // 1. Login Screen
+        // Card sizes
+        // ─────────────────────────────────────────
+
+        private void GetCardSize(out float width, out float height)
+        {
+            switch (_state)
+            {
+                case MenuState.Login:         width = 400; height = 280; break;
+                case MenuState.MainMenu:      width = 400; height = 360; break;
+                case MenuState.CreateLobby:   width = 400; height = 320; break;
+                case MenuState.BrowseLobbies: width = 550; height = 420; break;
+                case MenuState.JoinByCode:    width = 400; height = 260; break;
+                case MenuState.InLobby:       width = 550; height = 520; break;
+                default:                      width = 400; height = 300; break;
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // 1. Login
         // ─────────────────────────────────────────
 
         private void DrawLogin()
         {
-            CenterText("PurrLobby", 1.5f);
-            ImGui.Dummy(new Vector2(0, SPACING * 2));
+            GUILayout.Label("PurrLobby", _title);
+            GUILayout.Space(12);
 
-            float w = ImGui.GetContentRegionAvail().x;
+            GUILayout.Label("Player Name", _subtitle);
+            _playerName = GUILayout.TextField(_playerName, _field);
 
-            ImGui.SetNextItemWidth(w);
-            ImGui.InputText("##PlayerName", ref _playerName, 128);
-            ImGui.TextDisabled("Player Name");
+            GUILayout.Space(4);
 
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Label("Player ID", _subtitle);
+            _playerId = GUILayout.TextField(_playerId, _field);
 
-            ImGui.SetNextItemWidth(w);
-            ImGui.InputText("##PlayerId", ref _playerId, 128);
-            ImGui.TextDisabled("Player ID");
-
-            ImGui.Dummy(new Vector2(0, SPACING));
+            GUILayout.Space(8);
 
             if (settings != null)
             {
-                ImGui.TextDisabled($"API: {settings.apiUrl}");
-                ImGui.TextDisabled($"Game: {settings.gameId}");
+                GUILayout.Label($"API: {settings.apiUrl}", _subtitle);
+                GUILayout.Label($"Game: {settings.gameId}", _subtitle);
             }
             else
             {
-                ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1f), "No PurrLobbySettings assigned!");
+                var c = GUI.color;
+                GUI.color = new Color(1f, 0.4f, 0.4f);
+                GUILayout.Label("No PurrLobbySettings assigned!", _subtitle);
+                GUI.color = c;
             }
 
-            ImGui.Dummy(new Vector2(0, SPACING));
+            GUILayout.Space(8);
 
-            bool disabled = _loading || settings == null;
-            if (disabled) ImGui.BeginDisabled();
-
-            if (ImGui.Button("Connect", new Vector2(w, BUTTON_HEIGHT)))
+            GUI.enabled = !_loading && settings != null;
+            if (GUILayout.Button("Connect", _btn))
             {
                 _provider = settings.CreateProvider(_playerId, _playerName);
                 _gameStarter = settings.CreateGameStarter(_playerId, _playerName);
                 _state = MenuState.MainMenu;
             }
-
-            if (disabled) ImGui.EndDisabled();
+            GUI.enabled = true;
         }
 
         // ─────────────────────────────────────────
@@ -331,19 +377,17 @@ namespace PurrLobby
 
         private void DrawMainMenu()
         {
-            CenterText($"Welcome, {_playerName}!", 1.2f);
-            ImGui.Dummy(new Vector2(0, SPACING * 2));
+            GUILayout.Label($"Welcome, {_playerName}!", _title);
+            GUILayout.Space(12);
 
-            float w = ImGui.GetContentRegionAvail().x;
+            GUI.enabled = !_loading;
 
-            if (_loading) ImGui.BeginDisabled();
-
-            if (ImGui.Button("Create Lobby", new Vector2(w, BUTTON_HEIGHT)))
+            if (GUILayout.Button("Create Lobby", _btn))
                 _state = MenuState.CreateLobby;
 
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Space(4);
 
-            if (ImGui.Button("Browse Lobbies", new Vector2(w, BUTTON_HEIGHT)))
+            if (GUILayout.Button("Browse Lobbies", _btn))
             {
                 RunAsync(async () =>
                 {
@@ -351,14 +395,14 @@ namespace PurrLobby
                 }, MenuState.BrowseLobbies);
             }
 
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Space(4);
 
-            if (ImGui.Button("Join by Code", new Vector2(w, BUTTON_HEIGHT)))
+            if (GUILayout.Button("Join by Code", _btn))
                 _state = MenuState.JoinByCode;
 
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Space(4);
 
-            if (ImGui.Button("Quick Play", new Vector2(w, BUTTON_HEIGHT)))
+            if (GUILayout.Button("Quick Play", _btn))
             {
                 RunAsync(async () =>
                 {
@@ -367,13 +411,13 @@ namespace PurrLobby
                 }, MenuState.InLobby);
             }
 
-            if (_loading) ImGui.EndDisabled();
+            GUI.enabled = true;
 
-            ImGui.Dummy(new Vector2(0, SPACING * 3));
-            ImGui.Separator();
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Space(16);
+            DrawSeparator();
+            GUILayout.Space(4);
 
-            if (ImGui.Button("Disconnect", new Vector2(w, BUTTON_HEIGHT)))
+            if (GUILayout.Button("Disconnect", _btn))
             {
                 _provider = null;
                 _gameStarter = null;
@@ -385,38 +429,31 @@ namespace PurrLobby
         }
 
         // ─────────────────────────────────────────
-        // 3. Create Lobby Screen
+        // 3. Create Lobby
         // ─────────────────────────────────────────
 
         private void DrawCreateLobby()
         {
-            CenterText("Create Lobby", 1.2f);
-            ImGui.Dummy(new Vector2(0, SPACING));
+            GUILayout.Label("Create Lobby", _title);
+            GUILayout.Space(8);
 
-            float w = ImGui.GetContentRegionAvail().x;
+            GUILayout.Label("Lobby Name", _subtitle);
+            _lobbyName = GUILayout.TextField(_lobbyName, _field);
 
-            ImGui.SetNextItemWidth(w);
-            ImGui.InputText("##LobbyName", ref _lobbyName, 128);
-            ImGui.TextDisabled("Lobby Name");
+            GUILayout.Space(4);
 
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Label($"Max Players: {_maxPlayers}", _subtitle);
+            _maxPlayers = Mathf.RoundToInt(GUILayout.HorizontalSlider(_maxPlayers, 2, 16));
 
-            ImGui.SetNextItemWidth(w);
-            ImGui.SliderInt("##MaxPlayers", ref _maxPlayers, 2, 16, "%d players");
-            ImGui.TextDisabled("Max Players");
+            GUILayout.Space(4);
 
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Label("Visibility", _subtitle);
+            _visibilityIndex = GUILayout.Toolbar(_visibilityIndex, new[] { "Public", "Private" });
 
-            var visNames = new[] { "Public", "Private" };
-            ImGui.SetNextItemWidth(w);
-            ImGui.Combo("##Visibility", ref _visibilityIndex, visNames, visNames.Length);
-            ImGui.TextDisabled("Visibility");
+            GUILayout.Space(8);
 
-            ImGui.Dummy(new Vector2(0, SPACING));
-
-            if (_loading) ImGui.BeginDisabled();
-
-            if (ImGui.Button("Create", new Vector2(w, BUTTON_HEIGHT)))
+            GUI.enabled = !_loading;
+            if (GUILayout.Button("Create", _btn))
             {
                 var s = new LobbySettings
                 {
@@ -432,116 +469,99 @@ namespace PurrLobby
                     _lastConnectionInfo = null;
                 }, MenuState.InLobby);
             }
+            GUI.enabled = true;
 
-            if (_loading) ImGui.EndDisabled();
-
-            ImGui.Dummy(new Vector2(0, 4));
-
-            if (ImGui.Button("Back", new Vector2(w, BUTTON_HEIGHT)))
+            GUILayout.Space(4);
+            if (GUILayout.Button("Back", _btn))
                 _state = MenuState.MainMenu;
         }
 
         // ─────────────────────────────────────────
-        // 4. Browse Lobbies Screen
+        // 4. Browse Lobbies
         // ─────────────────────────────────────────
 
         private void DrawBrowseLobbies()
         {
-            CenterText("Browse Lobbies", 1.2f);
-            ImGui.Dummy(new Vector2(0, SPACING));
+            GUILayout.Label("Browse Lobbies", _title);
+            GUILayout.Space(8);
 
-            float w = ImGui.GetContentRegionAvail().x;
-
-            if (_loading) ImGui.BeginDisabled();
-
-            if (ImGui.Button("Refresh", new Vector2(120, BUTTON_HEIGHT)))
+            GUI.enabled = !_loading;
+            if (GUILayout.Button("Refresh", _btn, GUILayout.Width(120)))
             {
                 RunAsync(async () =>
                 {
                     _queryResults = await _provider.QueryLobbies();
                 });
             }
+            GUI.enabled = true;
 
-            if (_loading) ImGui.EndDisabled();
-
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Space(4);
 
             if (_queryResults != null && _queryResults.Count > 0)
             {
-                if (ImGui.BeginTable("Lobbies", 4, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+                // Header
+                GUILayout.BeginHorizontal(_rowEven);
+                GUILayout.Label("Name", _headerLabel, GUILayout.Width(200));
+                GUILayout.Label("Players", _headerLabel, GUILayout.Width(80));
+                GUILayout.Label("Code", _headerLabel, GUILayout.Width(100));
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+
+                for (int i = 0; i < _queryResults.Count; i++)
                 {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 3f);
-                    ImGui.TableSetupColumn("Players", ImGuiTableColumnFlags.None, 1.5f);
-                    ImGui.TableSetupColumn("Code", ImGuiTableColumnFlags.None, 1.5f);
-                    ImGui.TableSetupColumn("##Action", ImGuiTableColumnFlags.None, 1f);
-                    ImGui.TableHeadersRow();
+                    var info = _queryResults[i];
+                    var rowStyle = i % 2 == 0 ? _rowEven : _rowOdd;
 
-                    for (int i = 0; i < _queryResults.Count; i++)
+                    GUILayout.BeginHorizontal(rowStyle);
+                    GUILayout.Label(info.name ?? info.id ?? "", GUILayout.Width(200));
+                    GUILayout.Label($"{info.playerCount}/{info.maxPlayers}", GUILayout.Width(80));
+                    GUILayout.Label(info.code ?? "-", GUILayout.Width(100));
+                    GUILayout.FlexibleSpace();
+
+                    GUI.enabled = !_loading;
+                    if (GUILayout.Button("Join", GUILayout.Width(50)))
                     {
-                        var info = _queryResults[i];
-                        ImGui.TableNextRow();
-
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(info.name ?? info.id ?? "");
-
-                        ImGui.TableNextColumn();
-                        ImGui.Text($"{info.playerCount}/{info.maxPlayers}");
-
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(info.code ?? "-");
-
-                        ImGui.TableNextColumn();
-                        if (_loading) ImGui.BeginDisabled();
-                        if (ImGui.SmallButton($"Join##{i}"))
+                        var lobbyId = info.id;
+                        RunAsync(async () =>
                         {
-                            var lobbyId = info.id;
-                            RunAsync(async () =>
-                            {
-                                _lobby = await _provider.JoinLobby(lobbyId);
-                                SubscribeLobbyEvents(_lobby);
-                                _chatMessages.Clear();
-                                _lastConnectionInfo = null;
-                            }, MenuState.InLobby);
-                        }
-                        if (_loading) ImGui.EndDisabled();
+                            _lobby = await _provider.JoinLobby(lobbyId);
+                            SubscribeLobbyEvents(_lobby);
+                            _chatMessages.Clear();
+                            _lastConnectionInfo = null;
+                        }, MenuState.InLobby);
                     }
+                    GUI.enabled = true;
 
-                    ImGui.EndTable();
+                    GUILayout.EndHorizontal();
                 }
             }
             else if (_queryResults != null)
             {
-                ImGui.Dummy(new Vector2(0, SPACING));
-                ImGui.TextDisabled("No lobbies found.");
+                GUILayout.Space(8);
+                GUILayout.Label("No lobbies found.", _subtitle);
             }
 
-            ImGui.Dummy(new Vector2(0, SPACING));
-
-            if (ImGui.Button("Back", new Vector2(w, BUTTON_HEIGHT)))
+            GUILayout.Space(8);
+            if (GUILayout.Button("Back", _btn))
                 _state = MenuState.MainMenu;
         }
 
         // ─────────────────────────────────────────
-        // 5. Join by Code Screen
+        // 5. Join by Code
         // ─────────────────────────────────────────
 
         private void DrawJoinByCode()
         {
-            CenterText("Join by Code", 1.2f);
-            ImGui.Dummy(new Vector2(0, SPACING * 2));
+            GUILayout.Label("Join by Code", _title);
+            GUILayout.Space(12);
 
-            float w = ImGui.GetContentRegionAvail().x;
+            GUILayout.Label("Lobby Code", _subtitle);
+            _joinCode = GUILayout.TextField(_joinCode, _field);
 
-            ImGui.SetNextItemWidth(w);
-            ImGui.InputText("##Code", ref _joinCode, 64);
-            ImGui.TextDisabled("Lobby Code");
+            GUILayout.Space(8);
 
-            ImGui.Dummy(new Vector2(0, SPACING));
-
-            bool canJoin = !_loading && !string.IsNullOrWhiteSpace(_joinCode);
-            if (!canJoin) ImGui.BeginDisabled();
-
-            if (ImGui.Button("Join", new Vector2(w, BUTTON_HEIGHT)))
+            GUI.enabled = !_loading && !string.IsNullOrWhiteSpace(_joinCode);
+            if (GUILayout.Button("Join", _btn))
             {
                 var code = _joinCode;
                 RunAsync(async () =>
@@ -552,104 +572,85 @@ namespace PurrLobby
                     _lastConnectionInfo = null;
                 }, MenuState.InLobby);
             }
+            GUI.enabled = true;
 
-            if (!canJoin) ImGui.EndDisabled();
-
-            ImGui.Dummy(new Vector2(0, 4));
-
-            if (ImGui.Button("Back", new Vector2(w, BUTTON_HEIGHT)))
+            GUILayout.Space(4);
+            if (GUILayout.Button("Back", _btn))
                 _state = MenuState.MainMenu;
         }
 
         // ─────────────────────────────────────────
-        // 6. In Lobby / Waiting Room
+        // 6. In Lobby
         // ─────────────────────────────────────────
 
         private void DrawInLobby()
         {
-            if (_lobby == null)
-            {
-                _state = MenuState.MainMenu;
-                return;
-            }
+            if (_lobby == null) { _state = MenuState.MainMenu; return; }
 
-            float w = ImGui.GetContentRegionAvail().x;
-
-            // Header
-            ImGui.Text($"Lobby: {_lobby.id}");
-            ImGui.SameLine();
-            if (ImGui.SmallButton("Copy ID"))
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Lobby: {_lobby.id}", _headerLabel);
+            if (GUILayout.Button("Copy ID", GUILayout.Width(60), GUILayout.Height(20)))
                 GUIUtility.systemCopyBuffer = _lobby.id;
+            GUILayout.EndHorizontal();
 
-            ImGui.Text($"Max Players: {_lobby.maxPlayers}");
-
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Label($"Max Players: {_lobby.maxPlayers}", _subtitle);
+            GUILayout.Space(4);
 
             // Player list
-            ImGui.Text("Players");
-            ImGui.Separator();
+            GUILayout.Label("Players", _headerLabel);
+            DrawSeparator();
 
             var players = _lobby.players;
-            if (players != null && ImGui.BeginTable("Players", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+            if (players != null)
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 3f);
-                ImGui.TableSetupColumn("Role", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("##Action", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableHeadersRow();
-
-                bool isLocalHost = _lobby.localPlayer != null && _lobby.localPlayer.isHost;
+                bool isLocalHost = _lobby.localPlayer is { isHost: true };
 
                 for (int i = 0; i < players.Count; i++)
                 {
                     var p = players[i];
-                    ImGui.TableNextRow();
+                    var rowStyle = i % 2 == 0 ? _rowEven : _rowOdd;
 
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(p.displayName ?? "");
+                    GUILayout.BeginHorizontal(rowStyle);
+                    GUILayout.Label(p.displayName ?? "", GUILayout.Width(200));
 
-                    ImGui.TableNextColumn();
                     if (p.isHost)
-                        ImGui.TextColored(new Vector4(1f, 0.85f, 0.2f, 1f), "Host");
+                    {
+                        var c = GUI.color;
+                        GUI.color = new Color(1f, 0.85f, 0.2f);
+                        GUILayout.Label("Host", GUILayout.Width(60));
+                        GUI.color = c;
+                    }
                     else
-                        ImGui.TextDisabled("Player");
+                    {
+                        GUILayout.Label("Player", _subtitle, GUILayout.Width(60));
+                    }
 
-                    ImGui.TableNextColumn();
+                    GUILayout.FlexibleSpace();
+
                     bool isSelf = _lobby.localPlayer != null && p.id == _lobby.localPlayer.id;
                     if (isLocalHost && !isSelf)
                     {
-                        if (ImGui.SmallButton($"Kick##{i}"))
+                        if (GUILayout.Button("Kick", GUILayout.Width(44), GUILayout.Height(20)))
                         {
                             try { _lobby.KickPlayer(p); }
                             catch (Exception ex) { ShowError(ex.Message); }
                         }
                     }
-                }
 
-                ImGui.EndTable();
+                    GUILayout.EndHorizontal();
+                }
             }
 
-            ImGui.Dummy(new Vector2(0, 4));
+            GUILayout.Space(4);
+            DrawLobbyChat();
+            GUILayout.Space(4);
+            DrawGameStarter();
 
-            // Chat
-            DrawLobbyChat(w);
+            GUILayout.Space(8);
+            DrawSeparator();
+            GUILayout.Space(4);
 
-            ImGui.Dummy(new Vector2(0, 4));
-
-            // Game Starter (host only)
-            DrawGameStarter(w);
-
-            ImGui.Dummy(new Vector2(0, 4));
-
-            // Advanced section (metadata)
-            if (ImGui.CollapsingHeader("Advanced"))
-                DrawMetadataEditors();
-
-            ImGui.Dummy(new Vector2(0, SPACING));
-            ImGui.Separator();
-            ImGui.Dummy(new Vector2(0, 4));
-
-            // Leave button
-            if (ImGui.Button("Leave Lobby", new Vector2(w, BUTTON_HEIGHT)))
+            if (GUILayout.Button("Leave Lobby", _btn))
             {
                 try
                 {
@@ -659,61 +660,52 @@ namespace PurrLobby
                     _lastConnectionInfo = null;
                     _state = MenuState.MainMenu;
                 }
-                catch (Exception ex)
-                {
-                    ShowError(ex.Message);
-                }
-            }
-        }
-
-        private void DrawLobbyChat(float w)
-        {
-            if (_lobby?.chat == null) return;
-
-            ImGui.Text("Chat");
-            ImGui.Separator();
-
-            float chatHeight = ImGui.GetTextLineHeightWithSpacing() * 6;
-            if (ImGui.BeginChild("ChatLog", new Vector2(0, chatHeight), true))
-            {
-                for (int i = 0; i < _chatMessages.Count; i++)
-                    ImGui.TextUnformatted(_chatMessages[i]);
-
-                if (_chatMessages.Count > 0)
-                    ImGui.SetScrollHereY(1.0f);
-            }
-            ImGui.EndChild();
-
-            ImGui.SetNextItemWidth(w - 60);
-            bool enter = ImGui.InputText("##ChatInput", ref _chatInput, 512, ImGuiInputTextFlags.EnterReturnsTrue);
-            ImGui.SameLine();
-
-            bool send = ImGui.Button("Send", new Vector2(52, 0)) || enter;
-            if (send && !string.IsNullOrEmpty(_chatInput))
-            {
-                try
-                {
-                    var bytes = Encoding.UTF8.GetBytes(_chatInput);
-                    _lobby.chat.SendMessage(new ArraySegment<byte>(bytes));
-                    _chatMessages.Add($"[{DateTime.Now:HH:mm:ss}] (you): {_chatInput}");
-                    _chatInput = "";
-                }
                 catch (Exception ex) { ShowError(ex.Message); }
             }
         }
 
-        private void DrawGameStarter(float w)
+        private void DrawLobbyChat()
+        {
+            if (_lobby?.chat == null) return;
+
+            GUILayout.Label("Chat", _headerLabel);
+            DrawSeparator();
+
+            _chatScroll = GUILayout.BeginScrollView(_chatScroll, GUILayout.Height(100));
+            for (int i = 0; i < _chatMessages.Count; i++)
+                GUILayout.Label(_chatMessages[i]);
+            GUILayout.EndScrollView();
+
+            GUILayout.BeginHorizontal();
+            _chatInput = GUILayout.TextField(_chatInput, _field);
+            if (GUILayout.Button("Send", GUILayout.Width(52), GUILayout.Height(26)))
+            {
+                if (!string.IsNullOrEmpty(_chatInput))
+                {
+                    try
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(_chatInput);
+                        _lobby.chat.SendMessage(new ArraySegment<byte>(bytes));
+                        _chatMessages.Add($"[{DateTime.Now:HH:mm:ss}] (you): {_chatInput}");
+                        _chatInput = "";
+                    }
+                    catch (Exception ex) { ShowError(ex.Message); }
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawGameStarter()
         {
             if (_gameStarter == null) return;
 
-            bool isHost = _lobby.localPlayer != null && _lobby.localPlayer.isHost;
+            bool isHost = _lobby.localPlayer is { isHost: true };
             if (!isHost && !_lastConnectionInfo.HasValue) return;
 
             if (isHost)
             {
-                if (_loading) ImGui.BeginDisabled();
-
-                if (ImGui.Button("Start Game", new Vector2(w, BUTTON_HEIGHT)))
+                GUI.enabled = !_loading;
+                if (GUILayout.Button("Start Game", _btn))
                 {
                     var req = new GameStartRequest { lobbyId = _lobby.id };
                     RunAsync(async () =>
@@ -722,124 +714,39 @@ namespace PurrLobby
                         _lastConnectionInfo = info;
                     });
                 }
-
-                if (_loading) ImGui.EndDisabled();
+                GUI.enabled = true;
             }
 
             if (_lastConnectionInfo.HasValue)
             {
                 var ci = _lastConnectionInfo.Value;
-                ImGui.Dummy(new Vector2(0, 4));
-                ImGui.TextColored(new Vector4(0.6f, 1f, 0.6f, 1f), "Game Ready");
-                ImGui.Text($"  Address: {ci.serverAddress}:{ci.serverPort}");
+                GUILayout.Space(4);
+                var c = GUI.color;
+                GUI.color = new Color(0.6f, 1f, 0.6f);
+                GUILayout.Label("Game Ready", _headerLabel);
+                GUI.color = c;
+                GUILayout.Label($"  Address: {ci.serverAddress}:{ci.serverPort}");
                 if (!string.IsNullOrEmpty(ci.connectionToken))
-                    ImGui.Text($"  Token: {ci.connectionToken}");
+                    GUILayout.Label($"  Token: {ci.connectionToken}");
             }
-        }
-
-        private void DrawMetadataEditors()
-        {
-            if (_lobby == null) return;
-
-            // Lobby metadata
-            if (_lobby.lobbyData != null)
-            {
-                ImGui.Text("Lobby Metadata");
-                ImGui.InputText("Key##lobby", ref _lobbyMetaKey, 128);
-                ImGui.SameLine();
-                ImGui.InputText("Value##lobby", ref _lobbyMetaValue, 256);
-                ImGui.SameLine();
-                if (ImGui.SmallButton("Set##lobby"))
-                {
-                    try { _lobby.lobbyData.SetData(_lobbyMetaKey, _lobbyMetaValue); }
-                    catch (Exception ex) { ShowError(ex.Message); }
-                }
-                ImGui.SameLine();
-                if (ImGui.SmallButton("Remove##lobby"))
-                {
-                    try { _lobby.lobbyData.RemoveData(_lobbyMetaKey); }
-                    catch (Exception ex) { ShowError(ex.Message); }
-                }
-
-                ImGui.Separator();
-            }
-
-            // Player metadata
-            if (_lobby.localPlayer?.userData != null)
-            {
-                ImGui.Text("Player Metadata");
-                ImGui.InputText("Key##player", ref _playerMetaKey, 128);
-                ImGui.SameLine();
-                ImGui.InputText("Value##player", ref _playerMetaValue, 256);
-                ImGui.SameLine();
-                if (ImGui.SmallButton("Set##player"))
-                {
-                    try { _lobby.localPlayer.userData.SetData(_playerMetaKey, _playerMetaValue); }
-                    catch (Exception ex) { ShowError(ex.Message); }
-                }
-                ImGui.SameLine();
-                if (ImGui.SmallButton("Remove##player"))
-                {
-                    try { _lobby.localPlayer.userData.RemoveData(_playerMetaKey); }
-                    catch (Exception ex) { ShowError(ex.Message); }
-                }
-            }
-        }
-
-        // ─────────────────────────────────────────
-        // Fullscreen card helpers
-        // ─────────────────────────────────────────
-
-        private void GetCardSize(out float width, out float height)
-        {
-            switch (_state)
-            {
-                case MenuState.Login:         width = 400; height = 280; break;
-                case MenuState.MainMenu:      width = 400; height = 360; break;
-                case MenuState.CreateLobby:   width = 400; height = 300; break;
-                case MenuState.BrowseLobbies: width = 550; height = 420; break;
-                case MenuState.JoinByCode:    width = 400; height = 300; break;
-                case MenuState.InLobby:       width = 550; height = 500; break;
-                default:                      width = 400; height = 300; break;
-            }
-        }
-
-        private static void BeginCenteredCard(float width, float height)
-        {
-            var windowSize = ImGui.GetWindowSize();
-            float x = (windowSize.x - width) * 0.5f;
-            float y = (windowSize.y - height) * 0.5f;
-            ImGui.SetCursorPos(new Vector2(x, y));
-
-            ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.12f, 0.12f, 0.15f, 0.95f));
-            ImGui.BeginChild("Card", new Vector2(width, height), true);
-        }
-
-        private static void EndCenteredCard()
-        {
-            ImGui.EndChild();
-            ImGui.PopStyleColor();
         }
 
         // ─────────────────────────────────────────
         // Helpers
         // ─────────────────────────────────────────
 
-        private static void CenterText(string text, float scale = 1f)
+        private static void DrawSeparator()
         {
-            if (scale > 1f)
-                ImGui.SetWindowFontScale(scale);
+            var rect = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.Height(1));
+            EditorLine(rect, new Color(0.3f, 0.3f, 0.3f, 0.6f));
+        }
 
-            float textWidth = ImGui.CalcTextSize(text).x;
-            float regionWidth = ImGui.GetContentRegionAvail().x;
-            float offset = (regionWidth - textWidth) * 0.5f;
-            if (offset > 0)
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
-
-            ImGui.Text(text);
-
-            if (scale > 1f)
-                ImGui.SetWindowFontScale(1f);
+        private static void EditorLine(Rect rect, Color color)
+        {
+            var prev = GUI.color;
+            GUI.color = color;
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = prev;
         }
     }
 }
