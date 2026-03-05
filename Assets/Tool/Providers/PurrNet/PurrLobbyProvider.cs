@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using PurrLobby.Internal;
+using PurrLobby.Utils;
 
 namespace PurrLobby
 {
@@ -11,10 +11,9 @@ namespace PurrLobby
         readonly LobbyApiClient _api;
         readonly PurrSession _session;
 
-        internal event Action<string, string> onPlayerTokenReceived;
-
         public PurrLobbyClient(PurrSession session)
         {
+            _session = session;
             if (string.IsNullOrEmpty(session.apiUrl)) throw new ArgumentException("apiUrl is required");
             if (string.IsNullOrEmpty(session.playerId)) throw new ArgumentException("playerId is required");
             if (string.IsNullOrEmpty(session.projectClientKey)) throw new ArgumentException("projectClientKey is required");
@@ -34,7 +33,7 @@ namespace PurrLobby
             var lobbyData = Json.ParseObject(response);
             string lobbyId = lobbyData.GetString("id");
             string playerToken = lobbyData.GetString("playerToken");
-            onPlayerTokenReceived?.Invoke(lobbyId, playerToken);
+            _session.SetPlayerToken(playerToken);
 
             var lobby = new PurrLobby(_api, lobbyId, _session.playerId, playerToken, lobbyData);
             var snapshot = await FetchSnapshot(lobbyId, playerToken);
@@ -117,7 +116,7 @@ namespace PurrLobby
 
         async Task<ILobby> BuildLobbyFromPoll(string lobbyId, string playerToken)
         {
-            onPlayerTokenReceived?.Invoke(lobbyId, playerToken);
+            _session.SetPlayerToken(playerToken);
 
             var snapshot = await FetchSnapshot(lobbyId, playerToken);
             var lobbyObj = snapshot.GetObject("lobby");

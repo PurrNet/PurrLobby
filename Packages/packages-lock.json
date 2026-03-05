@@ -219,7 +219,21 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.collections": "2.6.2"
       },
-      "hash": "5a03b409a12e57ad77253771bba22a6b4900018d"
+      "hash": "7d0daf459d17c8df6bc07a8727e7409c21ee24d4"
+    },
+    "dev.purrnet.services": {
+      "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#dev",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "a093a480b02ca82d6bf7b778f29591e39795537e"
+    },
+    "dev.purrnet.ui": {
+      "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.0.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "d79a5dbb09a7a02051f719daadd8b0d7907383cc"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

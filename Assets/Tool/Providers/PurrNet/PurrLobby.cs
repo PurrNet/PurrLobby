@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using PurrLobby.Internal;
+using PurrLobby.Utils;
 using UnityEngine;
 
 namespace PurrLobby

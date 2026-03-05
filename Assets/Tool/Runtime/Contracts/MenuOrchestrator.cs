@@ -8,5 +8,12 @@ namespace PurrLobby
         public LobbyProvider lobbyProvider;
         public MatchmakingProvider matchmakingProvider;
         public GameStarterProvider gameStarterProvider;
+
+        public void Initialize()
+        {
+            lobbyProvider?.Initialize(this);
+            matchmakingProvider?.Initialize(this);
+            gameStarterProvider?.Initialize(this);
+        }
     }
 }

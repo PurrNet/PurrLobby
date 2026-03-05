@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace PurrLobby.Internal
+namespace PurrLobby.Utils
 {
     internal sealed class LobbyApiClient
     {

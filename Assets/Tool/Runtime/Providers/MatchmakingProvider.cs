@@ -17,6 +17,8 @@ namespace PurrLobby
 
     public abstract class MatchmakingProvider : ScriptableObject
     {
+        public abstract void Initialize(MenuOrchestrator menuOrchestrator);
+
         public abstract void StartMatchmaking(MatchmakingRequest request, Action<MatchmakingTicketResponse> onComplete);
         public abstract void CancelMatchmaking(MatchmakingTicket ticket, Action<APIResponse> onComplete);
 

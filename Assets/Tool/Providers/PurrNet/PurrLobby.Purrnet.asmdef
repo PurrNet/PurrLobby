@@ -1,0 +1,19 @@
+{
+    "name": "PurrLobby.PurrNet",
+    "rootNamespace": "PurrLobby.PurrNet",
+    "references": [
+        "GUID:fb5aa70e09e0db742957de215ef97d5b",
+        "GUID:1de6d4b8537cdd546bff9f1e4c45a4c8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

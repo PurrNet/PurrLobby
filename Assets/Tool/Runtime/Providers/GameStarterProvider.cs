@@ -17,6 +17,8 @@ namespace PurrLobby
 
     public abstract class GameStarterProvider : ScriptableObject
     {
+        public abstract void Initialize(MenuOrchestrator menuOrchestrator);
+
         public abstract void StartGame(ILobby lobby, Action<GameStartResponse> onComplete);
     }
 }

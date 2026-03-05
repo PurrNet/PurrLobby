@@ -72,6 +72,7 @@ namespace PurrLobby
 
         private void Start()
         {
+            _orchestrator.Initialize();
             /*var session = _orchestrator != null ? _orchestrator.sessionProvider : null;
             if (session != null && session.isLoggedIn)*/
                 _state = MenuState.MainMenu;

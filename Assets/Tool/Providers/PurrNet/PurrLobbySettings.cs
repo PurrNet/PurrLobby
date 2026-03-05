@@ -15,6 +15,11 @@ namespace PurrLobby
             return _client ??= new PurrLobbyClient(_session);
         }
 
+        public override void Initialize(MenuOrchestrator orchestrator)
+        {
+            _session.Login(null);
+        }
+
         public override async void CreateLobby(LobbySettings settings, Action<LobbyResponse> onComplete)
         {
             try
@@ -37,6 +42,7 @@ namespace PurrLobby
             }
             catch (Exception ex)
             {
+                Debug.LogException(ex);
                 onComplete?.Invoke(LobbyResponse.Failure(ex.Message));
             }
         }

@@ -1,28 +1,10 @@
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace PurrLobby.Internal
+namespace PurrLobby.Utils
 {
-    internal static class TaskUtils
-    {
-        public static Task DelaySeconds(float seconds) => PurrRunner.DelaySeconds(seconds);
-
-        public static async void Forget(this Task task)
-        {
-            try
-            {
-                await task;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
-        }
-    }
-
-    internal sealed class PurrRunner : MonoBehaviour
+    public sealed class PurrRunner : MonoBehaviour
     {
         static PurrRunner _instance;
 

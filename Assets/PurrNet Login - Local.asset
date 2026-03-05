@@ -12,3 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d52960fa5d3a4641ab7ef34348b64e4, type: 3}
   m_Name: PurrNet Login - Local
   m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.PurrLoginSettings
+  _apiUrl: https://purrnet.dev
+  _projectClientKey: pk_7db447bdbe8a154e1cbc8ed3cae826121b63b52b41c93556f9de808bb4a5fb66

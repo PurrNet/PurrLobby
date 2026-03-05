@@ -28,6 +28,7 @@ namespace PurrLobby
 
     public abstract class LobbyProvider : ScriptableObject
     {
+        public abstract void Initialize(MenuOrchestrator orchestrator);
         public abstract void CreateLobby(LobbySettings settings, Action<LobbyResponse> onComplete);
         public abstract void JoinLobby(string lobbyId, Action<LobbyResponse> onComplete);
         public abstract void JoinLobbyByCode(string code, Action<LobbyResponse> onComplete);

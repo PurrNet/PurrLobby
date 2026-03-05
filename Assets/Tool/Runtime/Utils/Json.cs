@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace PurrLobby.Internal
+namespace PurrLobby.Utils
 {
-    internal static class Json
+    public static class Json
     {
         public static JObject ParseObject(string json)
         {
@@ -18,7 +18,7 @@ namespace PurrLobby.Internal
         }
     }
 
-    internal static class JsonExtensions
+    public static class JsonExtensions
     {
         public static string GetString(this JObject obj, string key, string fallback = null)
         {
