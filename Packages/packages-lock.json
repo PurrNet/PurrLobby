@@ -211,7 +211,7 @@
       "url": "https://packages.unity.com"
     },
     "dev.purrnet.purrnet": {
-      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.19.2-beta.22",
+      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.19.2-beta.25",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -219,7 +219,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.collections": "2.6.2"
       },
-      "hash": "5c2e3364e0525ec8ce6c6ea7b131b007f4e02996"
+      "hash": "fb68815482a09f1a2878038befe7e8d843db429a"
     },
     "dev.purrnet.services": {
       "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#dev",
@@ -229,13 +229,13 @@
       "hash": "0272a6f7f86b518410a1a46a4544d019767183dc"
     },
     "dev.purrnet.ui": {
-      "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.1.0",
+      "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.2.0",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.ugui": "2.0.0"
       },
-      "hash": "e6f0cee44e2ab8792de599c3c4058402de88aeae"
+      "hash": "bf8d6c9b7c465cf03cec769ab4a70ccc862f8436"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
