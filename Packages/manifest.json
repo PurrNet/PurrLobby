@@ -47,7 +47,7 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
-    "dev.purrnet.ui": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.2.0",
-    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.19.2-beta.25"
+    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.19.2-beta.25",
+    "dev.purrnet.ui": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.3.0-beta.1"
   }
 }

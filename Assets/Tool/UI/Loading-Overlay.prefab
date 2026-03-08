@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 3757059796450715669}
   - component: {fileID: 7013309687995207026}
   - component: {fileID: 7369200712116256220}
+  - component: {fileID: 5211379204155712046}
+  - component: {fileID: 6162395591195356905}
   m_Layer: 5
   m_Name: Loading-Overlay
   m_TagString: Untagged
@@ -143,6 +145,32 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &5211379204155712046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4011433262790735740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e357839e38993e408d4c4cb44568797, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.LoadingOverlay
+  _canvasGroup: {fileID: 6162395591195356905}
+  _speed: 5
+--- !u!225 &6162395591195356905
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4011433262790735740}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &5181920318517169537
 GameObject:
   m_ObjectHideFlags: 0

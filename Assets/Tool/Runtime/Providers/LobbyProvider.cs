@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrLobby
@@ -28,7 +30,8 @@ namespace PurrLobby
 
     public abstract class LobbyProvider : ScriptableObject
     {
-        public abstract void Initialize(MenuOrchestrator orchestrator);
+        public abstract Task Login(ViewStack stack);
+        public abstract void Logout();
         public abstract void CreateLobby(LobbySettings settings, Action<LobbyResponse> onComplete);
         public abstract void JoinLobby(string lobbyId, Action<LobbyResponse> onComplete);
         public abstract void JoinLobbyByCode(string code, Action<LobbyResponse> onComplete);

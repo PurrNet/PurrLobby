@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrLobby
@@ -14,8 +16,8 @@ namespace PurrLobby
         [NonSerialized]
         public readonly SessionCookies cookies = new SessionCookies();
 
-        public abstract void Login(Action<APIResponse> onComplete);
+        public abstract Task Login(ViewStack stack);
 
-        public virtual void Logout() {}
+        public abstract Task Logout();
     }
 }

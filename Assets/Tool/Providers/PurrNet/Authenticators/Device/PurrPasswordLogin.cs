@@ -1,20 +1,21 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
 using PurrNet.Lobby;
-using PurrNet.UI;
 using PurrNet.Services;
+using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrLobby.PurrNet
 {
-    public class PurrDeviceLogin : MonoView
+    public class PurrPasswordLogin : MonoView
     {
-        const string KEY_PREFIX = nameof(PurrDeviceLogin) + "_";
+        const string KEY_PREFIX = nameof(PurrPasswordLogin) + "_";
 
         [SerializeField] private RectTransform _content;
-        [SerializeField] private TMPro.TMP_InputField _displayName;
+        [SerializeField] private TMPro.TMP_InputField _username;
+        [SerializeField] private TMPro.TMP_InputField _password;
         [SerializeField] private ToggleElement _rememberMe;
         [SerializeField] private LoadingOverlay _loadingOverlay;
         [SerializeField] private CloseParentView _closeParentView;
@@ -42,19 +43,24 @@ namespace PurrLobby.PurrNet
             _onDone = onDone;
             _rememberMe.value = PlayerPrefs.HasKey(KEY_PREFIX + nameof(_rememberMe));
             if (_rememberMe.value)
-                _displayName.text = PlayerPrefs.GetString(KEY_PREFIX + nameof(_displayName), "");
+                _username.text = PlayerPrefs.GetString(KEY_PREFIX + nameof(_username), "");
+        }
+
+        public void Register()
+        {
+
         }
 
         public void Login()
         {
             if (_rememberMe.value)
             {
-                PlayerPrefs.SetString(KEY_PREFIX + nameof(_displayName), _displayName.text);
+                PlayerPrefs.SetString(KEY_PREFIX + nameof(_username), _username.text);
                 PlayerPrefs.SetInt(KEY_PREFIX + nameof(_rememberMe), 1);
             }
             else
             {
-                PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_displayName));
+                PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_username));
                 PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_rememberMe));
             }
 
@@ -69,7 +75,7 @@ namespace PurrLobby.PurrNet
                 _loadingOverlay.Toggle(true);
 
                 var services = PurrServices.instance;
-                var response = await services.auth.LoginAsync(_deviceId, _displayName.text);
+                var response = await services.auth.LoginAsync(_deviceId, _username.text);
 
                 if (!response.success)
                 {

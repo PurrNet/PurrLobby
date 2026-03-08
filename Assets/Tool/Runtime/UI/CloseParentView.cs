@@ -7,8 +7,12 @@ namespace PurrLobby
     {
         [SerializeField] private AudioClip[] _closeSounds;
 
+        public bool canClose { get; set; } = true;
+
         public void Close()
         {
+            if (!canClose) return;
+
             var view = GetComponentInParent<MonoView>();
             if (view && view.parentStack)
             {

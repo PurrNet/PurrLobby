@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrLobby
@@ -17,7 +19,9 @@ namespace PurrLobby
 
     public abstract class GameStarterProvider : ScriptableObject
     {
-        public abstract void Initialize(MenuOrchestrator menuOrchestrator);
+        public abstract Task Login(ViewStack stack);
+
+        public abstract void Logout();
 
         public abstract void StartGame(ILobby lobby, Action<GameStartResponse> onComplete);
     }

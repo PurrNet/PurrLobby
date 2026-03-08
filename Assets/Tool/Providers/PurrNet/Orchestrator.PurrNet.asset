@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 055ed9f5a44895943a59f2c8990a4ca7, type: 3}
-  m_Name: Orchestrator
+  m_Name: Orchestrator.PurrNet
   m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.MenuOrchestrator
-  lobbyProvider: {fileID: 11400000, guid: 5e4360e8c2766cf448c192c7fff68c95, type: 2}
+  sessionProvider: {fileID: 11400000, guid: f3595a4b475d69c40920509baf248ca3, type: 2}
+  lobbyProvider: {fileID: 11400000, guid: e65904cd2015fd34d84e7467efb6eb95, type: 2}
   matchmakingProvider: {fileID: 0}
-  gameStarterProvider: {fileID: 11400000, guid: 2f492f191debdff43aebd5de04b8f4cc, type: 2}
+  gameStarterProvider: {fileID: 0}
