@@ -89,6 +89,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef70c0c86c15e8d4c8676848871603d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.CloseParentView
+  _closeSounds:
+  - {fileID: 8300000, guid: 2c54de40fc105c449bbfd51da9fd7394, type: 3}
 --- !u!114 &3924571055413783024
 MonoBehaviour:
   m_ObjectHideFlags: 0
