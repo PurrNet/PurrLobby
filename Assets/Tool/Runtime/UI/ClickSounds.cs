@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace PurrLobby
 {
-    public class SliderSounds : MonoBehaviour, IPointerDownHandler
+    public class ClickSounds : MonoBehaviour, IPointerDownHandler
     {
         [SerializeField] private AudioClip[] _clickSounds;
 
