@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1438791047168191671, guid: 9b9a3189e59794541a182c93f1530f0b, type: 3}
       propertyPath: m_Name
-      value: Panel-Scrollable Variant
+      value: Panel-Scrollable
       objectReference: {fileID: 0}
     - target: {fileID: 5719990402869331596, guid: 9b9a3189e59794541a182c93f1530f0b, type: 3}
       propertyPath: m_MinHeight
@@ -313,14 +313,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3169649293008210497, guid: 49a0e88e9be10464bb87d01711621631, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4668520445632238745, guid: 49a0e88e9be10464bb87d01711621631, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4668520445632238745, guid: 49a0e88e9be10464bb87d01711621631, type: 3}
-      propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4841138396887666959, guid: 49a0e88e9be10464bb87d01711621631, type: 3}

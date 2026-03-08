@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 namespace PurrLobby
 {
-    public class ButtonElement : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+    public class ButtonElement : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
     {
         [SerializeField] private RectangleGraphic _graphic;
         [Space]
@@ -88,13 +88,13 @@ namespace PurrLobby
             if (!_isHovering)
                 _backgroundTimer = 0f;
             _pressTimer = 0f;
+        }
 
-            if (_isHovering)
-            {
-                onClickUnity?.Invoke();
-                onClick?.Invoke();
-                Sounds2D.Play(new AudioSession(_clickSounds).WithPitch(1, 0.1f));
-            }
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            onClickUnity?.Invoke();
+            onClick?.Invoke();
+            Sounds2D.Play(new AudioSession(_clickSounds).WithPitch(1, 0.1f));
         }
     }
 }
