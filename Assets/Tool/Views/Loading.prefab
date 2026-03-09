@@ -448,7 +448,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
+  m_ScaleFactor: 1.5
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
@@ -498,6 +498,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79ae6131638193b4d8fca2adb2b6d12b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrLobby.LoadingView
+  _cullWindowsBehind: 0
   _messageText: {fileID: 5251971370904884151}
 --- !u!1 &5333194757285762978
 GameObject:

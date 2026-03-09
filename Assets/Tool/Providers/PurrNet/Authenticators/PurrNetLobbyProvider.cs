@@ -9,6 +9,9 @@ namespace PurrLobby.PurrNet
     public class PurrNetLobbyProvider : LobbyProvider
     {
         [SerializeField] private PurrNetSessionProvider _sessionProvider;
+        [SerializeField] private int _maxPlayers = 4;
+
+        public override int maxPlayer => _maxPlayers;
 
         public override async Task Login(ViewStack stack)
         {
@@ -20,27 +23,27 @@ namespace PurrLobby.PurrNet
             _sessionProvider.Logout();
         }
 
-        public override void CreateLobby(LobbySettings settings, Action<LobbyResponse> onComplete)
+        public override Task<LobbyResponse> CreateLobby(LobbySettings settings)
         {
             throw new NotImplementedException();
         }
 
-        public override void JoinLobby(string lobbyId, Action<LobbyResponse> onComplete)
+        public override Task<LobbyResponse> JoinLobby(string lobbyId)
         {
             throw new NotImplementedException();
         }
 
-        public override void JoinLobbyByCode(string code, Action<LobbyResponse> onComplete)
+        public override Task<LobbyResponse> JoinLobbyByCode(string code)
         {
             throw new NotImplementedException();
         }
 
-        public override void JoinRandom(Action<LobbyResponse> onComplete, LobbyQuery query = default)
+        public override Task<LobbyResponse> JoinRandom(LobbyQuery query = default)
         {
             throw new NotImplementedException();
         }
 
-        public override void QueryLobbies(Action<LobbyCollectionResponse> onComplete, LobbyQuery query = default)
+        public override Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = default)
         {
             throw new NotImplementedException();
         }

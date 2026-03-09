@@ -48,7 +48,18 @@ namespace PurrLobby.PurrNet
 
         public void Register()
         {
+            if (_rememberMe.value)
+            {
+                PlayerPrefs.SetString(KEY_PREFIX + nameof(_username), _username.text);
+                PlayerPrefs.SetInt(KEY_PREFIX + nameof(_rememberMe), 1);
+            }
+            else
+            {
+                PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_username));
+                PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_rememberMe));
+            }
 
+            HandleRegisterAsync();
         }
 
         public void Login()
@@ -65,6 +76,36 @@ namespace PurrLobby.PurrNet
             }
 
             HandleLoginAsync();
+        }
+
+        private async void HandleRegisterAsync()
+        {
+            try
+            {
+                _closeParentView.canClose = false;
+                _loadingOverlay.Toggle(true);
+
+                var services = PurrServices.instance;
+                var response = await services.auth.LoginAsync(_deviceId, _username.text);
+
+                if (!response.success)
+                {
+                    Toaster.Push("Login Failed", response.error, true);
+                    return;
+                }
+
+                _onDone?.Invoke();
+                CloseMe();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
+                _closeParentView.canClose = false;
+                _loadingOverlay.Toggle(false);
+            }
         }
 
         private async void HandleLoginAsync()

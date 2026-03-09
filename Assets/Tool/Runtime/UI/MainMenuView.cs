@@ -53,6 +53,12 @@ namespace PurrNet.Lobby
             _manager.Initialize();
         }
 
+        public void CreateLobby()
+        {
+            var view = parentStack.Push<CreateLobbyView>();
+            view.Setup(_orchestrator);
+        }
+
         public void QuitGame()
         {
 #if UNITY_EDITOR

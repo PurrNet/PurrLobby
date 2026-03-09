@@ -30,12 +30,14 @@ namespace PurrLobby
 
     public abstract class LobbyProvider : ScriptableObject
     {
+        public abstract int maxPlayer { get; }
+
         public abstract Task Login(ViewStack stack);
         public abstract void Logout();
-        public abstract void CreateLobby(LobbySettings settings, Action<LobbyResponse> onComplete);
-        public abstract void JoinLobby(string lobbyId, Action<LobbyResponse> onComplete);
-        public abstract void JoinLobbyByCode(string code, Action<LobbyResponse> onComplete);
-        public abstract void JoinRandom(Action<LobbyResponse> onComplete, LobbyQuery query = default);
-        public abstract void QueryLobbies(Action<LobbyCollectionResponse> onComplete, LobbyQuery query = default);
+        public abstract Task<LobbyResponse> CreateLobby(LobbySettings settings);
+        public abstract Task<LobbyResponse> JoinLobby(string lobbyId);
+        public abstract Task<LobbyResponse> JoinLobbyByCode(string code);
+        public abstract Task<LobbyResponse> JoinRandom(LobbyQuery query = default);
+        public abstract Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = default);
     }
 }
