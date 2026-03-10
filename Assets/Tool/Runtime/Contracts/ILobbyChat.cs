@@ -4,8 +4,8 @@ namespace PurrLobby
 {
     public interface ILobbyChat
     {
-        void SendMessage(ArraySegment<byte> data);
+        void SendMessage(string data);
 
-        event Action<IPlayer, ArraySegment<byte>> onMessageReceived;
+        event Action<IPlayer, string> onMessageReceived;
     }
 }

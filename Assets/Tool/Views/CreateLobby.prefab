@@ -1543,7 +1543,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.PlaySoundOnSliderChanged
   _slider: {fileID: 1851851891228131154}
-  _volume: 0.2
+  _volume: 0.1
   _audioClips:
   - {fileID: 8300000, guid: e7632010517cd074a9d15120f4e4b4b0, type: 3}
 --- !u!1001 &7164595380823174513
@@ -1774,7 +1774,7 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5726173678584943172, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
-      insertIndex: 2
+      insertIndex: -1
       addedObject: {fileID: 7430795639826905212}
     - targetCorrespondingSourceObject: {fileID: 5726173678584943172, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       insertIndex: -1

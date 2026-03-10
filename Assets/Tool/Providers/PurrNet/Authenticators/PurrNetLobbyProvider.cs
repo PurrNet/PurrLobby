@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using PurrNet.Services;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -23,9 +24,28 @@ namespace PurrLobby.PurrNet
             _sessionProvider.Logout();
         }
 
-        public override Task<LobbyResponse> CreateLobby(LobbySettings settings)
+        public override async Task<LobbyResponse> CreateLobby(LobbySettings settings)
         {
-            throw new NotImplementedException();
+            var services = PurrServices.instance;
+
+            var result = await services.lobbies.CreateAsync(new CreateLobbyOptions
+            {
+                maxPlayers = settings.maxPlayers,
+                visibility = settings.visibility == LobbyVisibility.Public ?
+                    global::PurrNet.Services.LobbyVisibility.Public :
+                    global::PurrNet.Services.LobbyVisibility.Private,
+                name = settings.name,
+                metadata = settings.metadata
+            });
+
+            var response = new LobbyResponse
+            {
+                error = result.error,
+                success = result.success,
+                lobby = result.success ? new PurrNetLobby(services.lobbies, result.lobby, result.playerToken) : null
+            };
+
+            return response;
         }
 
         public override Task<LobbyResponse> JoinLobby(string lobbyId)

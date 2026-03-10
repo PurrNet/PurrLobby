@@ -9,5 +9,9 @@
         bool isHost { get; }
 
         IMetadata userData { get; }
+
+        public event System.Action onPlayerUpdated;
+
+        public event System.Action onPlayerMetadataUpdated;
     }
 }

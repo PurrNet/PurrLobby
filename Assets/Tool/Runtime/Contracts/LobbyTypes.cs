@@ -13,6 +13,7 @@ namespace PurrLobby
         public string name;
         public int maxPlayers;
         public LobbyVisibility visibility;
+        public Dictionary<string, string> metadata;
     }
 
     public struct LobbyInfo

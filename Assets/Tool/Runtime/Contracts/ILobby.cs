@@ -19,8 +19,6 @@ namespace PurrLobby
 
         ILobbyChat chat { get; }
 
-        void InvitePlayer(IPlayer player);
-
         void KickPlayer(IPlayer player);
 
         void LeaveLobby();
@@ -28,6 +26,8 @@ namespace PurrLobby
         event Action<IPlayer> onPlayerJoined;
 
         event Action<IPlayer> onPlayerLeft;
+
+        event Action<IPlayer> onPlayerUpdated;
 
         event Action<IPlayer> onHostChanged;
 

@@ -226,7 +226,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "4449f26f69be502242c47d0491b84cb8cba0f1a3"
+      "hash": "61d242b86088d7b9848febce4c0b0fbcfbb742d3"
     },
     "dev.purrnet.ui": {
       "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.3.0-beta.5",
