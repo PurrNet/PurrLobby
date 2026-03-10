@@ -19,6 +19,10 @@ namespace PurrNet.Lobby
 
         protected override IEnumerator OnExitTransition() => ViewTransitions.FadeOut(this);
 
+        protected override IEnumerator OnCulledTransition() => ViewTransitions.SlideToLeft(_content);
+
+        protected override IEnumerator OnUnculledTransition() => ViewTransitions.SlideFromLeft(_content);
+
         public void Setup(LobbyManager manager, MenuOrchestrator orchestrator)
         {
             _orchestrator = orchestrator;

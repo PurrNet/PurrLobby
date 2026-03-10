@@ -69,8 +69,8 @@ namespace PurrNet.Lobby
                     return;
                 }
 
-                var lobbyView = parentStack.Replace<LobbyView>();
                 _successfulExit = true;
+                var lobbyView = parentStack.Replace<LobbyView>();
                 lobbyView.Setup(_orchestrator, response.lobby);
             }
             catch (Exception e)
@@ -87,7 +87,7 @@ namespace PurrNet.Lobby
         protected override IEnumerator OnEnterTransition()
         {
             var fade = ViewTransitions.FadeIn(this);
-            var slide = ViewTransitions.SlideFromLeft(_content);
+            var slide = ViewTransitions.SlideFromRight(_content);
             return ViewTransitions.Parallel(fade, slide);
         }
 
@@ -96,13 +96,13 @@ namespace PurrNet.Lobby
             if (_successfulExit)
             {
                 var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToRight(_content);
+                var slide = ViewTransitions.SlideToLeft(_content);
                 return ViewTransitions.Parallel(fade, slide);
             }
             else
             {
                 var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToLeft(_content);
+                var slide = ViewTransitions.SlideToRight(_content);
                 return ViewTransitions.Parallel(fade, slide);
             }
         }
