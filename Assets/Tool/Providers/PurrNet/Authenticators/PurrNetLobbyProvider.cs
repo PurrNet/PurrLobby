@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using PurrNet.Services;
 using PurrNet.UI;
@@ -48,24 +48,80 @@ namespace PurrLobby.PurrNet
             return response;
         }
 
-        public override Task<LobbyResponse> JoinLobby(string lobbyId)
+        public override async Task<LobbyResponse> JoinLobby(string lobbyId)
         {
-            throw new NotImplementedException();
+            var services = PurrServices.instance;
+            var result = await services.lobbies.JoinAsync(lobbyId);
+
+            if (!result.success)
+                return LobbyResponse.Failure(result.error);
+
+            var snapshot = await services.lobbies.PollAsync(result.lobbyId);
+
+            if (!snapshot.success)
+                return LobbyResponse.Failure(snapshot.error);
+
+            var lobby = new PurrNetLobby(services.lobbies, snapshot.snapshot.lobby, result.playerToken);
+            return LobbyResponse.Success(lobby);
         }
 
-        public override Task<LobbyResponse> JoinLobbyByCode(string code)
+        public override async Task<LobbyResponse> JoinLobbyByCode(string code)
         {
-            throw new NotImplementedException();
+            var services = PurrServices.instance;
+            var result = await services.lobbies.JoinByCodeAsync(code);
+
+            if (!result.success)
+                return LobbyResponse.Failure(result.error);
+
+            var snapshot = await services.lobbies.PollAsync(result.lobbyId);
+
+            if (!snapshot.success)
+                return LobbyResponse.Failure(snapshot.error);
+
+            var lobby = new PurrNetLobby(services.lobbies, snapshot.snapshot.lobby, result.playerToken);
+            return LobbyResponse.Success(lobby);
         }
 
-        public override Task<LobbyResponse> JoinRandom(LobbyQuery query = default)
+        public override async Task<LobbyResponse> JoinRandom(LobbyQuery query = default)
         {
-            throw new NotImplementedException();
+            var services = PurrServices.instance;
+            var result = await services.lobbies.QuickJoinAsync(query.dataFilters);
+
+            if (!result.success)
+                return LobbyResponse.Failure(result.error);
+
+            var snapshot = await services.lobbies.PollAsync(result.lobbyId);
+
+            if (!snapshot.success)
+                return LobbyResponse.Failure(snapshot.error);
+
+            var lobby = new PurrNetLobby(services.lobbies, snapshot.snapshot.lobby, result.playerToken);
+            return LobbyResponse.Success(lobby);
         }
 
-        public override Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = default)
+        public override async Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = default)
         {
-            throw new NotImplementedException();
+            var services = PurrServices.instance;
+            var result = await services.lobbies.ListAsync();
+
+            if (!result.success)
+                return LobbyCollectionResponse.Failure(result.error);
+
+            var lobbies = new List<LobbyInfo>();
+
+            for (int i = 0; i < result.lobbies.Count; i++)
+            {
+                var l = result.lobbies[i];
+                lobbies.Add(new LobbyInfo
+                {
+                    id = l.id,
+                    name = l.name,
+                    code = l.code,
+                    maxPlayers = l.maxPlayers,
+                });
+            }
+
+            return LobbyCollectionResponse.Success(lobbies);
         }
     }
 }

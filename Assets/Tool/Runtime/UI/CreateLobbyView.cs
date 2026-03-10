@@ -31,6 +31,7 @@ namespace PurrNet.Lobby
         {
             _orchestrator = provider;
             _successfulExit = false;
+            _playerCountSlider.minValue = 1;
             _playerCountSlider.maxValue = _orchestrator.lobbyProvider.maxPlayer;
             _playerCountSlider.value = _orchestrator.lobbyProvider.maxPlayer;
             OnPlayerCountChanged(_orchestrator.lobbyProvider.maxPlayer);

@@ -53,6 +53,7 @@ namespace PurrLobby.PurrNet
             _metadata = new PurrNetMetadata(service, data.id, false);
             _chat = new PurrNetChat(_connection, this);
             _connection.onDestroyed += OnLobbyDestroyed;
+            _connection.onKicked += OnLobbyDestroyed;
             _connection.onSnapshot += OnLobbySnapshot;
             _connection.onPlayerJoined += OnPlayerJoined;
             _connection.onPlayerLeft += OnPlayerLeft;
@@ -63,7 +64,6 @@ namespace PurrLobby.PurrNet
         private void OnMetadataUpdated(Dictionary<string, string> metadata)
         {
             _metadata.Update(metadata);
-            onPlayerUpdated?.Invoke(localPlayer);
         }
 
         private void OnPlayerMetadataUpdated(string playerId, Dictionary<string, string> metadata)
@@ -106,7 +106,12 @@ namespace PurrLobby.PurrNet
                 _lastData.hostPlayerId = newHostId;
                 for (int i = 0; i < _players.Count; i++)
                 {
-                    if (_players[i].id == newHostId)
+                    if (_players[i].isHost && _players[i].id != newHostId)
+                    {
+                        _players[i].SetIsHost(false);
+                        onPlayerUpdated?.Invoke(_players[i]);
+                    }
+                    else if (_players[i].id == newHostId)
                     {
                         _players[i].SetIsHost(true);
                         host = _players[i];
@@ -210,10 +215,18 @@ namespace PurrLobby.PurrNet
         public void LeaveLobby()
         {
             _ = _service.LeaveAsync(_lastData.id);
+            Dispose();
         }
 
         public void Dispose()
         {
+            _connection.onDestroyed -= OnLobbyDestroyed;
+            _connection.onKicked -= OnLobbyDestroyed;
+            _connection.onSnapshot -= OnLobbySnapshot;
+            _connection.onPlayerJoined -= OnPlayerJoined;
+            _connection.onPlayerLeft -= OnPlayerLeft;
+            _connection.onPlayerMetadataUpdated -= OnPlayerMetadataUpdated;
+            _connection.onMetadataUpdated -= OnMetadataUpdated;
             _connection.Disconnect();
         }
 
