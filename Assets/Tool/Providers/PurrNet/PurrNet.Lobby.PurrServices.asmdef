@@ -1,6 +1,6 @@
 {
     "name": "PurrLobby.PurrNet",
-    "rootNamespace": "PurrLobby.PurrNet",
+    "rootNamespace": "PurrNet.Lobby.PurrServices",
     "references": [
         "GUID:fb5aa70e09e0db742957de215ef97d5b",
         "GUID:1de6d4b8537cdd546bff9f1e4c45a4c8",

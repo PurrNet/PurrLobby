@@ -2,7 +2,7 @@ using PurrNet.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public class ClickSounds : MonoBehaviour, IPointerDownHandler
     {

@@ -3,7 +3,7 @@ using System.Text;
 using PurrNet.Services;
 using UnityEngine;
 
-namespace PurrLobby.PurrNet
+namespace PurrNet.Lobby.PurrNet
 {
     public class PurrNetChat : ILobbyChat
     {

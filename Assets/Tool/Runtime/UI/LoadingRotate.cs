@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public class LoadingRotate : MonoBehaviour
     {

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public class SelectedOutline : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {

@@ -1,4 +1,4 @@
-using PurrLobby;
+using PurrNet.Lobby;
 using PurrNet.UI;
 using PurrNet.Utils;
 using UnityEngine;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     [CreateAssetMenu(menuName = "PurrNet/Lobby/Menu Orchestrator")]
     public class MenuOrchestrator : ScriptableObject

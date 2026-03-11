@@ -1,5 +1,5 @@
 using System;
-using PurrLobby;
+using PurrNet.Lobby;
 using PurrNet.UI;
 using UnityEngine;
 

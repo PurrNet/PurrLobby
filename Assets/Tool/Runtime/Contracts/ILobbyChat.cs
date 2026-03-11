@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public interface ILobbyChat
     {

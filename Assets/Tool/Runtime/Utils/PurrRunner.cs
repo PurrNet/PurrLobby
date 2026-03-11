@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace PurrLobby.Utils
+namespace PurrNet.Lobby.Utils
 {
     public sealed class PurrRunner : MonoBehaviour
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public sealed class SessionCookies
     {

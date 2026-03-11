@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace PurrLobby.Utils
+namespace PurrNet.Lobby.Utils
 {
     public static class TaskUtils
     {

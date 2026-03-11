@@ -4,7 +4,7 @@ using PurrNet.Services;
 using PurrNet.UI;
 using UnityEngine;
 
-namespace PurrLobby.PurrNet
+namespace PurrNet.Lobby.PurrNet
 {
     [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Lobby Provider", order = -201)]
     public class PurrNetLobbyProvider : LobbyProvider

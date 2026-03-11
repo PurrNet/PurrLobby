@@ -3,7 +3,7 @@ using PurrNet.Services;
 using PurrNet.UI;
 using UnityEngine;
 
-namespace PurrLobby.PurrNet
+namespace PurrNet.Lobby.PurrNet
 {
     [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Session Provider", order = -201)]
     public class PurrNetSessionProvider : SessionProvider

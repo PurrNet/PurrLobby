@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public interface ILobby
     {

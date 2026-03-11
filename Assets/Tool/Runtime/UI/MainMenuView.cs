@@ -1,5 +1,5 @@
 using System.Collections;
-using PurrLobby;
+using PurrNet.Lobby;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -38,6 +38,11 @@ namespace PurrNet.Lobby
                 orchestrator.sessionProvider.playerName : "Guest";
 
             _profileDisplayName.text = $"<icon=account_outline> {username}";
+        }
+
+        public void Matchmake()
+        {
+
         }
 
         public void Logout()

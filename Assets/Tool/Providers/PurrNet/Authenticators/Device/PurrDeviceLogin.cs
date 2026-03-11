@@ -7,7 +7,7 @@ using PurrNet.UI;
 using PurrNet.Services;
 using UnityEngine;
 
-namespace PurrLobby.PurrNet
+namespace PurrNet.Lobby.PurrNet
 {
     public class PurrDeviceLogin : MonoView
     {

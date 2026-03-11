@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public abstract class SessionProvider : ScriptableObject
     {

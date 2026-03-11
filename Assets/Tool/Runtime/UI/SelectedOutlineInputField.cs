@@ -1,7 +1,7 @@
 using PurrNet.UI;
 using UnityEngine;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public class SelectedOutlineInputField : MonoBehaviour
     {

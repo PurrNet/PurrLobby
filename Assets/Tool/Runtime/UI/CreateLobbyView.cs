@@ -1,6 +1,6 @@
 using System;
 using System.Collections;
-using PurrLobby;
+using PurrNet.Lobby;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;

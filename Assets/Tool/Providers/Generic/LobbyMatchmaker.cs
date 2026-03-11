@@ -1,0 +1,145 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using PurrNet.Lobby;
+using PurrNet.UI;
+using UnityEngine;
+
+namespace PurrNet.Lobby.GenericProviders
+{
+    [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Matchmaker", order = -200)]
+    public class LobbyMatchmaker : MatchmakingProvider
+    {
+        [SerializeField] private LobbyProvider _lobbyProvider;
+        [SerializeField] private string _lobbyNamePrefix = "Matchmaking";
+        [SerializeField] private int _maxPlayers = 4;
+
+        private MatchmakingTicket? _activeTicket;
+        private bool _cancelled;
+
+        public override async Task Login(ViewStack stack)
+        {
+            await _lobbyProvider.Login(stack);
+        }
+
+        public override void Logout()
+        {
+            _lobbyProvider.Logout();
+        }
+
+        public override async void StartMatchmaking(MatchmakingRequest request, Action<MatchmakingTicketResponse> onComplete)
+        {
+            try
+            {
+                var ticket = new MatchmakingTicket
+                {
+                    ticketId = Guid.NewGuid().ToString()
+                };
+
+                _activeTicket = ticket;
+                _cancelled = false;
+
+                onComplete?.Invoke(MatchmakingTicketResponse.Success(ticket));
+                RaiseStatusChanged(ticket, MatchmakingStatus.Searching);
+
+                try
+                {
+                    var lobby = await FindOrCreateLobby(request);
+
+                    if (_cancelled)
+                        return;
+
+                    if (lobby == null)
+                    {
+                        _activeTicket = null;
+                        RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
+                        RaiseMatchmakingError(ticket, "Failed to find or create a lobby.");
+                        return;
+                    }
+
+                    _activeTicket = null;
+                    RaiseStatusChanged(ticket, MatchmakingStatus.Found);
+                    RaiseMatchFound(ticket, new MatchResult
+                    {
+                        lobbyId = lobby.id
+                    });
+                }
+                catch (Exception e)
+                {
+                    if (_cancelled)
+                        return;
+
+                    _activeTicket = null;
+                    RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
+                    RaiseMatchmakingError(ticket, e.Message);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        public override void CancelMatchmaking(MatchmakingTicket ticket, Action<APIResponse> onComplete)
+        {
+            if (_activeTicket == null || _activeTicket.Value.ticketId != ticket.ticketId)
+            {
+                onComplete?.Invoke(APIResponse.Failure("No active matchmaking with that ticket."));
+                return;
+            }
+
+            _cancelled = true;
+            _activeTicket = null;
+            RaiseStatusChanged(ticket, MatchmakingStatus.Cancelled);
+            onComplete?.Invoke(APIResponse.Success());
+        }
+
+        private async Task<ILobby> FindOrCreateLobby(MatchmakingRequest request)
+        {
+            var gameMode = request.gameMode ?? string.Empty;
+
+            // Build filters to match game mode metadata
+            var filters = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(gameMode))
+                filters["gameMode"] = gameMode;
+
+            // Try quick-joining an existing lobby with matching filters
+            var joinResult = await _lobbyProvider.JoinRandom(new LobbyQuery
+            {
+                dataFilters = filters
+            });
+
+            if (joinResult.success)
+                return joinResult.lobby;
+
+            if (_cancelled)
+                return null;
+
+            // No available lobby found, create one
+            var metadata = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(gameMode))
+                metadata["gameMode"] = gameMode;
+
+            // Merge any extra attributes from the request
+            if (request.attributes != null)
+            {
+                foreach (var kvp in request.attributes)
+                    metadata[kvp.Key] = kvp.Value;
+            }
+
+            var lobbyName = string.IsNullOrEmpty(gameMode)
+                ? _lobbyNamePrefix
+                : $"{_lobbyNamePrefix} - {gameMode}";
+
+            var createResult = await _lobbyProvider.CreateLobby(new LobbySettings
+            {
+                name = lobbyName,
+                maxPlayers = _maxPlayers,
+                visibility = LobbyVisibility.Public,
+                metadata = metadata
+            });
+
+            return createResult.success ? createResult.lobby : null;
+        }
+    }
+}

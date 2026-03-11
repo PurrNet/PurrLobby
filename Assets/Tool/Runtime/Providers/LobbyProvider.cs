@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public struct LobbyResponse
     {

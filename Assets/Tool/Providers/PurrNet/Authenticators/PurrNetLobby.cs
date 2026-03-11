@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using PurrNet.Services;
 
-namespace PurrLobby.PurrNet
+namespace PurrNet.Lobby.PurrNet
 {
     public class PurrNetLobby : ILobby, IDisposable
     {

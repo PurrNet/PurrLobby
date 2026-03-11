@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public class LoadingOverlay : MonoBehaviour
     {

@@ -1,4 +1,4 @@
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     public static class GameStartKeys
     {

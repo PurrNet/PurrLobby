@@ -3,7 +3,7 @@ using PurrNet.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace PurrLobby
+namespace PurrNet.Lobby
 {
     [ExecuteInEditMode]
     public class ToggleElement : MonoBehaviour, IPointerClickHandler
