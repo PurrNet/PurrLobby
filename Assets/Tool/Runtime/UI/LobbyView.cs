@@ -1,7 +1,6 @@
 using System.Collections;
 using PurrLobby;
 using PurrNet.UI;
-using TMPro;
 using UnityEngine;
 
 namespace PurrNet.Lobby
@@ -9,18 +8,53 @@ namespace PurrNet.Lobby
     public class LobbyView : MonoView
     {
         [SerializeField] private RectTransform _content;
+        [SerializeField] private PlayerEntry _playerPrefab;
+        [SerializeField] private GameObject _playerPlaceholderPrefab;
+        [SerializeField] private RectTransform _playerContent;
 
-        private LobbyProvider _lobbyProvider;
         private ILobby _lobby;
 
-        public void Setup(MenuOrchestrator orchestrator, ILobby lobby)
+        private UIPool<PlayerEntry> _playerEntryPool;
+        private UIPool<Transform> _playerPlaceholderPool;
+
+        public void Setup(ILobby lobby)
         {
-            _lobbyProvider = orchestrator.lobbyProvider;
+            _playerEntryPool ??= new UIPool<PlayerEntry>(_playerPrefab, _playerContent);
+            _playerPlaceholderPool ??= new UIPool<Transform>(_playerPlaceholderPrefab.transform, _playerContent);
+
             _lobby = lobby;
+
+            RenderPlayerList(lobby);
 
             _lobby.onPlayerJoined += OnPlayerJoined;
             _lobby.onPlayerLeft += OnPlayerLeft;
             _lobby.onLobbyDestroyed += OnLobbyDestroyed;
+        }
+
+        private void RenderPlayerList(ILobby lobby)
+        {
+            _playerEntryPool.ResetCounter();
+            _playerPlaceholderPool.ResetCounter();
+
+
+            for (int i = 0; i < lobby.maxPlayers; i++)
+            {
+                var player = i < lobby.players.Count ? lobby.players[i] : null;
+
+                if (player == null)
+                {
+                    _playerPlaceholderPool.GetInstance().SetAsLastSibling();
+                }
+                else
+                {
+                    var entry = _playerEntryPool.GetInstance();
+                    entry.transform.SetAsLastSibling();
+                    entry.Setup(lobby.localPlayer, player);
+                }
+            }
+
+            _playerEntryPool.DiscardRest();
+            _playerPlaceholderPool.DiscardRest();
         }
 
         public override void OnPopped()
@@ -43,12 +77,12 @@ namespace PurrNet.Lobby
 
         private void OnPlayerJoined(IPlayer player)
         {
-            Debug.Log($"Player joined: {player.displayName}");
+            RenderPlayerList(_lobby);
         }
 
         private void OnPlayerLeft(IPlayer player)
         {
-            Debug.Log($"Player left: {player.displayName}");
+            RenderPlayerList(_lobby);
         }
 
         protected override IEnumerator OnExitTransition()

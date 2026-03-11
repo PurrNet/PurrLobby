@@ -6,7 +6,7 @@ namespace PurrLobby
     public class InputFieldMandatory : MonoBehaviour
     {
         [SerializeField] private TMP_InputField _inputField;
-        [SerializeField] private SelectedOutline _graphic;
+        [SerializeField] private SelectedOutlineInputField _graphic;
         [SerializeField] private TMP_Text _label;
         [SerializeField] private TMP_Text _subLabel;
         [SerializeField] private AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);

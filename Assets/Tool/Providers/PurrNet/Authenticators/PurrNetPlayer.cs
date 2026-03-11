@@ -1,5 +1,6 @@
 using System;
 using PurrNet.Services;
+using UnityEngine;
 
 namespace PurrLobby.PurrNet
 {
@@ -9,7 +10,18 @@ namespace PurrLobby.PurrNet
 
         public string displayName { get; private set;  }
 
+        public Texture2D avatar { get; private set; }
+
         public bool isHost { get; private set; }
+
+        public bool isReady
+        {
+            get
+            {
+                return userData != null && userData.TryGetData(IPlayer.READY_KEY, out var ready)
+                                        && ready == IPlayer.READY_TRUTHY_VALUE;
+            }
+        }
 
         public IMetadata userData { get; }
 

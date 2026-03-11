@@ -1,11 +1,11 @@
-﻿using PurrNet.UI;
+using PurrNet.UI;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace PurrLobby
 {
-    public class SelectedOutline : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class SelectedOutlineInputField : MonoBehaviour
     {
+        [SerializeField] private  TMPro.TMP_InputField _input;
         [SerializeField] private RectangleGraphic _graphic;
         [SerializeField] AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
         [SerializeField] private Color _outlineColor = Color.white;
@@ -15,7 +15,6 @@ namespace PurrLobby
 
         private float _timeSinceToggle;
         private bool _isSelected;
-        private bool _isFocused;
 
         public Color outlineColor
         {
@@ -34,20 +33,16 @@ namespace PurrLobby
             _timeSinceToggle = _transitionDuration;
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
-        {
-            _isSelected = true;
-            _timeSinceToggle = 0f;
-        }
-
-        public void OnPointerExit(PointerEventData eventData)
-        {
-            _isSelected = false;
-            _timeSinceToggle = 0f;
-        }
-
         private void Update()
         {
+            bool isCurrentlySelected = _input.isFocused;
+
+            if (_isSelected != isCurrentlySelected)
+            {
+                _isSelected = isCurrentlySelected;
+                _timeSinceToggle = 0f;
+            }
+
             var lerp = Mathf.Clamp01(_timeSinceToggle / _transitionDuration);
             lerp = _transitionCurve.Evaluate(lerp);
 

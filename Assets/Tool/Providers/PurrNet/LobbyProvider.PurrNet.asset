@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: LobbyProvider.PurrNet
   m_EditorClassIdentifier: PurrLobby.PurrNet::PurrLobby.PurrNet.PurrNetLobbyProvider
   _sessionProvider: {fileID: 11400000, guid: f3595a4b475d69c40920509baf248ca3, type: 2}
+  _maxPlayers: 8
