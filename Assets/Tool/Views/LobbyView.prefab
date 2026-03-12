@@ -3449,6 +3449,30 @@ PrefabInstance:
       propertyPath: _graphicColor.r
       value: 0.7169812
       objectReference: {fileID: 0}
+    - target: {fileID: 8394812538829302174, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _useMaxRoundness
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394812538829302174, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _uniformRoundness
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394812538829302174, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _roundnessInPixels.w
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394812538829302174, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _roundnessInPixels.x
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394812538829302174, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _roundnessInPixels.y
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394812538829302174, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _roundnessInPixels.z
+      value: 16
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

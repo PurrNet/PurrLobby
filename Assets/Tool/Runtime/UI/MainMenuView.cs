@@ -1,5 +1,4 @@
 using System.Collections;
-using PurrNet.Lobby;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -46,6 +45,16 @@ namespace PurrNet.Lobby
             {
                 gameMode = "PurrNet"
             });
+        }
+
+        public void JoinWithCode()
+        {
+            parentStack.Push<JoinWithCodeView>().Setup(_orchestrator.lobbyProvider);
+        }
+
+        public void BrowseLobbies()
+        {
+
         }
 
         public void Logout()
