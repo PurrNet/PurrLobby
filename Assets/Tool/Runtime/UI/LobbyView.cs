@@ -60,6 +60,7 @@ namespace PurrNet.Lobby
 
         private void OnKickPlayer(IPlayer target)
         {
+            Debug.Log($"Kicking player {target.displayName}");
             _lobby.KickPlayer(target);
         }
 

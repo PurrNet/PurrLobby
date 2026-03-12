@@ -24,6 +24,7 @@ namespace PurrNet.Lobby
 
         public void Setup(IPlayer localPlayer, IPlayer player, Action<IPlayer> onKick)
         {
+            _onKickPlayer  = onKick;
             _localPlayer = localPlayer;
             _player = player;
             UpdatePlayerInfo();
