@@ -91,7 +91,7 @@ namespace PurrNet.Lobby
             _input.text = string.Empty;
 
             if (message.Length > MAX_LEN)
-                message = message[..MAX_LEN];
+                message = $"{message[..MAX_LEN]}...";
 
             if (!string.IsNullOrWhiteSpace(message))
             {

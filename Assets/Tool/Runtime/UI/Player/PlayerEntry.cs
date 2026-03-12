@@ -1,7 +1,5 @@
 using System;
-using PurrNet.Lobby;
 using PurrNet.UI;
-using PurrNet.Utils;
 using UnityEngine;
 
 namespace PurrNet.Lobby
@@ -70,6 +68,8 @@ namespace PurrNet.Lobby
 
             _outline.outlineWidthNotSelected = isMe ? 1f : 0f;
             _options.SetActive(iAmHost && !_player.isHost);
+
+            _status.text = _player.isReady ? "Ready" : "Not Ready";
 
             IPlayer.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
         }

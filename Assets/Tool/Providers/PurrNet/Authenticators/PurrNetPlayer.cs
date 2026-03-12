@@ -10,7 +10,7 @@ namespace PurrNet.Lobby.PurrNet
 
         public string displayName { get; private set;  }
 
-        public Texture2D avatar { get; private set; }
+        public Texture2D avatar => null;
 
         public bool isHost { get; private set; }
 
@@ -34,9 +34,15 @@ namespace PurrNet.Lobby.PurrNet
             userData = new PurrNetMetadata(service, lobbyId, true);
         }
 
-        public void SetIsHost(bool isHost)
+        internal void SetIsHost(bool isHost)
         {
             this.isHost = isHost;
+        }
+
+        public void SetReady(bool isReady)
+        {
+            userData.SetData(IPlayer.READY_KEY, isReady ? IPlayer.READY_TRUTHY_VALUE : "0");
+            TriggerOnPlayerUpdated(); // optimistic update
         }
 
         internal bool Update(string hostId, LobbyPlayer player)
@@ -64,12 +70,12 @@ namespace PurrNet.Lobby.PurrNet
             return changed;
         }
 
-        public void TriggerOnPlayerUpdated()
+        internal void TriggerOnPlayerUpdated()
         {
             onPlayerUpdated?.Invoke();
         }
 
-        public void TriggerOnPlayerMetadataUpdated()
+        internal void TriggerOnPlayerMetadataUpdated()
         {
             onPlayerMetadataUpdated?.Invoke();
         }

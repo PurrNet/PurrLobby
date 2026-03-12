@@ -39,6 +39,7 @@ namespace PurrNet.Lobby
         public void CopyLobbyCodeToClipboard()
         {
             GUIUtility.systemCopyBuffer = _lobby.joinCode;
+            Toaster.Push("Lobby Code", "Code copied to clipboard!");
         }
 
         private void RenderPlayerList(ILobby lobby)
@@ -68,7 +69,6 @@ namespace PurrNet.Lobby
 
         private void OnKickPlayer(IPlayer target)
         {
-            Debug.Log($"Kicking player {target.displayName}");
             _lobby.KickPlayer(target);
         }
 

@@ -40,7 +40,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7934210723257809038
 CanvasRenderer:
@@ -114,8 +114,8 @@ MonoBehaviour:
   _framePlacement: 0
   _outlineSize: 2
   _outlineColor: {r: 1, g: 0, b: 0, a: 0}
-  _shadowSize: 0
-  _shadowBlur: 0
+  _shadowSize: 10
+  _shadowBlur: 23.39
   _shadowPower: 1
   _shadowColor: {r: 0, g: 0, b: 0, a: 1}
   _embossSize: 0
