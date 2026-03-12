@@ -1573,6 +1573,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b490491e5db010940ab495966b7afa95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.LobbyChat
+  _scrollRect: {fileID: 8803670264561286374}
   _chatEntry: {fileID: 4883984539483302638, guid: bf1d213aad4bd7b4fae25f7824e7782b, type: 3}
   _content: {fileID: 6281976336222256979}
   _input: {fileID: 2672227115018637867}
@@ -1617,6 +1618,17 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &8803670264561286374 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5403904812215770187, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
+  m_PrefabInstance: {fileID: 3517994920046305453}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
 --- !u!224 &9197785451430310633 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5726173678584943172, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}

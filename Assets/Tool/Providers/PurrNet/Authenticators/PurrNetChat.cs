@@ -21,7 +21,10 @@ namespace PurrNet.Lobby.PurrNet
         private void OnChatMessage(ChatMessage obj)
         {
             if (_lobby.TryGetPlayer(obj.playerId, out var player))
-                onMessageReceived?.Invoke(player, obj.data);
+            {
+                var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(obj.data));
+                onMessageReceived?.Invoke(player, decoded);
+            }
         }
 
         public void SendMessage(string data)

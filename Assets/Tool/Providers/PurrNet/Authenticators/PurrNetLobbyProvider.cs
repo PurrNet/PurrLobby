@@ -38,6 +38,9 @@ namespace PurrNet.Lobby.PurrNet
                 metadata = settings.metadata
             });
 
+            if (result.success)
+                services.activePlayerToken = result.playerToken;
+
             var response = new LobbyResponse
             {
                 error = result.error,
