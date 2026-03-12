@@ -1575,6 +1575,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.LobbyChat
   _scrollRect: {fileID: 8803670264561286374}
   _chatEntry: {fileID: 4883984539483302638, guid: bf1d213aad4bd7b4fae25f7824e7782b, type: 3}
+  _systemEntry: {fileID: 3427863856257466220, guid: 45c9d4f279f6483439a70b3d8d32ad1f, type: 3}
   _content: {fileID: 6281976336222256979}
   _input: {fileID: 2672227115018637867}
 --- !u!224 &6281976336222256979 stripped
@@ -1844,6 +1845,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9197785451430310633}
     m_Modifications:
+    - target: {fileID: 1770624670841886758, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
+      propertyPath: m_RichText
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2749052429146863248, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
+      propertyPath: m_isRichText
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2749052429146863248, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
+      propertyPath: m_parseCtrlCharacters
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7939607101648543798, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
       propertyPath: m_Name
       value: InputField

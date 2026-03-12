@@ -16,15 +16,20 @@ namespace PurrNet.Lobby
         {
             this.player = player;
 
-            _username.text = player.displayName;
-            _message.text = message;
+            if (_username && player != null)
+                _username.text = player.displayName;
 
-            IPlayer.SetupAvatar(player, _avatarGraphic, _avatarLetter);
+            if (_message)
+                _message.text = message;
+
+            if (_avatarGraphic && _avatarLetter && player != null)
+                IPlayer.SetupAvatar(player, _avatarGraphic, _avatarLetter);
         }
 
         public void AppendNewMessage(string message)
         {
-            _message.text += $"\n{message}";
+            if (_message)
+                _message.text += $"\n{message}";
         }
     }
 }

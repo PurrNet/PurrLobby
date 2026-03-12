@@ -1,3 +1,4 @@
+using System;
 using PurrNet.Lobby;
 using PurrNet.UI;
 using PurrNet.Utils;
@@ -19,7 +20,9 @@ namespace PurrNet.Lobby
         private IPlayer _localPlayer;
         private IPlayer _player;
 
-        public void Setup(IPlayer localPlayer, IPlayer player)
+        private Action<IPlayer>  _onKickPlayer;
+
+        public void Setup(IPlayer localPlayer, IPlayer player, Action<IPlayer> onKick)
         {
             _localPlayer = localPlayer;
             _player = player;
@@ -33,6 +36,12 @@ namespace PurrNet.Lobby
 
             player.onPlayerUpdated += UpdatePlayerInfo;
             player.onPlayerMetadataUpdated += UpdatePlayerInfo;
+        }
+
+        public void Kick()
+        {
+            if (_player != null)
+                _onKickPlayer?.Invoke(_player);
         }
 
         private void OnDisable()

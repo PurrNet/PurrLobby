@@ -50,12 +50,17 @@ namespace PurrNet.Lobby
                 {
                     var entry = _playerEntryPool.GetInstance();
                     entry.transform.SetAsLastSibling();
-                    entry.Setup(lobby.localPlayer, player);
+                    entry.Setup(lobby.localPlayer, player, OnKickPlayer);
                 }
             }
 
             _playerEntryPool.DiscardRest();
             _playerPlaceholderPool.DiscardRest();
+        }
+
+        private void OnKickPlayer(IPlayer target)
+        {
+            _lobby.KickPlayer(target);
         }
 
         public override void OnPopped()

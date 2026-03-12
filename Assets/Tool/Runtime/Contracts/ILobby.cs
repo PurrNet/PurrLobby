@@ -17,9 +17,13 @@ namespace PurrNet.Lobby
 
         IMetadata lobbyData { get; }
 
+        bool isLobbyJoinable { get; }
+
         ILobbyChat chat { get; }
 
         void KickPlayer(IPlayer player);
+
+        void SetIsLobbyJoinable(bool isJoinable);
 
         void LeaveLobby();
 

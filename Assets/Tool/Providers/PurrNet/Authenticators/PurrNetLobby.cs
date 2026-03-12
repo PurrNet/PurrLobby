@@ -18,6 +18,8 @@ namespace PurrNet.Lobby.PurrNet
 
         public IMetadata lobbyData => _metadata;
 
+        public bool isLobbyJoinable => _lastData.joinable;
+
         public ILobbyChat chat => _chat;
 
         public event Action<IPlayer> onPlayerJoined;
@@ -210,6 +212,12 @@ namespace PurrNet.Lobby.PurrNet
         public void KickPlayer(IPlayer player)
         {
             _ = _service.KickAsync(_lastData.id, player.id);
+        }
+
+        public void SetIsLobbyJoinable(bool isJoinable)
+        {
+            _lastData.joinable = isJoinable;
+            _ = _service.SetJoinableAsync(_lastData.id, isJoinable);
         }
 
         public void LeaveLobby()

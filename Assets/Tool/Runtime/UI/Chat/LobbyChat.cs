@@ -11,6 +11,7 @@ namespace PurrNet.Lobby
     {
         [SerializeField] private ScrollRect _scrollRect;
         [SerializeField] private ChatEntry _chatEntry;
+        [SerializeField] private ChatEntry _systemEntry;
         [SerializeField] private RectTransform _content;
         [SerializeField] private TMPro.TMP_InputField _input;
 
@@ -22,6 +23,8 @@ namespace PurrNet.Lobby
         {
             _lobby = lobby;
             _lobby.chat.onMessageReceived += OnMessageReceived;
+            _lobby.onPlayerJoined += OnPlayerJoined;
+            _lobby.onPlayerLeft += OnPlayerLeft;
             _scrollRect.verticalNormalizedPosition = 0f;
         }
 
@@ -57,7 +60,21 @@ namespace PurrNet.Lobby
             _input.onSubmit.RemoveListener(OnSubmit);
 
             if (_lobby != null)
+            {
                 _lobby.chat.onMessageReceived -= OnMessageReceived;
+                _lobby.onPlayerJoined -= OnPlayerJoined;
+                _lobby.onPlayerLeft -= OnPlayerLeft;
+            }
+        }
+
+        private void OnPlayerJoined(IPlayer player)
+        {
+            SystemMessage($"{player.displayName} joined the lobby.");
+        }
+
+        private void OnPlayerLeft(IPlayer player)
+        {
+            SystemMessage($"{player.displayName} left the lobby.");
         }
 
         public void OnSubmit(string _)
@@ -93,6 +110,14 @@ namespace PurrNet.Lobby
             float contentHeight = _content.rect.height;
             float viewportHeight = _scrollRect.viewport.rect.height;
             return contentHeight > viewportHeight;
+        }
+
+        private void SystemMessage(string message)
+        {
+            _lastChatEntry = null;
+            var entry = Instantiate(_systemEntry, _content);
+            string final = $"<icon=server> {message}";
+            entry.Setup(null, final);
         }
 
         private void OnMessageReceived(IPlayer player, string message)
