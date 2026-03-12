@@ -14,6 +14,8 @@ namespace PurrNet.Lobby
         [SerializeField] private TMPro.TMP_Text _username;
         [SerializeField] private TMPro.TMP_Text _status;
         [SerializeField] private GameObject _options;
+        [SerializeField] private Color _statusReady = Color.green;
+        [SerializeField] private Color _statusUnready = Color.gray;
 
         private IPlayer _localPlayer;
         private IPlayer _player;
@@ -70,6 +72,7 @@ namespace PurrNet.Lobby
             _options.SetActive(iAmHost && !_player.isHost);
 
             _status.text = _player.isReady ? "Ready" : "Not Ready";
+            _status.color = _player.isReady ? _statusReady : _statusUnready;
 
             IPlayer.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
         }

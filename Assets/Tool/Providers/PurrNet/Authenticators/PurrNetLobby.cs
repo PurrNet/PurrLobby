@@ -91,10 +91,10 @@ namespace PurrNet.Lobby.PurrNet
             var player = new PurrNetPlayer(_service, id);
             player.Update(_lastData.hostPlayerId, playerInfo);
             _players.Add(player);
-            onPlayerJoined?.Invoke(player);
-
             if (player.id == _localPlayerId)
                 localPlayer = player;
+
+            onPlayerJoined?.Invoke(player);
 
             if (player.isHost)
             {

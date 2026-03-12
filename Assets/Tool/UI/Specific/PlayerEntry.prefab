@@ -676,6 +676,8 @@ MonoBehaviour:
   _username: {fileID: 3976862944778025737}
   _status: {fileID: 8418477308867016023}
   _options: {fileID: 527458344618502230}
+  _statusReady: {r: 0.29411766, g: 0.7529412, b: 0.3529412, a: 1}
+  _statusUnready: {r: 0.62352943, g: 0.627451, b: 0.63529414, a: 1}
 --- !u!1 &8655436869982318912
 GameObject:
   m_ObjectHideFlags: 0

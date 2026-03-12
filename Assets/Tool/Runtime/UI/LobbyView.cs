@@ -13,6 +13,13 @@ namespace PurrNet.Lobby
         [SerializeField] private RectTransform _playerContent;
         [SerializeField] private LobbyChat _chat;
         [SerializeField] private TMP_InputField _lobbyCode;
+        [Space]
+        [SerializeField] private Color _readyColor;
+        [SerializeField] private Color _readyHover;
+        [SerializeField] private Color _unreadyColor;
+        [SerializeField] private Color _unreadyHover;
+        [SerializeField] private TMP_Text _readyButtonText;
+        [SerializeField] private ButtonElement _readyButton;
 
         private ILobby _lobby;
 
@@ -30,10 +37,16 @@ namespace PurrNet.Lobby
 
             _lobby.onPlayerJoined += OnPlayerJoined;
             _lobby.onPlayerLeft += OnPlayerLeft;
+            _lobby.onPlayerUpdated += OnPlayerUpdated;
             _lobby.onLobbyDestroyed += OnLobbyDestroyed;
 
             _chat.Setup(lobby);
             _lobbyCode.text = lobby.joinCode;
+        }
+
+        private void OnPlayerUpdated(IPlayer player)
+        {
+            UpdateLocalPlayerData(_lobby);
         }
 
         public void CopyLobbyCodeToClipboard()
@@ -41,6 +54,8 @@ namespace PurrNet.Lobby
             GUIUtility.systemCopyBuffer = _lobby.joinCode;
             Toaster.Push("Lobby Code", "Code copied to clipboard!");
         }
+
+        private bool _wasReady = true;
 
         private void RenderPlayerList(ILobby lobby)
         {
@@ -65,6 +80,32 @@ namespace PurrNet.Lobby
 
             _playerEntryPool.DiscardRest();
             _playerPlaceholderPool.DiscardRest();
+
+            UpdateLocalPlayerData(lobby);
+        }
+
+        private void UpdateLocalPlayerData(ILobby lobby)
+        {
+            bool localPlayerReady = lobby.localPlayer?.isReady == true;
+
+            if (_wasReady != localPlayerReady)
+            {
+                _readyButtonText.text = localPlayerReady ? "Unready" : "Ready";
+                _readyButton.backgroundNormal = localPlayerReady ? _readyColor : _unreadyColor;
+                _readyButton.backgroundHover = localPlayerReady ? _readyHover : _unreadyHover;
+                _wasReady = localPlayerReady;
+            }
+        }
+
+        public void ToggleReady()
+        {
+            if (_lobby?.localPlayer == null)
+            {
+                Toaster.Push("Lobby Error", "Your player isn't connected yet.");
+                return;
+            }
+
+            _lobby.localPlayer.SetReady(!_lobby.localPlayer.isReady);
         }
 
         private void OnKickPlayer(IPlayer target)
@@ -76,6 +117,7 @@ namespace PurrNet.Lobby
         {
             _lobby.onPlayerJoined -= OnPlayerJoined;
             _lobby.onPlayerLeft -= OnPlayerLeft;
+            _lobby.onPlayerUpdated -= OnPlayerUpdated;
             _lobby.onLobbyDestroyed -= OnLobbyDestroyed;
         }
 

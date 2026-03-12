@@ -25,6 +25,8 @@ namespace PurrNet.Lobby
 
         public event System.Action onPlayerMetadataUpdated;
 
+        public void SetReady(bool isReady);
+
         public static void SetupAvatar(IPlayer player, RectangleGraphic graphic, TMPro.TMP_Text letter)
         {
             if  (player.avatar)

@@ -28,6 +28,22 @@ namespace PurrNet.Lobby
 
         public event Action onClick;
 
+        public Color backgroundNormal
+        {
+            get => _backgroundNormal;
+            set
+            {
+                _backgroundNormal = value;
+                _backgroundTimer = 0f;
+            }
+        }
+
+        public Color backgroundHover
+        {
+            get => _backgroundHover;
+            set => _backgroundHover = value;
+        }
+
         private float _interactableTimer = 0f;
         private float _backgroundTimer = 0f;
         private float _pressTimer = 0f;
