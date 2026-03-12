@@ -7,6 +7,8 @@ namespace PurrNet.Lobby
     {
         string id { get; }
 
+        string joinCode { get; }
+
         IPlayer localPlayer { get; }
 
         IPlayer host { get; }

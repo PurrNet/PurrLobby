@@ -8,6 +8,8 @@ namespace PurrNet.Lobby.PurrNet
     {
         public string id => _lastData.id;
 
+        public string joinCode => _lastData.code;
+
         public IPlayer localPlayer { get; private set; }
 
         public IPlayer host { get; private set; }

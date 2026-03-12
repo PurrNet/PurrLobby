@@ -1,5 +1,6 @@
 using System.Collections;
 using PurrNet.UI;
+using TMPro;
 using UnityEngine;
 
 namespace PurrNet.Lobby
@@ -11,6 +12,7 @@ namespace PurrNet.Lobby
         [SerializeField] private GameObject _playerPlaceholderPrefab;
         [SerializeField] private RectTransform _playerContent;
         [SerializeField] private LobbyChat _chat;
+        [SerializeField] private TMP_InputField _lobbyCode;
 
         private ILobby _lobby;
 
@@ -31,6 +33,12 @@ namespace PurrNet.Lobby
             _lobby.onLobbyDestroyed += OnLobbyDestroyed;
 
             _chat.Setup(lobby);
+            _lobbyCode.text = lobby.joinCode;
+        }
+
+        public void CopyLobbyCodeToClipboard()
+        {
+            GUIUtility.systemCopyBuffer = _lobby.id;
         }
 
         private void RenderPlayerList(ILobby lobby)
