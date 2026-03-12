@@ -292,7 +292,7 @@ MonoBehaviour:
   _playerPlaceholderPrefab: {fileID: 6043925533959274500, guid: a6f618a8a1ac6e146b1f8691ed9e7d3a, type: 3}
   _playerContent: {fileID: 329250983144878735}
   _chat: {fileID: 6280149757632161066}
-  _lobbyCode: {fileID: 0}
+  _lobbyCode: {fileID: 2187711664067649461}
 --- !u!1 &1842517321319689424
 GameObject:
   m_ObjectHideFlags: 0
@@ -919,7 +919,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 0
+  m_Spacing: 8
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -1047,7 +1047,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1770624670841886758, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
       propertyPath: m_Text
-      value: IKHJNFEIHJF
+      value: INVALID
       objectReference: {fileID: 0}
     - target: {fileID: 1770624670841886758, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
       propertyPath: m_ReadOnly
@@ -1055,7 +1055,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2749052429146863248, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
       propertyPath: m_text
-      value: "IKHJNFEIHJF\u200B"
+      value: "INVALID\u200B"
       objectReference: {fileID: 0}
     - target: {fileID: 7939607101648543798, guid: d02123be3806c174f896ced5c19f5d17, type: 3}
       propertyPath: m_Name

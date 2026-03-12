@@ -38,7 +38,7 @@ namespace PurrNet.Lobby
 
         public void CopyLobbyCodeToClipboard()
         {
-            GUIUtility.systemCopyBuffer = _lobby.id;
+            GUIUtility.systemCopyBuffer = _lobby.joinCode;
         }
 
         private void RenderPlayerList(ILobby lobby)
