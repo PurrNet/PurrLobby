@@ -61,20 +61,7 @@ namespace PurrNet.Lobby
             _outline.outlineWidthNotSelected = isMe ? 1f : 0f;
             _options.SetActive(iAmHost && !_player.isHost);
 
-            if  (_player.avatar)
-            {
-                _avatarGraphic.texture = _player.avatar;
-                _avatarLetter.enabled = false;
-            }
-            else
-            {
-                var playerHash = Hasher.Hash(_player.id);
-                var playerRandomColor = Color.HSVToRGB(playerHash % 1000 / 1000f, 0.5f, 0.8f);
-                _avatarGraphic.color = playerRandomColor;
-                _avatarGraphic.texture = null;
-                _avatarLetter.enabled = true;
-                _avatarLetter.text = !string.IsNullOrEmpty(_player.displayName) ? _player.displayName[..1].ToUpper() : "?";
-            }
+            IPlayer.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
         }
     }
 }

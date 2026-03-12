@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using PurrNet.UI;
+using PurrNet.Utils;
+using UnityEngine;
 
 namespace PurrNet.Lobby
 {
@@ -22,5 +24,23 @@ namespace PurrNet.Lobby
         public event System.Action onPlayerUpdated;
 
         public event System.Action onPlayerMetadataUpdated;
+
+        public static void SetupAvatar(IPlayer player, RectangleGraphic graphic, TMPro.TMP_Text letter)
+        {
+            if  (player.avatar)
+            {
+                graphic.texture = player.avatar;
+                letter.enabled = false;
+            }
+            else
+            {
+                var playerHash = Hasher.Hash(player.id);
+                var playerRandomColor = Color.HSVToRGB(playerHash % 1000 / 1000f, 0.5f, 0.8f);
+                graphic.color = playerRandomColor;
+                graphic.texture = null;
+                letter.enabled = true;
+                letter.text = !string.IsNullOrEmpty(player.displayName) ? player.displayName[..1].ToUpper() : "?";
+            }
+        }
     }
 }

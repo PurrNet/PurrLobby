@@ -10,6 +10,7 @@ namespace PurrNet.Lobby
         [SerializeField] private PlayerEntry _playerPrefab;
         [SerializeField] private GameObject _playerPlaceholderPrefab;
         [SerializeField] private RectTransform _playerContent;
+        [SerializeField] private LobbyChat _chat;
 
         private ILobby _lobby;
 
@@ -28,6 +29,8 @@ namespace PurrNet.Lobby
             _lobby.onPlayerJoined += OnPlayerJoined;
             _lobby.onPlayerLeft += OnPlayerLeft;
             _lobby.onLobbyDestroyed += OnLobbyDestroyed;
+
+            _chat.Setup(lobby);
         }
 
         private void RenderPlayerList(ILobby lobby)
