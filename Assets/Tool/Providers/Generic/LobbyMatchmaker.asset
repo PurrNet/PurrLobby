@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: PurrLobby.PurrNet::PurrLobby.PurrNet.PurrNetLobbyMatchmaker
   _lobbyProvider: {fileID: 11400000, guid: e65904cd2015fd34d84e7467efb6eb95, type: 2}
   _lobbyNamePrefix: Matchmaking
-  _maxPlayers: 4
+  _maxPlayers: 8

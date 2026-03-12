@@ -17,7 +17,7 @@ namespace PurrNet.Lobby
             _instance = this;
         }
 
-        public static void Push(string title, string message, bool error)
+        public static void Push(string title, string message, bool error = false)
         {
             _instance.InternalPush(title, message, error);
         }

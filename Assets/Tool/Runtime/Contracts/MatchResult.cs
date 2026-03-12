@@ -2,7 +2,7 @@ namespace PurrNet.Lobby
 {
     public struct MatchResult
     {
-        public string lobbyId;
+        public ILobby lobby;
         public ConnectionInfo connection;
     }
 }

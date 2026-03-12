@@ -42,7 +42,10 @@ namespace PurrNet.Lobby
 
         public void Matchmake()
         {
-
+            parentStack.Push<MatchmakingView>().Setup(_orchestrator, new MatchmakingRequest
+            {
+                gameMode = "PurrNet"
+            });
         }
 
         public void Logout()

@@ -1,5 +1,4 @@
 using System.Collections;
-using PurrNet.Lobby;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -35,7 +34,6 @@ namespace PurrNet.Lobby
         {
             _playerEntryPool.ResetCounter();
             _playerPlaceholderPool.ResetCounter();
-
 
             for (int i = 0; i < lobby.maxPlayers; i++)
             {

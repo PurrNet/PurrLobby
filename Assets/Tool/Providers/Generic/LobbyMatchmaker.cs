@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PurrNet.Lobby;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -12,7 +11,6 @@ namespace PurrNet.Lobby.GenericProviders
     {
         [SerializeField] private LobbyProvider _lobbyProvider;
         [SerializeField] private string _lobbyNamePrefix = "Matchmaking";
-        [SerializeField] private int _maxPlayers = 4;
 
         private MatchmakingTicket? _activeTicket;
         private bool _cancelled;
@@ -61,7 +59,7 @@ namespace PurrNet.Lobby.GenericProviders
                     RaiseStatusChanged(ticket, MatchmakingStatus.Found);
                     RaiseMatchFound(ticket, new MatchResult
                     {
-                        lobbyId = lobby.id
+                        lobby = lobby
                     });
                 }
                 catch (Exception e)
@@ -76,6 +74,7 @@ namespace PurrNet.Lobby.GenericProviders
             }
             catch (Exception e)
             {
+                RaiseMatchmakingError(new MatchmakingTicket { ticketId = "N/A" }, $"Unexpected error starting matchmaking: {e.Message}");
                 Debug.LogException(e);
             }
         }
@@ -134,7 +133,7 @@ namespace PurrNet.Lobby.GenericProviders
             var createResult = await _lobbyProvider.CreateLobby(new LobbySettings
             {
                 name = lobbyName,
-                maxPlayers = _maxPlayers,
+                maxPlayers = _lobbyProvider.maxPlayer,
                 visibility = LobbyVisibility.Public,
                 metadata = metadata
             });

@@ -56,6 +56,7 @@ namespace PurrNet.Lobby.PurrNet
             if (!result.success)
                 return LobbyResponse.Failure(result.error);
 
+            services.activePlayerToken = result.playerToken;
             var snapshot = await services.lobbies.PollAsync(result.lobbyId);
 
             if (!snapshot.success)
@@ -73,6 +74,7 @@ namespace PurrNet.Lobby.PurrNet
             if (!result.success)
                 return LobbyResponse.Failure(result.error);
 
+            services.activePlayerToken = result.playerToken;
             var snapshot = await services.lobbies.PollAsync(result.lobbyId);
 
             if (!snapshot.success)
@@ -90,6 +92,7 @@ namespace PurrNet.Lobby.PurrNet
             if (!result.success)
                 return LobbyResponse.Failure(result.error);
 
+            services.activePlayerToken = result.playerToken;
             var snapshot = await services.lobbies.PollAsync(result.lobbyId);
 
             if (!snapshot.success)
