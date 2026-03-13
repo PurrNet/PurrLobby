@@ -25,7 +25,7 @@ namespace PurrNet.Lobby
         private void InternalPush(string title, string message, bool error)
         {
             Sounds2D.Play(new AudioSession(error ? _toastSoundsError : _toastSounds)
-                .WithPitch(1f, 0.1f));
+                .WithPitch(1f, 0.1f).WithVolume(0.1f));
 
             var entry = Instantiate(_prefab, _parent);
             entry.Setup(title, message, error);
