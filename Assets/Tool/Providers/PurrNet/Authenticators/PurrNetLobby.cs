@@ -195,10 +195,10 @@ namespace PurrNet.Lobby.PurrNet
                     if (player.isHost)
                         host = player;
 
-                    onPlayerJoined?.Invoke(player);
-
                     if (player.id == _localPlayerId)
                         localPlayer = player;
+
+                    onPlayerJoined?.Invoke(player);
 
                     if (player.isHost)
                         onHostChanged?.Invoke(player);

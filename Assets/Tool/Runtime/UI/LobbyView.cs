@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
@@ -20,15 +22,32 @@ namespace PurrNet.Lobby
         [SerializeField] private Color _unreadyHover;
         [SerializeField] private TMP_Text _readyButtonText;
         [SerializeField] private ButtonElement _readyButton;
+        [Space]
+        [SerializeField] private Color _unmutedColor;
+        [SerializeField] private Color _unmutedHover;
+        [SerializeField] private Color _mutedColor;
+        [SerializeField] private Color _mutedHover;
+        [SerializeField] private ButtonElement _microphoneButton;
+        [SerializeField] private TMP_Text _microphoneText;
+        [SerializeField] private GameObject _microphoneFeature;
+        [Space]
+        [SerializeField] private bool _connectToPurrnetInLobby = true;
+        [SerializeField] private LobbyConnectionProvider _lobbyConnection;
 
         private ILobby _lobby;
+        private bool _lobbyConnected;
+        private bool _hasLocalMicEnabled;
 
-        private UIPool<PlayerEntry> _playerEntryPool;
         private UIPool<Transform> _playerPlaceholderPool;
+
+        public ILobby lobby => _lobby;
+
+        public bool localMicEnabled => _hasLocalMicEnabled;
+
+        public event Action<bool> onLocalMicEnabledChanged;
 
         public void Setup(ILobby lobby)
         {
-            _playerEntryPool ??= new UIPool<PlayerEntry>(_playerPrefab, _playerContent);
             _playerPlaceholderPool ??= new UIPool<Transform>(_playerPlaceholderPrefab.transform, _playerContent);
 
             _lobby = lobby;
@@ -39,9 +58,46 @@ namespace PurrNet.Lobby
             _lobby.onPlayerLeft += OnPlayerLeft;
             _lobby.onPlayerUpdated += OnPlayerUpdated;
             _lobby.onLobbyDestroyed += OnLobbyDestroyed;
+            _lobby.onHostChanged += OnHostChanged;
 
             _chat.Setup(lobby);
             _lobbyCode.text = lobby.joinCode;
+
+            _microphoneFeature.SetActive(false);
+            ConnectToLobby(lobby);
+            UpdateMicGraphics();
+        }
+
+        public void EnableMicrophoneFeature()
+        {
+            _microphoneFeature.SetActive(true);
+        }
+
+        public void ToggleMicrophone()
+        {
+            _hasLocalMicEnabled = !_hasLocalMicEnabled;
+            onLocalMicEnabledChanged?.Invoke(_hasLocalMicEnabled);
+            UpdateMicGraphics();
+        }
+
+        private void UpdateMicGraphics()
+        {
+            _microphoneText.text = _hasLocalMicEnabled ? "<icon=microphone>" : "<icon=microphone_off>";
+
+            var color = _hasLocalMicEnabled ? _unmutedColor : _mutedColor;
+            var highlight = _hasLocalMicEnabled ? _unmutedHover : _mutedHover;
+
+            _microphoneButton.backgroundNormal = color;
+            _microphoneButton.backgroundHover = highlight;
+        }
+
+        private void ConnectToLobby(ILobby lobby)
+        {
+            if (_connectToPurrnetInLobby && _lobby.localPlayer != null && !_lobbyConnected && _lobbyConnection)
+            {
+                _lobbyConnection.JoinedLobby(lobby);
+                _lobbyConnected = true;
+            }
         }
 
         private void OnPlayerUpdated(IPlayer player)
@@ -59,7 +115,6 @@ namespace PurrNet.Lobby
 
         private void RenderPlayerList(ILobby lobby)
         {
-            _playerEntryPool.ResetCounter();
             _playerPlaceholderPool.ResetCounter();
 
             for (int i = 0; i < lobby.maxPlayers; i++)
@@ -67,18 +122,9 @@ namespace PurrNet.Lobby
                 var player = i < lobby.players.Count ? lobby.players[i] : null;
 
                 if (player == null)
-                {
                     _playerPlaceholderPool.GetInstance().SetAsLastSibling();
-                }
-                else
-                {
-                    var entry = _playerEntryPool.GetInstance();
-                    entry.transform.SetAsLastSibling();
-                    entry.Setup(lobby.localPlayer, player, OnKickPlayer);
-                }
             }
 
-            _playerEntryPool.DiscardRest();
             _playerPlaceholderPool.DiscardRest();
 
             UpdateLocalPlayerData(lobby);
@@ -115,10 +161,26 @@ namespace PurrNet.Lobby
 
         public override void OnPopped()
         {
-            _lobby.onPlayerJoined -= OnPlayerJoined;
-            _lobby.onPlayerLeft -= OnPlayerLeft;
-            _lobby.onPlayerUpdated -= OnPlayerUpdated;
-            _lobby.onLobbyDestroyed -= OnLobbyDestroyed;
+            if (_lobby != null)
+            {
+                _lobby.onPlayerJoined -= OnPlayerJoined;
+                _lobby.onPlayerLeft -= OnPlayerLeft;
+                _lobby.onPlayerUpdated -= OnPlayerUpdated;
+                _lobby.onLobbyDestroyed -= OnLobbyDestroyed;
+                _lobby.onHostChanged -= OnHostChanged;
+
+                if (_lobbyConnected && _lobbyConnection)
+                {
+                    _lobbyConnection.LeftLobby(_lobby);
+                    _lobbyConnected = false;
+                }
+            }
+        }
+
+        private void OnHostChanged(IPlayer host)
+        {
+            if (_lobbyConnected && _lobbyConnection)
+                _lobbyConnection.OnHostChanged(_lobby, host, host == _lobby.localPlayer);
         }
 
         private void OnLobbyDestroyed()
@@ -132,14 +194,30 @@ namespace PurrNet.Lobby
             PopMe();
         }
 
+        private readonly Dictionary<IPlayer, PlayerEntry> _uiPlayerEntry = new();
+
         private void OnPlayerJoined(IPlayer player)
         {
+            var entry = Instantiate(_playerPrefab, _playerContent);
+            entry.Setup(_lobby, player, OnKickPlayer);
+            _uiPlayerEntry.Add(player, entry);
+
             RenderPlayerList(_lobby);
+            ConnectToLobby(_lobby);
+
+            if (_lobbyConnected)
+                _lobbyConnection.OnPlayerRegistered(player);
         }
 
         private void OnPlayerLeft(IPlayer player)
         {
+            if (_uiPlayerEntry.Remove(player, out var entry))
+                Destroy(entry.gameObject);
+
             RenderPlayerList(_lobby);
+
+            if (_lobbyConnected)
+                _lobbyConnection.OnPlayerUnregistered(player);
         }
 
         protected override IEnumerator OnExitTransition()
@@ -150,6 +228,12 @@ namespace PurrNet.Lobby
         protected override IEnumerator OnEnterTransition()
         {
             return ViewTransitions.SlideFromRight(_content);
+        }
+
+        public void PlayerPhonemeChanged(IPlayer player, string phoneme)
+        {
+            if (_uiPlayerEntry.TryGetValue(player, out var entry))
+                entry.PhonemeChanged(phoneme);
         }
     }
 }

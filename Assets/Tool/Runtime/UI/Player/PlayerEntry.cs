@@ -1,9 +1,17 @@
 using System;
 using PurrNet.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace PurrNet.Lobby
 {
+    [Serializable]
+    public struct PhonemeEntry
+    {
+        public string phoneme;
+        public Sprite sprite;
+    }
+
     public class PlayerEntry : MonoBehaviour
     {
         [SerializeField] private RectangleGraphic _graphic;
@@ -16,16 +24,21 @@ namespace PurrNet.Lobby
         [SerializeField] private GameObject _options;
         [SerializeField] private Color _statusReady = Color.green;
         [SerializeField] private Color _statusUnready = Color.gray;
+        [SerializeField] private Image _phonemeSprite;
+        [Space]
+        [SerializeField] private PhonemeEntry[] _phonemeEntries;
+        [SerializeField] private Sprite _phonemeRest;
 
-        private IPlayer _localPlayer;
+        private ILobby _lobby;
+        private IPlayer _localPlayer => _lobby.localPlayer;
         private IPlayer _player;
 
         private Action<IPlayer>  _onKickPlayer;
 
-        public void Setup(IPlayer localPlayer, IPlayer player, Action<IPlayer> onKick)
+        public void Setup(ILobby lobby, IPlayer player, Action<IPlayer> onKick)
         {
-            _onKickPlayer  = onKick;
-            _localPlayer = localPlayer;
+            _onKickPlayer = onKick;
+            _lobby = lobby;
             _player = player;
             UpdatePlayerInfo();
 
@@ -75,6 +88,43 @@ namespace PurrNet.Lobby
             _status.color = _player.isReady ? _statusReady : _statusUnready;
 
             IPlayer.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
+        }
+
+        private string _lastPhoneme = "";
+        private float _lastPhonemeChangedTime = -100f;
+
+        private void Update()
+        {
+            bool shouldHide = string.IsNullOrWhiteSpace(_lastPhoneme) && Time.time - _lastPhonemeChangedTime > 1f;
+            Vector4 currentColor = _phonemeSprite.color;
+            var targetColor = shouldHide ? new Vector4(1, 1, 1, 0) : new Vector4(1, 1, 1, 1);
+            var newColor = Vector4.MoveTowards(currentColor, targetColor, Time.deltaTime * 5f);
+            _phonemeSprite.color = newColor;
+            _phonemeSprite.gameObject.SetActive(newColor.w != 0f);
+        }
+
+        private void OnPhonemeChanged()
+        {
+            for (int i = 0; i < _phonemeEntries.Length; i++)
+            {
+                if (_phonemeEntries[i].phoneme == _lastPhoneme)
+                {
+                    _phonemeSprite.sprite = _phonemeEntries[i].sprite;
+                    return;
+                }
+            }
+
+            _phonemeSprite.sprite = _phonemeRest;
+        }
+
+        public void PhonemeChanged(string phoneme)
+        {
+            if (phoneme != _lastPhoneme)
+            {
+                _lastPhoneme = phoneme;
+                _lastPhonemeChangedTime = Time.time;
+                OnPhonemeChanged();
+            }
         }
     }
 }
