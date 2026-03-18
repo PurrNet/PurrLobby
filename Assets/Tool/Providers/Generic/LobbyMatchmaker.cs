@@ -97,16 +97,16 @@ namespace PurrNet.Lobby.GenericProviders
         {
             var gameMode = request.gameMode ?? string.Empty;
 
-            // Build filters to match game mode metadata
-            var filters = new Dictionary<string, string>();
-            if (!string.IsNullOrEmpty(gameMode))
-                filters["gameMode"] = gameMode;
+            LobbyQuery query = null;
 
-            // Try quick-joining an existing lobby with matching filters
-            var joinResult = await _lobbyProvider.JoinRandom(new LobbyQuery
+            if (!string.IsNullOrEmpty(gameMode))
             {
-                dataFilters = filters
-            });
+                query = new LobbyQuery()
+                    .AddDataFilter("gameMode", gameMode)
+                    .AddDataFilter("matchmaking", "y");
+            }
+
+            var joinResult = await _lobbyProvider.JoinRandom(query);
 
             if (joinResult.success)
                 return joinResult.lobby;
@@ -117,7 +117,10 @@ namespace PurrNet.Lobby.GenericProviders
             // No available lobby found, create one
             var metadata = new Dictionary<string, string>();
             if (!string.IsNullOrEmpty(gameMode))
+            {
                 metadata["gameMode"] = gameMode;
+                metadata["matchmaking"] = "y";
+            }
 
             // Merge any extra attributes from the request
             if (request.attributes != null)

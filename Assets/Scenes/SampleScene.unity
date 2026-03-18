@@ -427,8 +427,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3abe515c5d16bd040ae82719c30df9d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrServices.Runtime::PurrNet.Services.PurrServices
-  _serverUrl: https://purrnet.dev/
-  _apiKey: pk_pub_cbb27721ac9a9b1bd8abb2469ce68554ad8688e7aea20fe304ae067cf10ab096
+  _serverUrl: http://localhost:5173/
+  _apiKey: pk_pub_3d6925e49862662e91c5ccb38c7c653d32894c3dfdfb2a1f26b8f1ea8ed1b04a
 --- !u!1 &1058843092
 GameObject:
   m_ObjectHideFlags: 0

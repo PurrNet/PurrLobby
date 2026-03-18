@@ -17,6 +17,9 @@ namespace PurrNet.Lobby
         private UIPool<LobbyInfoEntry> _lobbyEntries;
         private bool _successfulExit;
 
+        private LobbyQuery _query = new LobbyQuery()
+            .AddStringFilter("matchmaking", FilterComparison.NotEqual, "y");
+
         public void Setup(LobbyProvider lobbyProvider)
         {
             _lobbyProvider = lobbyProvider;
@@ -31,7 +34,7 @@ namespace PurrNet.Lobby
             try
             {
                 _loadingOverlay.Toggle(true);
-                var res = await _lobbyProvider.QueryLobbies();
+                var res = await _lobbyProvider.QueryLobbies(_query);
                 if (!this)
                     return;
                 SetupView(res);

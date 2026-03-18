@@ -87,10 +87,10 @@ namespace PurrNet.Lobby.PurrNet
             return LobbyResponse.Success(lobby);
         }
 
-        public override async Task<LobbyResponse> JoinRandom(LobbyQuery query = default)
+        public override async Task<LobbyResponse> JoinRandom(LobbyQuery query = null)
         {
             var services = PurrServices.instance;
-            var result = await services.lobbies.QuickJoinAsync(query.dataFilters);
+            var result = await services.lobbies.QuickJoinAsync(ToServicesQuery(query));
 
             if (!result.success)
                 return LobbyResponse.Failure(result.error);
@@ -105,10 +105,10 @@ namespace PurrNet.Lobby.PurrNet
             return LobbyResponse.Success(lobby);
         }
 
-        public override async Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = default)
+        public override async Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null)
         {
             var services = PurrServices.instance;
-            var result = await services.lobbies.ListAsync();
+            var result = await services.lobbies.ListAsync(ToServicesQuery(query));
 
             if (!result.success)
                 return LobbyCollectionResponse.Failure(result.error);
@@ -123,11 +123,58 @@ namespace PurrNet.Lobby.PurrNet
                     id = l.id,
                     name = l.name,
                     code = l.code,
+                    playerCount = l.playerCount,
                     maxPlayers = l.maxPlayers,
+                    joinable = l.joinable,
+                    metadata = l.metadata
                 });
             }
 
             return LobbyCollectionResponse.Success(lobbies);
+        }
+
+        private static global::PurrNet.Services.LobbyQuery ToServicesQuery(LobbyQuery query)
+        {
+            if (query == null) return null;
+
+            var sq = new global::PurrNet.Services.LobbyQuery();
+
+            if (query.stringFilters != null)
+            {
+                foreach (var f in query.stringFilters)
+                    sq.AddStringFilter(f.key, ToServicesOp(f.op), f.value);
+            }
+
+            if (query.numericalFilters != null)
+            {
+                foreach (var f in query.numericalFilters)
+                    sq.AddNumericalFilter(f.key, ToServicesOp(f.op), f.value);
+            }
+
+            if (query.nearValueSorts != null)
+            {
+                foreach (var ns in query.nearValueSorts)
+                    sq.AddNearValueFilter(ns.key, ns.target);
+            }
+
+            if (query.slotsAvailable > 0)
+                sq.SetSlotsAvailable(query.slotsAvailable);
+
+            return sq;
+        }
+
+        private static global::PurrNet.Services.LobbyComparison ToServicesOp(FilterComparison op)
+        {
+            switch (op)
+            {
+                case FilterComparison.Equal: return global::PurrNet.Services.LobbyComparison.Equal;
+                case FilterComparison.NotEqual: return global::PurrNet.Services.LobbyComparison.NotEqual;
+                case FilterComparison.LessThan: return global::PurrNet.Services.LobbyComparison.LessThan;
+                case FilterComparison.GreaterThan: return global::PurrNet.Services.LobbyComparison.GreaterThan;
+                case FilterComparison.LessThanOrEqual: return global::PurrNet.Services.LobbyComparison.LessThanOrEqual;
+                case FilterComparison.GreaterThanOrEqual: return global::PurrNet.Services.LobbyComparison.GreaterThanOrEqual;
+                default: return global::PurrNet.Services.LobbyComparison.Equal;
+            }
         }
     }
 }

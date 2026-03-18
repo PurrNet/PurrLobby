@@ -43,8 +43,8 @@ namespace PurrNet.Lobby
 
         public abstract Task<LobbyResponse> JoinLobbyByCode(string code);
 
-        public abstract Task<LobbyResponse> JoinRandom(LobbyQuery query = default);
+        public abstract Task<LobbyResponse> JoinRandom(LobbyQuery query = null);
 
-        public abstract Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = default);
+        public abstract Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null);
     }
 }
