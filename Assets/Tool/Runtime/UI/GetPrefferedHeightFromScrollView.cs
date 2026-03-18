@@ -20,5 +20,10 @@ namespace PurrNet.Lobby
             var contentHeight = _scrollContent.sizeDelta.y;
             _target.preferredHeight = contentHeight + bottom + top;
         }
+
+        public void ForceRebuild()
+        {
+            LateUpdate();
+        }
     }
 }

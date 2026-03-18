@@ -290,7 +290,7 @@ MonoBehaviour:
   _cullWindowsBehind: 1
   _content: {fileID: 2745614998433910954}
   _playerPrefab: {fileID: 5005115316920093660, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
-  _playerPlaceholderPrefab: {fileID: 6043925533959274500, guid: a6f618a8a1ac6e146b1f8691ed9e7d3a, type: 3}
+  _playerPlaceholderPrefab: {fileID: 3659789763750420499, guid: c445dbca9cfa44c4aa93183de38fdcb6, type: 3}
   _playerContent: {fileID: 329250983144878735}
   _chat: {fileID: 6280149757632161066}
   _lobbyCode: {fileID: 2187711664067649461}

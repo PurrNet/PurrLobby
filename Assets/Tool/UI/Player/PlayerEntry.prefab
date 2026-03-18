@@ -215,7 +215,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 2
+  m_Spacing: 0
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
@@ -345,7 +345,7 @@ MonoBehaviour:
   _embossShadowColor: {r: 0, g: 0, b: 0, a: 1}
   _useMaxRoundness: 0
   _uniformRoundness: 0
-  _roundnessInPixels: {x: 16, y: 16, z: 16, w: 16}
+  _roundnessInPixels: {x: 21, y: 21, z: 21, w: 21}
 --- !u!114 &6489382104225965187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -580,7 +580,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 52}
+  m_SizeDelta: {x: 245.2, y: 42}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5669219590109143166
 CanvasRenderer:
@@ -663,9 +663,9 @@ MonoBehaviour:
   _embossStrength: 0.5
   _embossHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _embossShadowColor: {r: 0, g: 0, b: 0, a: 1}
-  _useMaxRoundness: 0
+  _useMaxRoundness: 1
   _uniformRoundness: 1
-  _roundnessInPixels: {x: 16, y: 16, z: 16, w: 16}
+  _roundnessInPixels: {x: 8, y: 8, z: 8, w: 8}
 --- !u!114 &7222759419653779725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -681,8 +681,8 @@ MonoBehaviour:
   m_Padding:
     m_Left: 14
     m_Right: 8
-    m_Top: 8
-    m_Bottom: 8
+    m_Top: 2
+    m_Bottom: 2
   m_ChildAlignment: 4
   m_Spacing: 8
   m_ChildForceExpandWidth: 0
@@ -708,7 +708,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 52
+  m_PreferredHeight: 40
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -925,8 +925,20 @@ PrefabInstance:
       value: Idle
       objectReference: {fileID: 0}
     - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: m_overflowMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: m_TextWrappingMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4288848031
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 8967047083258821514, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
       propertyPath: m_Name
@@ -1254,6 +1266,10 @@ PrefabInstance:
     - target: {fileID: 8859756083255496746, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_TextWrappingMode
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 1024
       objectReference: {fileID: 0}
     - target: {fileID: 8967047083258821514, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_Name
