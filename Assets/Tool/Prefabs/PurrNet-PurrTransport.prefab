@@ -131,4 +131,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.LobbyPlayerSpawner
   _manager: {fileID: 8990513008781140962}
-  _playerViewPrefab: {fileID: -8275876030435172096, guid: 4c91a878a9c730141ab9c7262a8ec948, type: 3}
+  _playerViewPrefab: {fileID: -8275876030435172096, guid: 9c1b3281fe991a44a9537887987229b8, type: 3}

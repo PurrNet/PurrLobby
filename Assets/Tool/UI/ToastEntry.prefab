@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6431688861087352159}
   - component: {fileID: 8657755649240457203}
   - component: {fileID: 4547367179797630170}
+  - component: {fileID: -929085822207758648}
   m_Layer: 5
   m_Name: ToastEntry
   m_TagString: Untagged
@@ -188,6 +189,23 @@ MonoBehaviour:
   _title: {fileID: 7213169937502962587}
   _message: {fileID: 6304920156853765882}
   _duration: 3
+--- !u!114 &-929085822207758648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985440419281333966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df50b8c11070da042bfb67716b57cd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.ClickSounds
+  _clickSounds:
+  - {fileID: 8300000, guid: 24300c13439bdc34ba6a448b09876de8, type: 3}
+  - {fileID: 8300000, guid: 0f09be60e6734a54bb3ddf2e8581e374, type: 3}
+  - {fileID: 8300000, guid: 10c49e10c6d59ca4b86070f3374b69ff, type: 3}
+  - {fileID: 8300000, guid: 3da018ea9941fab498be0a1753490ef2, type: 3}
 --- !u!1001 &2228858366911370161
 PrefabInstance:
   m_ObjectHideFlags: 0

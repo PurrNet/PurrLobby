@@ -116,7 +116,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 900416820126471601}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -776,20 +776,6 @@ MonoBehaviour:
   _statusReady: {r: 0.29411766, g: 0.7529412, b: 0.3529412, a: 1}
   _statusUnready: {r: 0.62352943, g: 0.627451, b: 0.63529414, a: 1}
   _phonemeSprite: {fileID: 8052722413629916396}
-  _phonemeEntries:
-  - phoneme: A
-    sprite: {fileID: 21300000, guid: 2314dfecefcacc34b88e52ba7f817135, type: 3}
-  - phoneme: E
-    sprite: {fileID: 21300000, guid: c5a36e96b24f6ce469fe53a83eff5c41, type: 3}
-  - phoneme: I
-    sprite: {fileID: 21300000, guid: 2314dfecefcacc34b88e52ba7f817135, type: 3}
-  - phoneme: O
-    sprite: {fileID: 21300000, guid: 773b3470abb99234884fbe9ba99e7fa4, type: 3}
-  - phoneme: U
-    sprite: {fileID: 21300000, guid: 789a678d01eac924ba13d62d86afb50e, type: 3}
-  - phoneme: S
-    sprite: {fileID: 21300000, guid: 522a8a295554292489ed113de78c6a1e, type: 3}
-  _phonemeRest: {fileID: 21300000, guid: 3cf70ae9b12d036499cdead6750a4caf, type: 3}
 --- !u!1 &8655436869982318912
 GameObject:
   m_ObjectHideFlags: 0

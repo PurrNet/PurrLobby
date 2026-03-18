@@ -39,6 +39,15 @@ namespace PurrNet.Lobby
 
         private Action<IPlayer>  _onKickPlayer;
 
+        private void Awake()
+        {
+#if PURR_VOICE
+            _phonemeSprite.color = new Color(1, 1, 1, 0);
+#else
+            _phonemeSprite.enabled = false;
+#endif
+        }
+
         public void Setup(ILobby lobby, IPlayer player, Action<IPlayer> onKick)
         {
             _onKickPlayer = onKick;

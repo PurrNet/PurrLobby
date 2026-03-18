@@ -147,7 +147,7 @@ namespace PurrNet.Lobby
         {
             if (_lobby?.localPlayer == null)
             {
-                Toaster.Push("Lobby Error", "Your player isn't connected yet.");
+                Toaster.PushError("Lobby Error", "Your player isn't connected yet.");
                 return;
             }
 
