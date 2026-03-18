@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7081952022573284553}
   - component: {fileID: 564921852227304368}
   - component: {fileID: 1455296083512103301}
+  - component: {fileID: 6425741475279877102}
   m_Layer: 5
   m_Name: CreateLobby
   m_TagString: Untagged
@@ -137,6 +138,20 @@ MonoBehaviour:
   _playerCountText: {fileID: 445740482133909631}
   _loadingOverlay: {fileID: 6501075767274370308}
   _closeParentView: {fileID: 3145489896960878851}
+--- !u!114 &6425741475279877102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1800561170132307054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32005b8df2a056347913b8004a0c9bc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.PopWindowWithBackButton
+  _closeSounds:
+  - {fileID: 8300000, guid: 2c54de40fc105c449bbfd51da9fd7394, type: 3}
 --- !u!1 &7277051423089293904
 GameObject:
   m_ObjectHideFlags: 0
@@ -1752,11 +1767,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Size
-      value: 0.55992377
+      value: 0.9999999
       objectReference: {fileID: 0}
     - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_TargetGraphic
@@ -1768,7 +1783,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9188611237920211996, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

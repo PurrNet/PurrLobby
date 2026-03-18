@@ -45,7 +45,7 @@ namespace PurrNet.Lobby
                 }
 
                 _successfulExit = true;
-                parentStack.Replace<LobbyView>().Setup(response.lobby);
+                parentStack.Replace<LobbyView>(this).Setup(response.lobby);
             }
             catch (Exception e)
             {

@@ -12,6 +12,7 @@ namespace PurrNet.Lobby
         public ILobby lobby;
 
         public static LobbyResponse Success(ILobby lobby) => new LobbyResponse { success = true, lobby = lobby };
+
         public static LobbyResponse Failure(string error) => new LobbyResponse { success = false, error = error };
     }
 
@@ -23,6 +24,7 @@ namespace PurrNet.Lobby
 
         public static LobbyCollectionResponse Success(IReadOnlyList<LobbyInfo> lobbies) =>
             new LobbyCollectionResponse { success = true, lobbies = lobbies };
+
         public static LobbyCollectionResponse Failure(string error) =>
             new LobbyCollectionResponse { success = false, error = error };
     }
@@ -32,11 +34,17 @@ namespace PurrNet.Lobby
         public abstract int maxPlayer { get; }
 
         public abstract Task Login(ViewStack stack);
+
         public abstract void Logout();
+
         public abstract Task<LobbyResponse> CreateLobby(LobbySettings settings);
+
         public abstract Task<LobbyResponse> JoinLobby(string lobbyId);
+
         public abstract Task<LobbyResponse> JoinLobbyByCode(string code);
+
         public abstract Task<LobbyResponse> JoinRandom(LobbyQuery query = default);
+
         public abstract Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = default);
     }
 }

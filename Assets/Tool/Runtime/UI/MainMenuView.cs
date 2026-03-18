@@ -54,7 +54,7 @@ namespace PurrNet.Lobby
 
         public void BrowseLobbies()
         {
-
+            parentStack.Push<LobbyBrowserView>().Setup(_orchestrator.lobbyProvider);
         }
 
         public void Logout()

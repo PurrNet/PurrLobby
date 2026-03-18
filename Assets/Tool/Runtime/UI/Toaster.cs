@@ -1,3 +1,4 @@
+using System;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -15,6 +16,11 @@ namespace PurrNet.Lobby
         private void Awake()
         {
             _instance = this;
+        }
+
+        public static void PushError(string title, Exception exception)
+        {
+            _instance.InternalPush(title, exception.Message, true);
         }
 
         public static void PushError(string title, string message)
