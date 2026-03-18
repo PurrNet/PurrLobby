@@ -18,6 +18,7 @@ namespace PurrNet.Lobby
         public LobbyView lobbyView { get; private set; }
         public ILobby lobby { get; private set; }
         public IPlayer player { get; private set; }
+        public PlayerEntry playerUIEntry { get; private set; }
 
 #if PURR_VOICE
         private void Awake()
@@ -72,6 +73,8 @@ namespace PurrNet.Lobby
             if (lobby.TryGetPlayer(playerId, out var playerRef))
                 player = playerRef;
             else PurrLogger.LogError($"Player `{playerId}` not found in lobby.");
+
+            playerUIEntry = lobbyView.TryGetPlayerEntry(player, out var entry) ? entry : null;
         }
 
         private void OnEnable()
@@ -94,10 +97,13 @@ namespace PurrNet.Lobby
 #endif
         }
 
+#if PURR_VOICE
         [UsedImplicitly]
         private void OnPhonemeChanged(string phoneme)
         {
-            lobbyView.PlayerPhonemeChanged(player, phoneme);
+            if (playerUIEntry)
+                playerUIEntry.PhonemeChanged(phoneme);
         }
+#endif
     }
 }

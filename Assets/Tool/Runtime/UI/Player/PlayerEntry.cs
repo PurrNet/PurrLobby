@@ -5,12 +5,14 @@ using UnityEngine.UI;
 
 namespace PurrNet.Lobby
 {
+#if PURR_VOICE
     [Serializable]
     public struct PhonemeEntry
     {
         public string phoneme;
         public Sprite sprite;
     }
+#endif
 
     public class PlayerEntry : MonoBehaviour
     {
@@ -25,9 +27,11 @@ namespace PurrNet.Lobby
         [SerializeField] private Color _statusReady = Color.green;
         [SerializeField] private Color _statusUnready = Color.gray;
         [SerializeField] private Image _phonemeSprite;
+#if PURR_VOICE
         [Space]
         [SerializeField] private PhonemeEntry[] _phonemeEntries;
         [SerializeField] private Sprite _phonemeRest;
+#endif
 
         private ILobby _lobby;
         private IPlayer _localPlayer => _lobby.localPlayer;
@@ -90,10 +94,18 @@ namespace PurrNet.Lobby
             IPlayer.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
         }
 
+        private void Update()
+        {
+#if PURR_VOICE
+            UpdatePhonemes();
+#endif
+        }
+
+#if PURR_VOICE
         private string _lastPhoneme = "";
         private float _lastPhonemeChangedTime = -100f;
 
-        private void Update()
+        private void UpdatePhonemes()
         {
             bool shouldHide = string.IsNullOrWhiteSpace(_lastPhoneme) && Time.time - _lastPhonemeChangedTime > 1f;
             Vector4 currentColor = _phonemeSprite.color;
@@ -101,6 +113,16 @@ namespace PurrNet.Lobby
             var newColor = Vector4.MoveTowards(currentColor, targetColor, Time.deltaTime * 5f);
             _phonemeSprite.color = newColor;
             _phonemeSprite.gameObject.SetActive(newColor.w != 0f);
+        }
+
+        public void PhonemeChanged(string phoneme)
+        {
+            if (phoneme != _lastPhoneme)
+            {
+                _lastPhoneme = phoneme;
+                _lastPhonemeChangedTime = Time.time;
+                OnPhonemeChanged();
+            }
         }
 
         private void OnPhonemeChanged()
@@ -116,15 +138,6 @@ namespace PurrNet.Lobby
 
             _phonemeSprite.sprite = _phonemeRest;
         }
-
-        public void PhonemeChanged(string phoneme)
-        {
-            if (phoneme != _lastPhoneme)
-            {
-                _lastPhoneme = phoneme;
-                _lastPhonemeChangedTime = Time.time;
-                OnPhonemeChanged();
-            }
-        }
+#endif
     }
 }

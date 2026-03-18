@@ -230,10 +230,9 @@ namespace PurrNet.Lobby
             return ViewTransitions.SlideFromRight(_content);
         }
 
-        public void PlayerPhonemeChanged(IPlayer player, string phoneme)
+        public bool TryGetPlayerEntry(IPlayer player, out PlayerEntry entry)
         {
-            if (_uiPlayerEntry.TryGetValue(player, out var entry))
-                entry.PhonemeChanged(phoneme);
+            return _uiPlayerEntry.TryGetValue(player, out entry);
         }
     }
 }
