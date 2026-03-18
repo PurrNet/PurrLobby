@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -24,6 +23,8 @@ namespace PurrNet.Lobby
             _lobbyEntries ??= new UIPool<LobbyInfoEntry>(_lobbyInfoEntry, _lobbyContent);
             Refresh();
         }
+
+        public void TriggerRefresh() => Refresh();
 
         private async void Refresh()
         {
@@ -73,7 +74,9 @@ namespace PurrNet.Lobby
                     Toaster.PushError("Failed to join lobby", res.error);
                     return;
                 }
-                parentStack.Replace<LobbyView>(this).Setup(res.lobby);
+
+                _successfulExit = true;
+                parentStack.ReplaceOrPush<LobbyView>(this).Setup(res.lobby);
             }
             catch (Exception e)
             {

@@ -42,7 +42,7 @@ namespace PurrNet.Lobby
         private void OnMatchFound(MatchmakingTicket ticket, MatchResult result)
         {
             if (_orchestrator.lobbyProvider && result.lobby != null)
-                parentStack.Replace<LobbyView>(this).Setup(result.lobby);
+                parentStack.ReplaceOrPush<LobbyView>(this).Setup(result.lobby);
         }
 
         public void Cancel()
