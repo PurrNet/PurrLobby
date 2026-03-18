@@ -113,6 +113,7 @@ namespace PurrNet.Lobby.PurrNet
                     if (_players[i].isHost && _players[i].id != newHostId)
                     {
                         _players[i].SetIsHost(false);
+                        _players[i].TriggerOnPlayerUpdated();
                         onPlayerUpdated?.Invoke(_players[i]);
                     }
                     else if (_players[i].id == newHostId)
@@ -120,6 +121,7 @@ namespace PurrNet.Lobby.PurrNet
                         _players[i].SetIsHost(true);
                         host = _players[i];
                         onHostChanged?.Invoke(_players[i]);
+                        _players[i].TriggerOnPlayerUpdated();
                         onPlayerUpdated?.Invoke(_players[i]);
                     }
                 }
