@@ -1,5 +1,4 @@
 using System;
-using PurrNet.Lobby;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -27,9 +26,6 @@ namespace PurrNet.Lobby
 
                 if (_orchestrator.matchmakingProvider)
                     await _orchestrator.matchmakingProvider.Login(_stack);
-
-                if (_orchestrator.gameStarterProvider)
-                    await _orchestrator.gameStarterProvider.Login(_stack);
 
                 _stack.Push<MainMenuView>().Setup(this, _orchestrator);
             }

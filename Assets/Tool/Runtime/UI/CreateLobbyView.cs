@@ -71,7 +71,7 @@ namespace PurrNet.Lobby
 
                 _successfulExit = true;
                 var lobbyView = parentStack.ReplaceOrPush<LobbyView>(this);
-                lobbyView.Setup(response.lobby);
+                lobbyView.Setup(response.lobby, _orchestrator.lobbyProvider);
             }
             catch (Exception e)
             {

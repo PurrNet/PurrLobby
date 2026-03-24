@@ -8,5 +8,10 @@ namespace PurrNet.Lobby
         public int serverPort;
         public string connectionToken;
         public Dictionary<string, string> metadata;
+
+        public override string ToString()
+        {
+            return $"serverAddress: {serverAddress}, serverPort: {serverPort}, connectionToken: {connectionToken},  metadata: {metadata}";
+        }
     }
 }

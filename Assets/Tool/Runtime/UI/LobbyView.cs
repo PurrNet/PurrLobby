@@ -1,6 +1,7 @@
 #if PURR_VOICE
 using System;
 #endif
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using PurrNet.UI;
@@ -48,9 +49,11 @@ namespace PurrNet.Lobby
         private bool _hasLocalMicEnabled;
         private float _allReadyTimer;
         private bool _wasAllReady;
+        private bool _gameStarted;
 
         private UIPool<Transform> _playerPlaceholderPool;
 
+        private LobbyProvider _lobbyProvider;
         public ILobby lobby => _lobby;
 
 #if PURR_VOICE
@@ -58,8 +61,9 @@ namespace PurrNet.Lobby
         public event Action<bool> onLocalMicEnabledChanged;
 #endif
 
-        public void Setup(ILobby lobby)
+        public void Setup(ILobby lobby, LobbyProvider provider)
         {
+            _lobbyProvider = provider;
             _allReadyTimer = _timeToStartGame;
             ResetStatusLabels();
 
@@ -119,6 +123,9 @@ namespace PurrNet.Lobby
             if (_lobby.localPlayer?.isHost == false)
                 return;
 
+            if (_gameStarted)
+                return;
+
             bool allReady = _lobby.players.Count > 0;
 
             foreach (var player in _lobby.players)
@@ -140,6 +147,19 @@ namespace PurrNet.Lobby
                 }
 
                 _allReadyTimer -= Time.deltaTime;
+
+                if (_allReadyTimer < 0)
+                {
+                    _gameStarted = true;
+                    _allReadyTimer = 0f;
+
+                    _lobbyStatusDetails.text = $"LOADING ...";
+                    _lobby.lobbyData.SetData(LOBBY_STATUS_DETAILS_STRING, _lobbyStatusDetails.text);
+
+                    StartGameAsync();
+                    return;
+                }
+
                 int secondsLeft = Mathf.CeilToInt(_allReadyTimer);
                 var text = $"{secondsLeft} ...";
 
@@ -156,6 +176,29 @@ namespace PurrNet.Lobby
                 ResetStatusLabels();
                 _lobby.lobbyData.SetData(LOBBY_STATUS_STRING, _lobbyStatus.text);
                 _lobby.lobbyData.SetData(LOBBY_STATUS_DETAILS_STRING, _lobbyStatusDetails.text);
+            }
+        }
+
+        private async void StartGameAsync()
+        {
+            LoadingView loadingView = null;
+
+            try
+            {
+                loadingView = parentStack.Push<LoadingView>();
+                loadingView.Setup("Joining game ...");
+                var joinInfo = await _lobbyProvider.gameStarter.StartGame(lobby);
+                Debug.Log(joinInfo);
+                loadingView.Setup("Loading game ...");
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
+                if (loadingView)
+                    loadingView.PopMe();
             }
         }
 

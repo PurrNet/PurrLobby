@@ -17,7 +17,7 @@ namespace PurrNet.Lobby
         private UIPool<LobbyInfoEntry> _lobbyEntries;
         private bool _successfulExit;
 
-        private LobbyQuery _query = new LobbyQuery()
+        private readonly LobbyQuery _query = new LobbyQuery()
             .AddStringFilter("matchmaking", FilterComparison.NotEqual, "y");
 
         public void Setup(LobbyProvider lobbyProvider)
@@ -79,7 +79,7 @@ namespace PurrNet.Lobby
                 }
 
                 _successfulExit = true;
-                parentStack.ReplaceOrPush<LobbyView>(this).Setup(res.lobby);
+                parentStack.ReplaceOrPush<LobbyView>(this).Setup(res.lobby, _lobbyProvider);
             }
             catch (Exception e)
             {

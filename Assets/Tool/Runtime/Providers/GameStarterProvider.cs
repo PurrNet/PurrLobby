@@ -15,6 +15,11 @@ namespace PurrNet.Lobby
             new GameStartResponse { success = true, connection = connection };
         public static GameStartResponse Failure(string error) =>
             new GameStartResponse { success = false, error = error };
+
+        public override string ToString()
+        {
+            return $"success: {success}, error: {error}, connection: {{ {connection} }}";
+        }
     }
 
     public abstract class GameStarterProvider : ScriptableObject
@@ -23,6 +28,6 @@ namespace PurrNet.Lobby
 
         public abstract void Logout();
 
-        public abstract void StartGame(ILobby lobby, Action<GameStartResponse> onComplete);
+        public abstract Task<GameStartResponse> StartGame(ILobby lobby);
     }
 }

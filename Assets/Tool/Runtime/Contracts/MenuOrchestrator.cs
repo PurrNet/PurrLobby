@@ -8,6 +8,5 @@ namespace PurrNet.Lobby
         public SessionProvider sessionProvider;
         public LobbyProvider lobbyProvider;
         public MatchmakingProvider matchmakingProvider;
-        public GameStarterProvider gameStarterProvider;
     }
 }

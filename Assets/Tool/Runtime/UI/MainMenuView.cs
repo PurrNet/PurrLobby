@@ -65,9 +65,6 @@ namespace PurrNet.Lobby
             if (_orchestrator.matchmakingProvider)
                 _orchestrator.matchmakingProvider.Logout();
 
-            if (_orchestrator.gameStarterProvider)
-                _orchestrator.gameStarterProvider.Logout();
-
             CloseMe();
 
             // restart loop
