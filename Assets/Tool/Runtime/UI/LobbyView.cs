@@ -90,6 +90,9 @@ namespace PurrNet.Lobby
 
         private void OnMetadata(string key, string value)
         {
+            if (_lobby.isHost)
+                return;
+
             switch (key)
             {
                 case LOBBY_STATUS_STRING:
@@ -193,7 +196,13 @@ namespace PurrNet.Lobby
             }
             catch (Exception e)
             {
+                Toaster.PushError("Failed to start game", e);
                 Debug.LogException(e);
+                ResetStatusLabels();
+                _wasAllReady = false;
+                _gameStarted = false;
+                _allReadyTimer = _timeToStartGame;
+                _lobby.localPlayer?.SetReady(false);
             }
             finally
             {

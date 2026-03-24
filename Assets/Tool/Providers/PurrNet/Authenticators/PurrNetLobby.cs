@@ -24,6 +24,8 @@ namespace PurrNet.Lobby.PurrNet
 
         public ILobbyChat chat => _chat;
 
+        public bool isHost => localPlayer?.isHost == true;
+
         public event Action<IPlayer> onPlayerJoined;
 
         public event Action<IPlayer> onPlayerLeft;

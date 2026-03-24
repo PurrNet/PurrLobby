@@ -23,6 +23,8 @@ namespace PurrNet.Lobby
 
         ILobbyChat chat { get; }
 
+        bool isHost { get; }
+
         void KickPlayer(IPlayer player);
 
         void SetIsLobbyJoinable(bool isJoinable);

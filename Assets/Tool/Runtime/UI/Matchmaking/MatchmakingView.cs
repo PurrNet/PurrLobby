@@ -52,7 +52,7 @@ namespace PurrNet.Lobby
 
             if (!_currentTicket.HasValue)
             {
-                 Toaster.Push($"Failed to cancel", "Waiting for ticket", true);
+                Toaster.Push($"Failed to cancel", "Waiting for ticket", true);
                 return;
             }
 
@@ -71,6 +71,11 @@ namespace PurrNet.Lobby
         private void OnStatusChanged(MatchmakingTicket ticket, MatchmakingStatus status)
         {
             _message.text = $"Matchmaking for {ticket.ticketId}: {status}";
+            if (status is MatchmakingStatus.Failed)
+            {
+                Toaster.PushError("Failed to matchmatch", $"{ticket.ticketId}");
+                PopMe();
+            }
         }
 
         private MatchmakingTicket? _currentTicket;
