@@ -1,4 +1,6 @@
+#if PURR_VOICE
 using System;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 using PurrNet.UI;
@@ -9,6 +11,9 @@ namespace PurrNet.Lobby
 {
     public class LobbyView : MonoView
     {
+        public const string LOBBY_STATUS_STRING = "LOBBY_STATUS_STRING";
+        public const string LOBBY_STATUS_DETAILS_STRING = "LOBBY_STATUS_DETAILS_STRING";
+
         [SerializeField] private RectTransform _content;
         [SerializeField] private PlayerEntry _playerPrefab;
         [SerializeField] private GameObject _playerPlaceholderPrefab;
@@ -31,23 +36,33 @@ namespace PurrNet.Lobby
         [SerializeField] private TMP_Text _microphoneText;
         [SerializeField] private GameObject _microphoneFeature;
         [Space]
+        [SerializeField] private float _timeToStartGame = 3f;
+        [SerializeField] private TMP_Text _lobbyStatus;
+        [SerializeField] private TMP_Text _lobbyStatusDetails;
+        [Space]
         [SerializeField] private bool _connectToPurrnetInLobby = true;
         [SerializeField] private LobbyConnectionProvider _lobbyConnection;
 
         private ILobby _lobby;
         private bool _lobbyConnected;
         private bool _hasLocalMicEnabled;
+        private float _allReadyTimer;
+        private bool _wasAllReady;
 
         private UIPool<Transform> _playerPlaceholderPool;
 
         public ILobby lobby => _lobby;
 
+#if PURR_VOICE
         public bool localMicEnabled => _hasLocalMicEnabled;
-
         public event Action<bool> onLocalMicEnabledChanged;
+#endif
 
         public void Setup(ILobby lobby)
         {
+            _allReadyTimer = _timeToStartGame;
+            ResetStatusLabels();
+
             _playerPlaceholderPool ??= new UIPool<Transform>(_playerPlaceholderPrefab.transform, _playerContent);
 
             _lobby = lobby;
@@ -59,6 +74,7 @@ namespace PurrNet.Lobby
             _lobby.onPlayerUpdated += OnPlayerUpdated;
             _lobby.onLobbyDestroyed += OnLobbyDestroyed;
             _lobby.onHostChanged += OnHostChanged;
+            _lobby.lobbyData.onDataChanged += OnMetadata;
 
             _chat.Setup(lobby);
             _lobbyCode.text = lobby.joinCode;
@@ -68,15 +84,87 @@ namespace PurrNet.Lobby
             UpdateMicGraphics();
         }
 
+        private void OnMetadata(string key, string value)
+        {
+            switch (key)
+            {
+                case LOBBY_STATUS_STRING:
+                {
+                    _lobbyStatus.text = value;
+                    break;
+                }
+                case LOBBY_STATUS_DETAILS_STRING:
+                {
+                    _lobbyStatusDetails.text = value;
+                    break;
+                }
+            }
+        }
+
+        private void ResetStatusLabels()
+        {
+            _lobbyStatus.SetText("WAITING FOR PLAYERS");
+            _lobbyStatusDetails.SetText("READY UP!");
+        }
+
+#if PURR_VOICE
         public void EnableMicrophoneFeature()
         {
             _microphoneFeature.SetActive(true);
+        }
+#endif
+
+        private void Update()
+        {
+            if (_lobby.localPlayer?.isHost == false)
+                return;
+
+            bool allReady = _lobby.players.Count > 0;
+
+            foreach (var player in _lobby.players)
+            {
+                if (!player.isReady)
+                {
+                    allReady = false;
+                    break;
+                }
+            }
+
+            if (allReady)
+            {
+                if (!_wasAllReady)
+                {
+                    _lobbyStatus.text = "STARTING GAME";
+                    _lobby.lobbyData.SetData(LOBBY_STATUS_STRING, _lobbyStatus.text);
+                    _wasAllReady = true;
+                }
+
+                _allReadyTimer -= Time.deltaTime;
+                int secondsLeft = Mathf.CeilToInt(_allReadyTimer);
+                var text = $"{secondsLeft} ...";
+
+                if (text != _lobbyStatusDetails.text)
+                {
+                    _lobbyStatusDetails.text = $"{secondsLeft} ...";
+                    _lobby.lobbyData.SetData(LOBBY_STATUS_DETAILS_STRING, _lobbyStatusDetails.text);
+                }
+            }
+            else if (_wasAllReady)
+            {
+                _wasAllReady = false;
+                _allReadyTimer = _timeToStartGame;
+                ResetStatusLabels();
+                _lobby.lobbyData.SetData(LOBBY_STATUS_STRING, _lobbyStatus.text);
+                _lobby.lobbyData.SetData(LOBBY_STATUS_DETAILS_STRING, _lobbyStatusDetails.text);
+            }
         }
 
         public void ToggleMicrophone()
         {
             _hasLocalMicEnabled = !_hasLocalMicEnabled;
+#if PURR_VOICE
             onLocalMicEnabledChanged?.Invoke(_hasLocalMicEnabled);
+#endif
             UpdateMicGraphics();
         }
 
@@ -168,6 +256,7 @@ namespace PurrNet.Lobby
                 _lobby.onPlayerUpdated -= OnPlayerUpdated;
                 _lobby.onLobbyDestroyed -= OnLobbyDestroyed;
                 _lobby.onHostChanged -= OnHostChanged;
+                _lobby.lobbyData.onDataChanged -= OnMetadata;
 
                 if (_lobbyConnected && _lobbyConnection)
                 {
