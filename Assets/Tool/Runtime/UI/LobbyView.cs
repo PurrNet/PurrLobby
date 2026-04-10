@@ -14,6 +14,7 @@ namespace PurrNet.Lobby
     {
         public const string LOBBY_STATUS_STRING = "LOBBY_STATUS_STRING";
         public const string LOBBY_STATUS_DETAILS_STRING = "LOBBY_STATUS_DETAILS_STRING";
+        public const string LOBBY_CONN_INFO = "LOBBY_CONN_INFO";
 
         [SerializeField] private RectTransform _content;
         [SerializeField] private PlayerEntry _playerPrefab;
@@ -53,7 +54,7 @@ namespace PurrNet.Lobby
 
         private UIPool<Transform> _playerPlaceholderPool;
 
-        private LobbyProvider _lobbyProvider;
+        private GameOrchestrator _orchestrator;
         public ILobby lobby => _lobby;
 
 #if PURR_VOICE
@@ -61,9 +62,9 @@ namespace PurrNet.Lobby
         public event Action<bool> onLocalMicEnabledChanged;
 #endif
 
-        public void Setup(ILobby lobby, LobbyProvider provider)
+        public void Setup(ILobby lobby, GameOrchestrator orchestrator)
         {
-            _lobbyProvider = provider;
+            _orchestrator = orchestrator;
             _allReadyTimer = _timeToStartGame;
             ResetStatusLabels();
 
@@ -103,6 +104,11 @@ namespace PurrNet.Lobby
                 case LOBBY_STATUS_DETAILS_STRING:
                 {
                     _lobbyStatusDetails.text = value;
+                    break;
+                }
+                case LOBBY_CONN_INFO:
+                {
+                    Debug.Log(value);
                     break;
                 }
             }
@@ -190,8 +196,9 @@ namespace PurrNet.Lobby
             {
                 loadingView = parentStack.Push<LoadingView>();
                 loadingView.Setup("Joining game ...");
-                var joinInfo = await _lobbyProvider.gameStarter.StartGame(lobby);
-                Debug.Log(joinInfo);
+                var joinInfo = await _orchestrator.gameAllocator.AllocateGame(lobby);
+                var connectionInfo = JsonUtility.ToJson(joinInfo.connection);
+                _lobby.lobbyData.SetData(LOBBY_CONN_INFO, connectionInfo);
                 loadingView.Setup("Loading game ...");
             }
             catch (Exception e)

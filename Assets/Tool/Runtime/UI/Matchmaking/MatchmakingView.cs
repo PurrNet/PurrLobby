@@ -7,11 +7,11 @@ namespace PurrNet.Lobby
     {
         [SerializeField] private TMPro.TMP_Text _message;
 
-        private MenuOrchestrator _orchestrator;
+        private GameOrchestrator _orchestrator;
         private MatchmakingProvider _provider;
         private bool _cancelling;
 
-        public void Setup(MenuOrchestrator orchestrator, MatchmakingRequest request)
+        public void Setup(GameOrchestrator orchestrator, MatchmakingRequest request)
         {
             _message.text = $"Matchmaking for {request.gameMode}: Queued";
             _orchestrator = orchestrator;
@@ -42,7 +42,7 @@ namespace PurrNet.Lobby
         private void OnMatchFound(MatchmakingTicket ticket, MatchResult result)
         {
             if (_orchestrator.lobbyProvider && result.lobby != null)
-                parentStack.ReplaceOrPush<LobbyView>(this).Setup(result.lobby, _orchestrator.lobbyProvider);
+                parentStack.ReplaceOrPush<LobbyView>(this).Setup(result.lobby, _orchestrator);
         }
 
         public void Cancel()

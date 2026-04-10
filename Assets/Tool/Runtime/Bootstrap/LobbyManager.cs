@@ -6,7 +6,7 @@ namespace PurrNet.Lobby
 {
     public class LobbyManager : MonoBehaviour
     {
-        [SerializeField] private MenuOrchestrator _orchestrator;
+        [SerializeField] private GameOrchestrator _orchestrator;
         [SerializeField] private ViewStack _stack;
 
         private void Start()

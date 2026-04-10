@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d740e0236349442093ff04c05cca35f5, type: 3}
   m_Name: DefaultMaps
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.GameMapCollection
-  gameMaps: []
+  maps:
+  - {fileID: 11400000, guid: 6b258eea22e925547a513cd197ff02ca, type: 2}

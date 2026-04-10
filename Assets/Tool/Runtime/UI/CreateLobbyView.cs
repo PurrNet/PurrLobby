@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using PurrNet.Lobby;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
@@ -20,14 +19,14 @@ namespace PurrNet.Lobby
         [SerializeField] private LoadingOverlay _loadingOverlay;
         [SerializeField] private CloseParentView _closeParentView;
 
-        private MenuOrchestrator _orchestrator;
+        private GameOrchestrator _orchestrator;
 
         public override void OnPopped()
         {
             _playerCountSlider.onValueChanged.RemoveAllListeners();
         }
 
-        public void Setup(MenuOrchestrator provider)
+        public void Setup(GameOrchestrator provider)
         {
             _orchestrator = provider;
             _successfulExit = false;
@@ -71,7 +70,7 @@ namespace PurrNet.Lobby
 
                 _successfulExit = true;
                 var lobbyView = parentStack.ReplaceOrPush<LobbyView>(this);
-                lobbyView.Setup(response.lobby, _orchestrator.lobbyProvider);
+                lobbyView.Setup(response.lobby, _orchestrator);
             }
             catch (Exception e)
             {

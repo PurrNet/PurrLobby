@@ -13,16 +13,16 @@ namespace PurrNet.Lobby
         [Space]
         [SerializeField] private LoadingOverlay _loadingOverlay;
 
-        private LobbyProvider _lobbyProvider;
+        private GameOrchestrator _orchestrator;
         private UIPool<LobbyInfoEntry> _lobbyEntries;
         private bool _successfulExit;
 
         private readonly LobbyQuery _query = new LobbyQuery()
             .AddStringFilter("matchmaking", FilterComparison.NotEqual, "y");
 
-        public void Setup(LobbyProvider lobbyProvider)
+        public void Setup(GameOrchestrator orchestrator)
         {
-            _lobbyProvider = lobbyProvider;
+            _orchestrator = orchestrator;
             _lobbyEntries ??= new UIPool<LobbyInfoEntry>(_lobbyInfoEntry, _lobbyContent);
             Refresh();
         }
@@ -34,7 +34,7 @@ namespace PurrNet.Lobby
             try
             {
                 _loadingOverlay.Toggle(true);
-                var res = await _lobbyProvider.QueryLobbies(_query);
+                var res = await _orchestrator.lobbyProvider.QueryLobbies(_query);
                 if (!this)
                     return;
                 SetupView(res);
@@ -71,7 +71,7 @@ namespace PurrNet.Lobby
             try
             {
                 _loadingOverlay.Toggle(true);
-                var res = await _lobbyProvider.JoinLobby(info.id);
+                var res = await _orchestrator.lobbyProvider.JoinLobby(info.id);
                 if (!res.success)
                 {
                     Toaster.PushError("Failed to join lobby", res.error);
@@ -79,7 +79,7 @@ namespace PurrNet.Lobby
                 }
 
                 _successfulExit = true;
-                parentStack.ReplaceOrPush<LobbyView>(this).Setup(res.lobby, _lobbyProvider);
+                parentStack.ReplaceOrPush<LobbyView>(this).Setup(res.lobby, _orchestrator);
             }
             catch (Exception e)
             {

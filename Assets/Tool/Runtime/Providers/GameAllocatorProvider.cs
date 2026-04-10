@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
@@ -22,12 +21,14 @@ namespace PurrNet.Lobby
         }
     }
 
-    public abstract class GameStarterProvider : ScriptableObject
+    public abstract class GameAllocatorProvider : ScriptableObject
     {
         public abstract Task Login(ViewStack stack);
 
         public abstract void Logout();
 
-        public abstract Task<GameStartResponse> StartGame(ILobby lobby);
+        public abstract Task<GameStartResponse> AllocateGame(ILobby lobby);
+
+        public abstract void Connect(NetworkManager manager, ConnectionInfo connection, bool shouldBeHost);
     }
 }

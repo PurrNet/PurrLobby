@@ -9,8 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4783b11438e641439958504242d56f66, type: 3}
-  m_Name: MapHealth
-  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.IntSettings
-  key: Health
-  value: 100
+  m_Script: {fileID: 11500000, guid: 1dca05c45d0b55b40bcca6a3a40fe6ea, type: 3}
+  m_Name: PurrTransportGameAllocator
+  m_EditorClassIdentifier: PurrNet.Lobby.GenericProviders::PurrNet.Lobby.GenericProviders.P2PGameStarter

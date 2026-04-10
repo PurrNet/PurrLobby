@@ -3,7 +3,8 @@
     "rootNamespace": "PurrNet.Lobby.GenericProviders",
     "references": [
         "GUID:fb5aa70e09e0db742957de215ef97d5b",
-        "GUID:fa956321508a2aa4da8596c3e41eb158"
+        "GUID:fa956321508a2aa4da8596c3e41eb158",
+        "GUID:6e20f757a1bae164fa42750dd2b27dcb"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

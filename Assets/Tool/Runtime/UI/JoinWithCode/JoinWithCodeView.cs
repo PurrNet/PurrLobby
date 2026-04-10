@@ -13,12 +13,12 @@ namespace PurrNet.Lobby
         [SerializeField] private LoadingOverlay _loadingOverlay;
         [SerializeField] private TMP_InputField _codeField;
 
-        private LobbyProvider _lobby;
+        private GameOrchestrator _orchestrator;
         private bool _successfulExit;
 
-        public void Setup(LobbyProvider provider)
+        public void Setup(GameOrchestrator orchestrator)
         {
-            _lobby = provider;
+            _orchestrator = orchestrator;
             _codeField.onSubmit.RemoveAllListeners();
             _codeField.text = "";
             _codeField.ActivateInputField();
@@ -37,7 +37,7 @@ namespace PurrNet.Lobby
                 _loadingOverlay.Toggle(true);
                 _canvasGroup.interactable = false;
 
-                var response = await _lobby.JoinLobbyByCode(_codeField.text);
+                var response = await _orchestrator.lobbyProvider.JoinLobbyByCode(_codeField.text);
                 if (!response.success)
                 {
                     Toaster.Push("Join Failed", response.error, true);
@@ -45,7 +45,7 @@ namespace PurrNet.Lobby
                 }
 
                 _successfulExit = true;
-                parentStack.ReplaceOrPush<LobbyView>(this).Setup(response.lobby, _lobby);
+                parentStack.ReplaceOrPush<LobbyView>(this).Setup(response.lobby, _orchestrator);
             }
             catch (Exception e)
             {

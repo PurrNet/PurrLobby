@@ -12,7 +12,7 @@ namespace PurrNet.Lobby
         [SerializeField] private TMPro.TMP_Text _profileDisplayName;
 
         private LobbyManager _manager;
-        private MenuOrchestrator _orchestrator;
+        private GameOrchestrator _orchestrator;
 
         protected override IEnumerator OnEnterTransition() => ViewTransitions.FadeIn(this);
 
@@ -22,7 +22,7 @@ namespace PurrNet.Lobby
 
         protected override IEnumerator OnUnculledTransition() => ViewTransitions.SlideFromLeft(_content);
 
-        public void Setup(LobbyManager manager, MenuOrchestrator orchestrator)
+        public void Setup(LobbyManager manager, GameOrchestrator orchestrator)
         {
             _orchestrator = orchestrator;
             _manager = manager;
@@ -49,12 +49,12 @@ namespace PurrNet.Lobby
 
         public void JoinWithCode()
         {
-            parentStack.Push<JoinWithCodeView>().Setup(_orchestrator.lobbyProvider);
+            parentStack.Push<JoinWithCodeView>().Setup(_orchestrator);
         }
 
         public void BrowseLobbies()
         {
-            parentStack.Push<LobbyBrowserView>().Setup(_orchestrator.lobbyProvider);
+            parentStack.Push<LobbyBrowserView>().Setup(_orchestrator);
         }
 
         public void Logout()

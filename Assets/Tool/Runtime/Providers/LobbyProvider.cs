@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace PurrNet.Lobby
 {
@@ -31,10 +32,6 @@ namespace PurrNet.Lobby
 
     public abstract class LobbyProvider : ScriptableObject
     {
-        [SerializeField] private GameStarterProvider _gameStarter;
-
-        public GameStarterProvider gameStarter => _gameStarter;
-
         public abstract int maxPlayer { get; }
 
         public abstract Task Login(ViewStack stack);
