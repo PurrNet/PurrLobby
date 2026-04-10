@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dca05c45d0b55b40bcca6a3a40fe6ea, type: 3}
   m_Name: PurrTransportGameAllocator
   m_EditorClassIdentifier: PurrNet.Lobby.GenericProviders::PurrNet.Lobby.GenericProviders.P2PGameStarter
+  _gameScene: GameScene

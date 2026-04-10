@@ -108,7 +108,7 @@ namespace PurrNet.Lobby
                 }
                 case LOBBY_CONN_INFO:
                 {
-                    Debug.Log(value);
+                    JoinGameAsync(value);
                     break;
                 }
             }
@@ -195,16 +195,54 @@ namespace PurrNet.Lobby
             try
             {
                 loadingView = parentStack.Push<LoadingView>();
-                loadingView.Setup("Joining game ...");
+                loadingView.Setup("Allocating game ...");
+
                 var joinInfo = await _orchestrator.gameAllocator.AllocateGame(lobby);
                 var connectionInfo = JsonUtility.ToJson(joinInfo.connection);
                 _lobby.lobbyData.SetData(LOBBY_CONN_INFO, connectionInfo);
+
                 loadingView.Setup("Loading game ...");
+                await _orchestrator.gameAllocator.LoadGame(lobby);
+
+                _orchestrator.gameAllocator.Connect(joinInfo.connection, true);
             }
             catch (Exception e)
             {
                 Toaster.PushError("Failed to start game", e);
-                Debug.LogException(e);
+                Debug.LogException(e, _orchestrator.gameAllocator);
+                ResetStatusLabels();
+                _wasAllReady = false;
+                _gameStarted = false;
+                _allReadyTimer = _timeToStartGame;
+                _lobby.localPlayer?.SetReady(false);
+            }
+            finally
+            {
+                if (loadingView)
+                    loadingView.PopMe();
+            }
+        }
+
+        private async void JoinGameAsync(string connectionInfo)
+        {
+            LoadingView loadingView = null;
+
+            try
+            {
+                loadingView = parentStack.Push<LoadingView>();
+                loadingView.Setup("Allocating game ...");
+
+                var info = JsonUtility.FromJson<ConnectionInfo>(connectionInfo);
+
+                loadingView.Setup("Loading game ...");
+                await _orchestrator.gameAllocator.LoadGame(lobby);
+
+                _orchestrator.gameAllocator.Connect(info, false);
+            }
+            catch (Exception e)
+            {
+                Toaster.PushError("Failed to start game", e);
+                Debug.LogException(e, _orchestrator.gameAllocator);
                 ResetStatusLabels();
                 _wasAllReady = false;
                 _gameStarted = false;

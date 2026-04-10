@@ -29,6 +29,8 @@ namespace PurrNet.Lobby
 
         public abstract Task<GameStartResponse> AllocateGame(ILobby lobby);
 
-        public abstract void Connect(NetworkManager manager, ConnectionInfo connection, bool shouldBeHost);
+        public abstract Task LoadGame(ILobby lobby);
+
+        public abstract void Connect(ConnectionInfo connection, bool shouldBeHost);
     }
 }

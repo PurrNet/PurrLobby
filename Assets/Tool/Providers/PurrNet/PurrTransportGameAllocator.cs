@@ -1,13 +1,18 @@
+using System;
 using System.Threading.Tasks;
+using PurrNet.Logging;
 using PurrNet.Transports;
 using PurrNet.UI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PurrNet.Lobby.GenericProviders
 {
     [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Purr Transport Game Allocator", order = -200)]
     public class PurrTransportGameAllocator : GameAllocatorProvider
     {
+        [SerializeField, PurrScene] private string _gameScene;
+
         public override Task Login(ViewStack stack) => Task.CompletedTask;
 
         public override void Logout() { }
@@ -20,6 +25,24 @@ namespace PurrNet.Lobby.GenericProviders
             }));
         }
 
+        public override Task LoadGame(ILobby lobby)
+        {
+            if (string.IsNullOrEmpty(_gameScene))
+                throw new Exception($"Game scene is not set. Please set the game scene in the inspector of `{name}`.");
+
+            var asyncOp = SceneManager.LoadSceneAsync(_gameScene);
+
+            if (asyncOp == null)
+            {
+                PurrLogger.LogError($"Loading scene `{_gameScene}` failed.");
+                return Task.CompletedTask;
+            }
+
+            var tcs = new TaskCompletionSource<bool>();
+            asyncOp.completed += _ => tcs.SetResult(true);
+            return tcs.Task;
+        }
+
         private T GetOrAddComponent<T>(GameObject gameObject) where T : Component
         {
             if (gameObject.TryGetComponent(out T component))
@@ -27,8 +50,22 @@ namespace PurrNet.Lobby.GenericProviders
             return gameObject.AddComponent<T>();
         }
 
-        public override void Connect(NetworkManager manager, ConnectionInfo connection, bool shouldBeHost)
+        public override void Connect(ConnectionInfo connection, bool shouldBeHost)
         {
+            var manager = NetworkManager.main;
+
+            if (!manager)
+            {
+                PurrLogger.LogError("No `NetworkManager` found in the scene.");
+                return;
+            }
+
+            if (manager.shouldAutoStartServer || manager.shouldAutoStartClient)
+            {
+                PurrLogger.LogError("`NetworkManager` is set to auto start (has auto start flags). Please disable auto start and try again.");
+                return;
+            }
+
             if (manager.transport is PurrTransport transport)
             {
                 transport.roomName = connection.serverAddress;
