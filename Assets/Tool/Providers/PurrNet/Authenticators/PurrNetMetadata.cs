@@ -47,6 +47,11 @@ namespace PurrNet.Lobby.PurrNet
             }
         }
 
+        public bool ContainsData(string key)
+        {
+            return _data.ContainsKey(key);
+        }
+
         public event Action<string, string> onDataChanged;
         static readonly List<string> _tempKeys = new ();
 

@@ -12,6 +12,8 @@ namespace PurrNet.Lobby
 
         void RemoveData(string key);
 
+        bool ContainsData(string key);
+
         event Action<string, string> onDataChanged;
     }
 }
