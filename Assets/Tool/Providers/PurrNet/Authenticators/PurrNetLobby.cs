@@ -145,6 +145,9 @@ namespace PurrNet.Lobby.PurrNet
         {
             _lastData = snapshot.lobby;
 
+            if (snapshot.metadata != null)
+                _metadata.Update(snapshot.metadata);
+
             for (int i = 0; i < _players.Count; i++)
             {
                 bool found = false;
@@ -164,6 +167,7 @@ namespace PurrNet.Lobby.PurrNet
                             _players[i].TriggerOnPlayerUpdated();
                             onPlayerUpdated?.Invoke(_players[i]);
                         }
+                        ApplyPlayerMetadataFromSnapshot(_players[i], snapshot);
                         break;
                     }
                 }
@@ -196,18 +200,29 @@ namespace PurrNet.Lobby.PurrNet
                     player.Update(_lastData.hostPlayerId, p);
                     _players.Add(player);
 
-                    if (player.isHost)
-                        host = player;
-
                     if (player.id == _localPlayerId)
                         localPlayer = player;
+
+                    ApplyPlayerMetadataFromSnapshot(player, snapshot);
 
                     onPlayerJoined?.Invoke(player);
 
                     if (player.isHost)
+                    {
+                        host = player;
                         onHostChanged?.Invoke(player);
+                    }
                 }
             }
+        }
+
+        private static void ApplyPlayerMetadataFromSnapshot(PurrNetPlayer player, LobbySnapshot snapshot)
+        {
+            if (snapshot.playerMetadata == null)
+                return;
+
+            if (snapshot.playerMetadata.TryGetValue(player.id, out var meta) && meta != null)
+                ((PurrNetMetadata)player.userData).Update(meta);
         }
 
         private void OnLobbyDestroyed()

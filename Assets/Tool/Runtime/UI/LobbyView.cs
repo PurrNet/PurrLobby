@@ -81,17 +81,11 @@ namespace PurrNet.Lobby
             _lobby.onHostChanged += OnHostChanged;
 
             if (_lobby.lobbyData.TryGetData(LOBBY_STATUS_STRING, out var lobbyStatus))
-            {
                 OnMetadata(LOBBY_STATUS_STRING, lobbyStatus);
-            }
-            else if (_lobby.lobbyData.TryGetData(LOBBY_STATUS_DETAILS_STRING, out var lobbyStatusDetails))
-            {
+            if (_lobby.lobbyData.TryGetData(LOBBY_STATUS_DETAILS_STRING, out var lobbyStatusDetails))
                 OnMetadata(LOBBY_STATUS_DETAILS_STRING, lobbyStatusDetails);
-            }
-            else if (_lobby.lobbyData.TryGetData(LOBBY_CONN_INFO, out var lobbyConnInfo))
-            {
+            if (_lobby.lobbyData.TryGetData(LOBBY_CONN_INFO, out var lobbyConnInfo))
                 OnMetadata(LOBBY_CONN_INFO, lobbyConnInfo);
-            }
 
             _lobby.lobbyData.onDataChanged += OnMetadata;
 
@@ -105,7 +99,6 @@ namespace PurrNet.Lobby
 
         private void OnMetadata(string key, string value)
         {
-            Debug.Log($"{key}: {value}");
             if (_lobby.isHost)
                 return;
 
