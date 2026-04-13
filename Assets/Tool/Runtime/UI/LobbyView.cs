@@ -206,6 +206,10 @@ namespace PurrNet.Lobby
                 loadingView.Setup("Allocating game ...");
 
                 var joinInfo = await _orchestrator.gameAllocator.AllocateGame(lobby);
+
+                if (!joinInfo.success)
+                    throw new Exception(joinInfo.error);
+
                 var connectionInfo = JsonUtility.ToJson(joinInfo.connection);
                 _lobby.lobbyData.SetData(LOBBY_CONN_INFO, connectionInfo);
 

@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace PurrNet.Lobby.GenericProviders
 {
-    [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Purr Transport Game Allocator", order = -200)]
+    [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Game Allocator", fileName = "PurrTransport Game Allocator", order = -200)]
     public class PurrTransportGameAllocator : GameAllocatorProvider
     {
         [SerializeField, PurrScene] private string _gameScene;
