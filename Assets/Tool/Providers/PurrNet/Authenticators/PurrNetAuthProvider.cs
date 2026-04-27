@@ -32,10 +32,23 @@ namespace PurrNet.Lobby.PurrNet
 
             _loggingIn = new TaskCompletionSource<bool>();
 
-            var deviceLogin = stack.Push<PurrDeviceLogin>();
-            deviceLogin.Setup(() => _loggingIn.TrySetResult(true));
+            var deviceLogin = stack.Push<DeviceLogin>();
+            deviceLogin.Setup(SetFlag, Login);
 
             await _loggingIn.Task;
+        }
+
+        void SetFlag()
+        {
+            _loggingIn.TrySetResult(true);
+        }
+
+        static async Task<APIResponse> Login(string deviceId, string displayName, bool rememberMe)
+        {
+            // PurrServices.auth manages its own session lifetime; rememberMe is unused here.
+            var services = PurrServices.instance;
+            var result = await services.auth.LoginAsync(deviceId, displayName);
+            return result.success ? APIResponse.Success() : APIResponse.Failure(result.error);
         }
 
         public override Task Logout()

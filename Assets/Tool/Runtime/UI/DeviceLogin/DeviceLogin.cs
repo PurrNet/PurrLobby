@@ -2,16 +2,16 @@ using System;
 using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using PurrNet.UI;
-using PurrNet.Services;
 using UnityEngine;
 using PurrNet.UI.HeroUI;
 
-namespace PurrNet.Lobby.PurrNet
+namespace PurrNet.Lobby
 {
-    public class PurrDeviceLogin : MonoView
+    public class DeviceLogin : MonoView
     {
-        const string KEY_PREFIX = nameof(PurrDeviceLogin) + "_";
+        const string KEY_PREFIX = nameof(DeviceLogin) + "_";
 
         [SerializeField] private RectTransform _content;
         [SerializeField] private TMPro.TMP_InputField _displayName;
@@ -21,6 +21,9 @@ namespace PurrNet.Lobby.PurrNet
 
         private string _deviceId;
         private Action _onDone;
+        private LoginCallback _onLogin;
+
+        public delegate Task<APIResponse> LoginCallback(string deviceId, string username, bool rememberMe);
 
         protected override IEnumerator OnEnterTransition() => ViewTransitions.SlideFromBottom(_content);
 
@@ -37,9 +40,10 @@ namespace PurrNet.Lobby.PurrNet
 #endif
         }
 
-        public void Setup(Action onDone)
+        public void Setup(Action onDone, LoginCallback loginCallback)
         {
             _onDone = onDone;
+            _onLogin = loginCallback;
             _rememberMe.value = PlayerPrefs.HasKey(KEY_PREFIX + nameof(_rememberMe));
             if (_rememberMe.value)
                 _displayName.text = PlayerPrefs.GetString(KEY_PREFIX + nameof(_displayName), "");
@@ -68,8 +72,7 @@ namespace PurrNet.Lobby.PurrNet
                 _closeParentView.canClose = false;
                 _loadingOverlay.Toggle(true);
 
-                var services = PurrServices.instance;
-                var response = await services.auth.LoginAsync(_deviceId, _displayName.text);
+                var response = await _onLogin(_deviceId, _displayName.text, _rememberMe.value);
 
                 if (!response.success)
                 {

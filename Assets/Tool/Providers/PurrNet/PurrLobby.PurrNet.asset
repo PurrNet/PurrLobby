@@ -16,5 +16,4 @@ MonoBehaviour:
   folders:
   - {fileID: 102900000, guid: 841643780e4a78b438363c7bda621482, type: 3}
   views:
-  - {fileID: 6095848600923947247, guid: 7fc2278ed695c534c9c575c2ab13e57a, type: 3}
   - {fileID: 3769991691652811937, guid: e9acff17a460e674ba41e192cc3f1e7b, type: 3}

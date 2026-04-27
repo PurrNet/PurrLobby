@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
-using PurrNet.Lobby;
 using PurrNet.Services;
 using PurrNet.UI;
 using UnityEngine;

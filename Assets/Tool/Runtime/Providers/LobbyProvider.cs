@@ -34,6 +34,13 @@ namespace PurrNet.Lobby
     {
         public abstract int maxPlayer { get; }
 
+        /// <summary>
+        /// Which optional features this provider implements. The UI uses this to hide buttons/views
+        /// for actions the backend can't perform (e.g. Nakama has no built-in lobby directory, so
+        /// JoinByCode / Browse / JoinRandom are unsupported there).
+        /// </summary>
+        public virtual LobbyCapabilities capabilities => LobbyCapabilities.All;
+
         public abstract Task Login(ViewStack stack);
 
         public abstract void Logout();

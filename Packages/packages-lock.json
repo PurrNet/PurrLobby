@@ -10,6 +10,15 @@
       },
       "hash": "924b312fae5c340f5349ccdc878d33f23fec704e"
     },
+    "com.heroiclabs.nakama-unity": {
+      "version": "https://github.com/heroiclabs/nakama-unity.git?path=/Packages/Nakama",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      },
+      "hash": "81ca60235430d2ada404d8423a2e908b96101682"
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.10",
       "depth": 0,
@@ -220,7 +229,7 @@
       "url": "https://packages.unity.com"
     },
     "dev.purrnet.purrnet": {
-      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.20.0-beta.102",
+      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.20.0-beta.108",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -228,7 +237,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.collections": "2.6.2"
       },
-      "hash": "d4e1f24cdebd0cedb8258b7c077ea3e349558fdb"
+      "hash": "0b11bed2b5cfb3c06efbd4feb6369471c11fa201"
     },
     "dev.purrnet.services": {
       "version": "file:dev.purrnet.services",

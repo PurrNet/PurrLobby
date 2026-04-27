@@ -9,6 +9,9 @@ namespace PurrNet.Lobby
         [SerializeField] private RectTransform _content;
         [SerializeField] private GameObject _matchmakingSection;
         [SerializeField] private GameObject _lobbySection;
+        [SerializeField] private GameObject _createLobbyButton;
+        [SerializeField] private GameObject _joinWithCodeButton;
+        [SerializeField] private GameObject _browseLobbiesButton;
         [SerializeField] private TMPro.TMP_Text _profileDisplayName;
 
         private LobbyManager _manager;
@@ -30,8 +33,17 @@ namespace PurrNet.Lobby
             if (_matchmakingSection)
                 _matchmakingSection.SetActive(orchestrator.matchmakingProvider);
 
+            var lobbyProvider = orchestrator.lobbyProvider;
             if (_lobbySection)
-                _lobbySection.SetActive(orchestrator.lobbyProvider);
+                _lobbySection.SetActive(lobbyProvider);
+
+            var caps = lobbyProvider ? lobbyProvider.capabilities : LobbyCapabilities.None;
+            if (_createLobbyButton)
+                _createLobbyButton.SetActive(caps.Has(LobbyCapabilities.CreateLobby));
+            if (_joinWithCodeButton)
+                _joinWithCodeButton.SetActive(caps.Has(LobbyCapabilities.JoinLobbyByCode));
+            if (_browseLobbiesButton)
+                _browseLobbiesButton.SetActive(caps.Has(LobbyCapabilities.QueryLobbies));
 
             var username = orchestrator.sessionProvider ?
                 orchestrator.sessionProvider.playerName : "Guest";
