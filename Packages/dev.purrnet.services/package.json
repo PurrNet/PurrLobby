@@ -1,0 +1,19 @@
+{
+  "name": "dev.purrnet.services",
+  "version": "1.0.0-beta.13",
+  "author": {
+    "name": "PurrNet Team",
+    "url": "https://purrnet.dev/"
+  },
+  "description": "Unity client for PurrNet lobby and matchmaking services",
+  "displayName": "PurrServices",
+  "documentationUrl": "https://purrnet.gitbook.io/",
+  "hideInEditor": false,
+  "keywords": [
+    "purrnet",
+    "networking",
+    "multiplayer",
+    "lobby",
+    "matchmaking"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+    "name": "PurrServices.Runtime",
+    "rootNamespace": "PurrServices",
+    "references": [
+        "GUID:3b5390adca4e2bb4791cb930316d6f3e",
+        "GUID:6e20f757a1bae164fa42750dd2b27dcb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
