@@ -238,13 +238,13 @@
       "hash": "d7049df59a9b3e30fc5e82bdd7bc4e3d5858a2c7"
     },
     "dev.purrnet.ui": {
-      "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.4.0-beta.3",
+      "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.5.0-beta.3",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.ugui": "2.0.0"
       },
-      "hash": "ce70784652ad079fcd12416ddee17191ea5de8af"
+      "hash": "7418bc103952393b40a3d0068b97ff023b6e2c7e"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

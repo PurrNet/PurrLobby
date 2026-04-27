@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
+using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby
 {

@@ -248,5 +248,6 @@ MonoBehaviour:
   _prefabCollections:
   - {fileID: 11400000, guid: 993b56811565d1b40ae755a9bd3ca530, type: 2}
   - {fileID: 11400000, guid: e392a91fae84f1541b38ea3dc8a29136, type: 2}
+  _colorPalette: {fileID: 11400000, guid: 4cab5bb920e59c44494e417b637cd042, type: 2}
   _pushOnStart: {fileID: 0}
   _orderOffset: 0

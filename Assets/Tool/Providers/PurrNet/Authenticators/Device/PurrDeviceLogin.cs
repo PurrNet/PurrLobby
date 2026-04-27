@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
-using PurrNet.Lobby;
 using PurrNet.UI;
 using PurrNet.Services;
 using UnityEngine;
+using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby.PurrNet
 {

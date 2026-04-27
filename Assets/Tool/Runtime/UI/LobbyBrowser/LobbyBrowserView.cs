@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using PurrNet.UI;
+using PurrNet.UI.HeroUI;
 using UnityEngine;
 
 namespace PurrNet.Lobby

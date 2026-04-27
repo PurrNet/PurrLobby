@@ -4,6 +4,7 @@ using PurrNet.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby
 {

@@ -6,6 +6,7 @@ using PurrNet.Lobby;
 using PurrNet.Services;
 using PurrNet.UI;
 using UnityEngine;
+using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby.PurrNet
 {
