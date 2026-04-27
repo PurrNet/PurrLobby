@@ -30,6 +30,12 @@ namespace PurrNet.Lobby.Nakama
             {
                 var bytes = Encoding.UTF8.GetBytes(data);
                 _ = _lobby.SendMatchStateBytesAsync(NakamaOpCodes.Chat, bytes);
+
+                // Nakama's relayed SendMatchStateAsync does not echo to the sender, so fire
+                // the local message ourselves to match the PurrNet chat contract where the
+                // sender sees their own messages.
+                if (_lobby.localPlayer != null)
+                    onMessageReceived?.Invoke(_lobby.localPlayer, data);
             }
             catch (Exception ex)
             {

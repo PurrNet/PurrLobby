@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace PurrNet.Lobby
 {
-    [CreateAssetMenu(menuName = "PurrNet/Lobby/Menu Orchestrator")]
+    [CreateAssetMenu(menuName = "PurrLobby/Menu Orchestrator")]
     public class GameOrchestrator : ScriptableObject
     {
         public SessionProvider sessionProvider;

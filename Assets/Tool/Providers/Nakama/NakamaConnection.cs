@@ -122,6 +122,7 @@ namespace PurrNet.Lobby.Nakama
         }
 
         private void OnSocketConnected() => onSocketConnected?.Invoke();
+
         private void OnSocketClosed(string reason) => onSocketDisconnected?.Invoke();
     }
 }

@@ -38,10 +38,40 @@ namespace PurrNet.Lobby.Nakama
         public ILobbyChat chat => _chat;
         public bool isHost => _localPlayer != null && _localPlayer.isHost;
 
-        public event Action<IPlayer> onPlayerJoined;
+        // onPlayerJoined and onHostChanged use replay-on-subscribe semantics: when a new handler
+        // attaches, it is immediately invoked for every existing player / the current host. The
+        // alternative — a one-shot deferred fire from the constructor — races with awaits that
+        // happen between `new NakamaLobby(...)` and the consumer's Setup call (e.g. JoinLobby's
+        // AwaitFirstSnapshotAsync), where Unity's message pump can drain the deferred fire before
+        // the LobbyView ever subscribes.
+        private Action<IPlayer> _onPlayerJoined;
+        public event Action<IPlayer> onPlayerJoined
+        {
+            add
+            {
+                _onPlayerJoined += value;
+                if (value == null)
+                    return;
+                for (int i = 0; i < _players.Count; i++)
+                    value.Invoke(_players[i]);
+            }
+            remove => _onPlayerJoined -= value;
+        }
+
+        private Action<IPlayer> _onHostChanged;
+        public event Action<IPlayer> onHostChanged
+        {
+            add
+            {
+                _onHostChanged += value;
+                if (value != null && _host != null)
+                    value.Invoke(_host);
+            }
+            remove => _onHostChanged -= value;
+        }
+
         public event Action<IPlayer> onPlayerLeft;
         public event Action<IPlayer> onPlayerUpdated;
-        public event Action<IPlayer> onHostChanged;
         public event Action onLobbyDestroyed;
 
         private readonly ISocket _socket;
@@ -248,12 +278,12 @@ namespace PurrNet.Lobby.Nakama
                     _players.Add(player);
                     _displayNames[presence.UserId] = presence.Username;
 
-                    onPlayerJoined?.Invoke(player);
+                    _onPlayerJoined?.Invoke(player);
 
                     if (isPlayerHost)
                     {
                         _host = player;
-                        onHostChanged?.Invoke(player);
+                        _onHostChanged?.Invoke(player);
                     }
 
                     // The host pushes a full snapshot to every newcomer so they can hydrate state.
@@ -494,7 +524,7 @@ namespace PurrNet.Lobby.Nakama
             }
 
             if (_host != null)
-                onHostChanged?.Invoke(_host);
+                _onHostChanged?.Invoke(_host);
         }
 
         private async Task LeaveQuietlyAsync()

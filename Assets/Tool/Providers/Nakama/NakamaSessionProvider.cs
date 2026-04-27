@@ -11,8 +11,27 @@ namespace PurrNet.Lobby.Nakama
     {
         [SerializeField] private NakamaConfig _config;
 
-        [Tooltip("PlayerPrefs key used to cache the auth + refresh tokens when the user opts into 'Remember Me' on the device login view. Leave empty to disable persistence entirely.")]
+        [Tooltip("PlayerPrefs key used to cache the auth + refresh tokens when the user opts into 'Remember Me' on the device login view. Leave empty to disable persistence entirely. In the editor the project folder name is appended to the key so MPPM/clone instances do not share a session.")]
         [SerializeField] private string _sessionPlayerPrefKey = "purr_lobby.nakama.session";
+
+        // Per-clone scoping in editor: each Multiplayer Play Mode / ParrelSync clone has its own
+        // project folder (Application.dataPath differs), so suffixing with the folder name yields
+        // a distinct PlayerPrefs key per clone — same trick PurrServices.AuthService uses.
+        private string ScopedPlayerPrefKey
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_sessionPlayerPrefKey))
+                    return _sessionPlayerPrefKey;
+#if UNITY_EDITOR
+                var projectPath = Application.dataPath;
+                var folderName = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(projectPath));
+                return _sessionPlayerPrefKey + "_" + folderName;
+#else
+                return _sessionPlayerPrefKey;
+#endif
+            }
+        }
 
         public override bool isLoggedIn => NakamaConnection.instance.isAuthenticated;
 
@@ -85,10 +104,11 @@ namespace PurrNet.Lobby.Nakama
 
         private bool TryRestorePersistedSession(NakamaConnection conn)
         {
-            if (string.IsNullOrEmpty(_sessionPlayerPrefKey) || !PlayerPrefs.HasKey(_sessionPlayerPrefKey))
+            var key = ScopedPlayerPrefKey;
+            if (string.IsNullOrEmpty(key) || !PlayerPrefs.HasKey(key))
                 return false;
 
-            var combined = PlayerPrefs.GetString(_sessionPlayerPrefKey);
+            var combined = PlayerPrefs.GetString(key);
             var parts = combined.Split('|');
             if (parts.Length < 1 || string.IsNullOrEmpty(parts[0]))
                 return false;
@@ -98,17 +118,19 @@ namespace PurrNet.Lobby.Nakama
 
         private void PersistSession(NakamaConnection conn)
         {
-            if (string.IsNullOrEmpty(_sessionPlayerPrefKey) || string.IsNullOrEmpty(conn.authToken))
+            var key = ScopedPlayerPrefKey;
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(conn.authToken))
                 return;
-            PlayerPrefs.SetString(_sessionPlayerPrefKey, $"{conn.authToken}|{conn.refreshToken}");
+            PlayerPrefs.SetString(key, $"{conn.authToken}|{conn.refreshToken}");
             PlayerPrefs.Save();
         }
 
         private void ClearPersistedSession()
         {
-            if (string.IsNullOrEmpty(_sessionPlayerPrefKey) || !PlayerPrefs.HasKey(_sessionPlayerPrefKey))
+            var key = ScopedPlayerPrefKey;
+            if (string.IsNullOrEmpty(key) || !PlayerPrefs.HasKey(key))
                 return;
-            PlayerPrefs.DeleteKey(_sessionPlayerPrefKey);
+            PlayerPrefs.DeleteKey(key);
             PlayerPrefs.Save();
         }
     }

@@ -29,7 +29,7 @@ namespace PurrNet.Lobby.Nakama
         public override int maxPlayer => _maxPlayers;
 
         public override LobbyCapabilities capabilities =>
-            LobbyCapabilities.CreateLobby | LobbyCapabilities.JoinLobbyById;
+            LobbyCapabilities.CreateLobby | LobbyCapabilities.JoinLobbyById | LobbyCapabilities.JoinLobbyByCode;
 
         public override async Task Login(ViewStack stack)
         {
@@ -52,16 +52,26 @@ namespace PurrNet.Lobby.Nakama
             if (!TryGetReadyConnection(out var conn, out var error))
                 return LobbyResponse.Failure(error);
 
+            IMatch match;
             try
             {
                 // Relayed match — no server module required.
-                var match = await conn.socket.CreateMatchAsync();
+                match = await conn.socket.CreateMatchAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[NakamaLobbyProvider] CreateMatchAsync threw {ex.GetType().FullName}: {ex}\nsocket.IsConnected={conn.socket?.IsConnected}, session.IsExpired={conn.session?.IsExpired}");
+                return LobbyResponse.Failure($"Failed to create Nakama match ({ex.GetType().Name}): {ex.Message}");
+            }
+
+            try
+            {
                 var maxPlayers = settings.maxPlayers > 0 ? settings.maxPlayers : _maxPlayers;
 
                 var lobby = new NakamaLobby(conn.session,
                     conn.socket,
                     match,
-                    code: string.Empty,
+                    code: match.Id,
                     name: string.IsNullOrEmpty(settings.name) ? "Lobby" : settings.name,
                     maxPlayers: maxPlayers,
                     hostUserId: conn.session.UserId,
@@ -71,7 +81,8 @@ namespace PurrNet.Lobby.Nakama
             }
             catch (Exception ex)
             {
-                return LobbyResponse.Failure($"Failed to create Nakama match: {ex.Message}");
+                Debug.LogError($"[NakamaLobbyProvider] NakamaLobby ctor threw {ex.GetType().FullName}: {ex}");
+                return LobbyResponse.Failure($"Failed to wrap Nakama match ({ex.GetType().Name}): {ex.Message}");
             }
         }
 
@@ -91,7 +102,7 @@ namespace PurrNet.Lobby.Nakama
                 var lobby = new NakamaLobby(conn.session,
                     conn.socket,
                     match,
-                    code: string.Empty,
+                    code: match.Id,
                     name: string.Empty,
                     maxPlayers: 0,
                     hostUserId: hostHint,
@@ -106,8 +117,9 @@ namespace PurrNet.Lobby.Nakama
             }
         }
 
-        public override Task<LobbyResponse> JoinLobbyByCode(string code) =>
-            Task.FromResult(LobbyResponse.Failure("NakamaLobbyProvider does not support join-by-code. Use the matchmaking provider for code-based pairing."));
+        // The "code" surfaced through ILobby.joinCode is the underlying Nakama match id, so
+        // join-by-code is just join-by-id under the hood.
+        public override Task<LobbyResponse> JoinLobbyByCode(string code) => JoinLobby(code);
 
         public override Task<LobbyResponse> JoinRandom(LobbyQuery query = null) =>
             Task.FromResult(LobbyResponse.Failure("NakamaLobbyProvider does not support random join. Use the matchmaking provider instead."));
