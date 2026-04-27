@@ -520,6 +520,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LobbyManager
       objectReference: {fileID: 0}
+    - target: {fileID: 6843563540068316891, guid: 559c5e2f7cecfe14f9d1e276dabd933d, type: 3}
+      propertyPath: _orchestrator
+      value: 
+      objectReference: {fileID: 11400000, guid: 10c0e6f0768273e4bb596a93a5809d7b, type: 2}
     - target: {fileID: 7619080357301862172, guid: 559c5e2f7cecfe14f9d1e276dabd933d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
