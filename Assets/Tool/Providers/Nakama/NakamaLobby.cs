@@ -80,6 +80,9 @@ namespace PurrNet.Lobby.Nakama
         private readonly NakamaChat _chat;
 
         private bool _disposed;
+        private bool _firstSnapshotReceived;
+        private TaskCompletionSource<bool> _firstSnapshotTcs;
+        private readonly object _snapshotGate = new();
 
         internal NakamaLobby(ISession session,
             ISocket socket,
@@ -97,7 +100,9 @@ namespace PurrNet.Lobby.Nakama
             _name = name;
             _maxPlayers = maxPlayers;
             _joinable = true;
-            _hostUserId = string.IsNullOrEmpty(hostUserId) ? session.UserId : hostUserId;
+            // null means "owner unknown; waiting for snapshot" — don't fall back to self,
+            // that would briefly mark the joiner as owner and skew the kick / metadata gates.
+            _hostUserId = hostUserId;
 
             _lobbyMetadata = new NakamaMetadata(this, ownerId: null, isLocalOwner: true);
             _chat = new NakamaChat(this);
@@ -167,6 +172,72 @@ namespace PurrNet.Lobby.Nakama
             _ = SendMatchStateAsync(NakamaOpCodes.SetJoinable, new JoinableMessage { joinable = isJoinable });
         }
 
+        /// <summary>
+        /// Used by the join paths to block the consumer until the owner's authoritative snapshot
+        /// lands — so by the time anyone holds an <see cref="ILobby"/> from a join call, the owner
+        /// identity and lobby metadata reflect the creator's truth instead of a local guess.
+        /// </summary>
+        internal Task AwaitFirstSnapshotAsync(int timeoutMs)
+        {
+            TaskCompletionSource<bool> tcs;
+            lock (_snapshotGate)
+            {
+                if (_firstSnapshotReceived)
+                    return Task.CompletedTask;
+                if (_disposed)
+                    return Task.FromException(new ObjectDisposedException(nameof(NakamaLobby)));
+                // Joined into a match with no other presences — no one to author a snapshot.
+                // The lobby is effectively dead; fail rather than waiting out the full timeout.
+                if (_players.Count <= 1)
+                    return Task.FromException(new InvalidOperationException(
+                        "Joined Nakama lobby has no other presences; the owner is gone."));
+                tcs = _firstSnapshotTcs ??= new TaskCompletionSource<bool>();
+            }
+            _ = SendMatchStateBytesAsync(NakamaOpCodes.RequestSnapshot, null);
+            return AwaitWithTimeoutAsync(tcs.Task, timeoutMs);
+        }
+
+        private static async Task AwaitWithTimeoutAsync(Task task, int timeoutMs)
+        {
+            if (timeoutMs <= 0)
+            {
+                await task;
+                return;
+            }
+            var completed = await Task.WhenAny(task, Task.Delay(timeoutMs));
+            if (completed != task)
+                throw new TimeoutException("Timed out waiting for first Nakama lobby snapshot.");
+            await task;
+        }
+
+        private void SetSnapshotReceived()
+        {
+            TaskCompletionSource<bool> tcs;
+            lock (_snapshotGate)
+            {
+                if (_firstSnapshotReceived)
+                    return;
+                _firstSnapshotReceived = true;
+                tcs = _firstSnapshotTcs;
+            }
+            tcs?.TrySetResult(true);
+        }
+
+        private void SetSnapshotFailed(Exception ex)
+        {
+            TaskCompletionSource<bool> tcs;
+            lock (_snapshotGate)
+            {
+                if (_firstSnapshotReceived)
+                    return;
+                // Mark received so callers that await *after* failure also surface the error
+                // (via a completed-with-exception task) instead of hanging indefinitely.
+                _firstSnapshotReceived = true;
+                tcs = _firstSnapshotTcs;
+            }
+            tcs?.TrySetException(ex);
+        }
+
         public async void LeaveLobby()
         {
             try
@@ -191,6 +262,8 @@ namespace PurrNet.Lobby.Nakama
             if (_disposed)
                 return;
             _disposed = true;
+            // Surface the disposal to anyone awaiting a first snapshot so they don't hang.
+            SetSnapshotFailed(new ObjectDisposedException(nameof(NakamaLobby)));
             _socket.ReceivedMatchPresence -= OnMatchPresence;
             _socket.ReceivedMatchState -= OnMatchState;
             _socket.Closed -= OnSocketDisconnect;
@@ -261,6 +334,7 @@ namespace PurrNet.Lobby.Nakama
 
             if (evt.Leaves != null)
             {
+                bool anyLeaves = false;
                 foreach (var presence in evt.Leaves)
                 {
                     if (presence == null)
@@ -268,11 +342,20 @@ namespace PurrNet.Lobby.Nakama
                     if (!TryRemovePlayer(presence.UserId, out var removed))
                         continue;
 
+                    anyLeaves = true;
                     onPlayerLeft?.Invoke(removed);
 
                     if (removed.isOwner)
                         HandleHostDisappeared();
                 }
+
+                // During the join await window we don't trust isOwner flags (the real owner is
+                // unknown until snapshot arrives). If a leave drained the match down to just us,
+                // there's no peer left to author a snapshot — fail fast instead of waiting out
+                // the full timeout.
+                if (anyLeaves && !_firstSnapshotReceived && _players.Count <= 1)
+                    SetSnapshotFailed(new InvalidOperationException(
+                        "Nakama lobby drained while waiting for the first snapshot."));
             }
         }
 
@@ -323,6 +406,7 @@ namespace PurrNet.Lobby.Nakama
         {
             if (_disposed)
                 return;
+            SetSnapshotFailed(new Exception($"Nakama socket closed: {reason}"));
             onLobbyDestroyed?.Invoke();
             Dispose();
         }
@@ -331,6 +415,8 @@ namespace PurrNet.Lobby.Nakama
         {
             if (msg == null)
                 return;
+
+            SetSnapshotReceived();
 
             _name = msg.lobbyName;
             _code = msg.code;
@@ -403,7 +489,27 @@ namespace PurrNet.Lobby.Nakama
         {
             if (msg == null || string.IsNullOrEmpty(msg.hostUserId))
                 return;
+
+            // Defend against stale migrations: if the named host isn't a current presence,
+            // accepting would null out _host while leaving _hostUserId pointing at a ghost,
+            // and we'd block all owner-gated ops (kick, joinable, metadata) until another
+            // migration arrived. Skip; the next valid migration or snapshot will repair us.
+            // Snapshots take the other path (ChangeHost direct) because initial hydration
+            // can legitimately reference presences whose join events haven't landed yet.
+            if (!TryFindPlayer(msg.hostUserId, out _))
+                return;
+
             ChangeHost(msg.hostUserId);
+
+            // Edge case: another peer's HandleHostDisappeared elected us as the new owner mid-join,
+            // before we ever received the original creator's snapshot. The electing peer doesn't
+            // send a snapshot (it's not the new owner) — we are the authoritative source now, so
+            // satisfy our own pending await and broadcast our state to everyone else.
+            if (msg.hostUserId == _session.UserId && !_firstSnapshotReceived)
+            {
+                SetSnapshotReceived();
+                _ = SendSnapshotAsync();
+            }
         }
 
         private void HandleHostDisappeared()
@@ -441,22 +547,31 @@ namespace PurrNet.Lobby.Nakama
 
             _hostUserId = newHostUserId;
 
+            // Resolve the new host against our current player list. May be null if the announcer
+            // saw a presence we haven't observed yet — in that case OnMatchPresence will backfill
+            // _host when the join event arrives (it checks presence.UserId == _hostUserId).
+            NakamaPlayer resolved = null;
+            if (!string.IsNullOrEmpty(newHostUserId))
+                TryFindPlayer(newHostUserId, out resolved);
+
+            // Reset before walking so a stale _host (e.g. from a previous owner that we've since
+            // dropped from _players) doesn't linger when the new id can't yet be resolved.
+            _host = resolved;
+
             for (int i = 0; i < _players.Count; i++)
             {
                 var p = _players[i];
-                var shouldBeHost = p.id == newHostUserId;
+                var shouldBeHost = resolved != null && p == resolved;
                 if (p.isOwner != shouldBeHost)
                 {
                     p.SetIsHost(shouldBeHost);
                     p.TriggerOnPlayerUpdated();
                     onPlayerUpdated?.Invoke(p);
                 }
-                if (shouldBeHost)
-                    _host = p;
             }
 
-            if (_host != null)
-                _onHostChanged?.Invoke(_host);
+            if (resolved != null)
+                _onHostChanged?.Invoke(resolved);
         }
 
         private async Task LeaveQuietlyAsync()

@@ -23,6 +23,9 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("Default max players for newly created lobbies.")]
         [SerializeField] private int _maxPlayers = 4;
 
+        [Tooltip("How long a joiner waits for the lobby owner's first snapshot before failing the join, in milliseconds.")]
+        [SerializeField] private int _snapshotTimeoutMs = 4000;
+
         public override int maxPlayer => _maxPlayers;
 
         public override LobbyCapabilities capabilities =>
@@ -91,24 +94,35 @@ namespace PurrNet.Lobby.Nakama
             if (!TryGetReadyConnection(out var conn, out var error))
                 return LobbyResponse.Failure(error);
 
+            IMatch match;
             try
             {
-                var match = await conn.socket.JoinMatchAsync(lobbyId);
-                var hostHint = ResolveHostHint(match, conn.session.UserId);
+                match = await conn.socket.JoinMatchAsync(lobbyId);
+            }
+            catch (Exception ex)
+            {
+                return LobbyResponse.Failure($"Failed to join Nakama match: {ex.Message}");
+            }
 
-                var lobby = new NakamaLobby(conn.session,
+            NakamaLobby lobby = null;
+            try
+            {
+                lobby = new NakamaLobby(conn.session,
                     conn.socket,
                     match,
                     code: match.Id,
                     name: string.Empty,
                     maxPlayers: 0,
-                    hostUserId: hostHint,
+                    hostUserId: null,
                     initialMetadata: null);
 
+                await lobby.AwaitFirstSnapshotAsync(_snapshotTimeoutMs);
                 return LobbyResponse.Success(lobby);
             }
             catch (Exception ex)
             {
+                lobby?.Dispose();
+                try { await conn.socket.LeaveMatchAsync(match.Id); } catch { /* swallow */ }
                 return LobbyResponse.Failure($"Failed to join Nakama match: {ex.Message}");
             }
         }
@@ -122,22 +136,6 @@ namespace PurrNet.Lobby.Nakama
 
         public override Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null) =>
             Task.FromResult(LobbyCollectionResponse.Failure("NakamaLobbyProvider does not support lobby listing. Discovery requires a custom server module which this provider intentionally avoids."));
-
-        private static string ResolveHostHint(IMatch match, string selfId)
-        {
-            string best = selfId;
-            if (match.Presences != null)
-            {
-                foreach (var p in match.Presences)
-                {
-                    if (p == null || string.IsNullOrEmpty(p.UserId))
-                        continue;
-                    if (string.IsNullOrEmpty(best) || string.CompareOrdinal(p.UserId, best) < 0)
-                        best = p.UserId;
-                }
-            }
-            return best;
-        }
 
         private bool TryGetReadyConnection(out NakamaConnection conn, out string error)
         {
