@@ -12,7 +12,7 @@ namespace PurrNet.Lobby.PurrNet
 
         public Texture2D avatar => null;
 
-        public bool isHost { get; private set; }
+        public bool isOwner { get; private set; }
 
         public bool isReady
         {
@@ -36,7 +36,7 @@ namespace PurrNet.Lobby.PurrNet
 
         internal void SetIsHost(bool isHost)
         {
-            this.isHost = isHost;
+            this.isOwner = isHost;
         }
 
         public void SetReady(bool isReady)
@@ -61,9 +61,9 @@ namespace PurrNet.Lobby.PurrNet
                 changed = true;
             }
 
-            if (isHost != (id == hostId))
+            if (isOwner != (id == hostId))
             {
-                isHost = id == hostId;
+                isOwner = id == hostId;
                 changed = true;
             }
 

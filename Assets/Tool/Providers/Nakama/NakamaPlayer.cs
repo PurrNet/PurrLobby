@@ -12,7 +12,7 @@ namespace PurrNet.Lobby.Nakama
 
         public Texture2D avatar => null;
 
-        public bool isHost { get; private set; }
+        public bool isOwner { get; private set; }
 
         public bool isReady =>
             userData != null
@@ -32,15 +32,15 @@ namespace PurrNet.Lobby.Nakama
             _lobby = lobby;
             id = userId;
             this.displayName = displayName;
-            this.isHost = isHost;
+            this.isOwner = isHost;
             _metadata = new NakamaMetadata(lobby, userId, isLocal);
         }
 
         internal void SetIsHost(bool value)
         {
-            if (isHost == value)
+            if (isOwner == value)
                 return;
-            isHost = value;
+            isOwner = value;
         }
 
         internal void SetDisplayName(string value)

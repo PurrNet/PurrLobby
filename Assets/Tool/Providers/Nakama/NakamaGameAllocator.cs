@@ -57,7 +57,7 @@ namespace PurrNet.Lobby.Nakama
             if (string.IsNullOrEmpty(_gameScene))
                 throw new Exception($"Game scene is not set. Please set the game scene in the inspector of `{name}`.");
 
-            if (_waitForGameStartFlag && lobby.isHost)
+            if (_waitForGameStartFlag && lobby.isOwner)
                 lobby.lobbyData.SetData(GameStartKeys.Status, "loading");
 
             var asyncOp = SceneManager.LoadSceneAsync(_gameScene);

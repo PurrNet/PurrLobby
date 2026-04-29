@@ -23,9 +23,6 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("Default max players for newly created lobbies.")]
         [SerializeField] private int _maxPlayers = 4;
 
-        [Tooltip("How long to wait for the host's snapshot after joining a lobby, in milliseconds.")]
-        [SerializeField] private int _snapshotTimeoutMs = 4000;
-
         public override int maxPlayer => _maxPlayers;
 
         public override LobbyCapabilities capabilities =>

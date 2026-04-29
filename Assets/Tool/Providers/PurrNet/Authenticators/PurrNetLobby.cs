@@ -12,7 +12,7 @@ namespace PurrNet.Lobby.PurrNet
 
         public IPlayer localPlayer { get; private set; }
 
-        public IPlayer host { get; private set; }
+        public IPlayer owner { get; private set; }
 
         public int maxPlayers => _lastData.maxPlayers;
 
@@ -24,7 +24,7 @@ namespace PurrNet.Lobby.PurrNet
 
         public ILobbyChat chat => _chat;
 
-        public bool isHost => localPlayer?.isHost == true;
+        public bool isOwner => localPlayer?.isOwner == true;
 
         public event Action<IPlayer> onPlayerJoined;
 
@@ -32,7 +32,7 @@ namespace PurrNet.Lobby.PurrNet
 
         public event Action<IPlayer> onPlayerUpdated;
 
-        public event Action<IPlayer> onHostChanged;
+        public event Action<IPlayer> onOwnerChanged;
 
         public event Action onLobbyDestroyed;
 
@@ -98,10 +98,10 @@ namespace PurrNet.Lobby.PurrNet
 
             onPlayerJoined?.Invoke(player);
 
-            if (player.isHost)
+            if (player.isOwner)
             {
-                host = player;
-                onHostChanged?.Invoke(player);
+                owner = player;
+                onOwnerChanged?.Invoke(player);
             }
         }
 
@@ -112,7 +112,7 @@ namespace PurrNet.Lobby.PurrNet
                 _lastData.hostPlayerId = newHostId;
                 for (int i = 0; i < _players.Count; i++)
                 {
-                    if (_players[i].isHost && _players[i].id != newHostId)
+                    if (_players[i].isOwner && _players[i].id != newHostId)
                     {
                         _players[i].SetIsHost(false);
                         _players[i].TriggerOnPlayerUpdated();
@@ -121,8 +121,8 @@ namespace PurrNet.Lobby.PurrNet
                     else if (_players[i].id == newHostId)
                     {
                         _players[i].SetIsHost(true);
-                        host = _players[i];
-                        onHostChanged?.Invoke(_players[i]);
+                        owner = _players[i];
+                        onOwnerChanged?.Invoke(_players[i]);
                         _players[i].TriggerOnPlayerUpdated();
                         onPlayerUpdated?.Invoke(_players[i]);
                     }
@@ -160,8 +160,8 @@ namespace PurrNet.Lobby.PurrNet
                         found = true;
                         if (_players[i].Update(_lastData.hostPlayerId, p))
                         {
-                            if (_players[i].isHost)
-                                host = _players[i];
+                            if (_players[i].isOwner)
+                                owner = _players[i];
                             if (_players[i].id == _localPlayerId)
                                 localPlayer = _players[i];
                             _players[i].TriggerOnPlayerUpdated();
@@ -207,10 +207,10 @@ namespace PurrNet.Lobby.PurrNet
 
                     onPlayerJoined?.Invoke(player);
 
-                    if (player.isHost)
+                    if (player.isOwner)
                     {
-                        host = player;
-                        onHostChanged?.Invoke(player);
+                        owner = player;
+                        onOwnerChanged?.Invoke(player);
                     }
                 }
             }

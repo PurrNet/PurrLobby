@@ -37,7 +37,7 @@ namespace PurrNet.Lobby.Nakama
             if (_data.TryGetValue(key, out var existing) && existing == value)
                 return;
 
-            if (_ownerId == null && !_lobby.isHost)
+            if (_ownerId == null && !_lobby.isOwner)
             {
                 UnityEngine.Debug.LogWarning("[NakamaMetadata] Lobby metadata can only be written by the host.");
                 return;
@@ -63,7 +63,7 @@ namespace PurrNet.Lobby.Nakama
 
         public void RemoveData(string key)
         {
-            if (_ownerId == null && !_lobby.isHost)
+            if (_ownerId == null && !_lobby.isOwner)
             {
                 UnityEngine.Debug.LogWarning("[NakamaMetadata] Lobby metadata can only be written by the host.");
                 return;

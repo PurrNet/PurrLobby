@@ -18,13 +18,13 @@ namespace PurrNet.Lobby.Nakama
         public string id => _matchId;
         public string joinCode => _code;
         public IPlayer localPlayer => _localPlayer;
-        public IPlayer host => _host;
+        public IPlayer owner => _host;
         public int maxPlayers => _maxPlayers;
         public IReadOnlyList<IPlayer> players => _players;
         public IMetadata lobbyData => _lobbyMetadata;
         public bool isLobbyJoinable => _joinable;
         public ILobbyChat chat => _chat;
-        public bool isHost => _localPlayer != null && _localPlayer.isHost;
+        public bool isOwner => _localPlayer != null && _localPlayer.isOwner;
 
         // onPlayerJoined and onHostChanged use replay-on-subscribe semantics: when a new handler
         // attaches, it is immediately invoked for every existing player / the current host. The
@@ -47,7 +47,7 @@ namespace PurrNet.Lobby.Nakama
         }
 
         private Action<IPlayer> _onHostChanged;
-        public event Action<IPlayer> onHostChanged
+        public event Action<IPlayer> onOwnerChanged
         {
             add
             {
@@ -121,7 +121,7 @@ namespace PurrNet.Lobby.Nakama
             _players.Add(selfPlayer);
             _displayNames[selfId] = selfDisplay;
             _localPlayer = selfPlayer;
-            if (selfPlayer.isHost)
+            if (selfPlayer.isOwner)
                 _host = selfPlayer;
 
             if (match.Presences != null)
@@ -146,7 +146,7 @@ namespace PurrNet.Lobby.Nakama
         {
             if (player == null)
                 return;
-            if (!isHost)
+            if (!isOwner)
             {
                 Debug.LogWarning("[NakamaLobby] Only the host can kick players.");
                 return;
@@ -156,7 +156,7 @@ namespace PurrNet.Lobby.Nakama
 
         public void SetIsLobbyJoinable(bool isJoinable)
         {
-            if (!isHost)
+            if (!isOwner)
             {
                 Debug.LogWarning("[NakamaLobby] Only the host can change joinability.");
                 return;
@@ -198,7 +198,7 @@ namespace PurrNet.Lobby.Nakama
 
         internal void SubmitLobbyMetadataPatch(Dictionary<string, string> patch)
         {
-            if (patch == null || patch.Count == 0 || !isHost)
+            if (patch == null || patch.Count == 0 || !isOwner)
                 return;
             _ = SendMatchStateAsync(NakamaOpCodes.LobbyMetadataPatch, new LobbyMetadataMessage { metadata = patch });
         }
@@ -254,7 +254,7 @@ namespace PurrNet.Lobby.Nakama
                     }
 
                     // The host pushes a full snapshot to every newcomer so they can hydrate state.
-                    if (this.isHost)
+                    if (this.isOwner)
                         _ = SendSnapshotAsync();
                 }
             }
@@ -270,7 +270,7 @@ namespace PurrNet.Lobby.Nakama
 
                     onPlayerLeft?.Invoke(removed);
 
-                    if (removed.isHost)
+                    if (removed.isOwner)
                         HandleHostDisappeared();
                 }
             }
@@ -308,7 +308,7 @@ namespace PurrNet.Lobby.Nakama
                         ApplyHostMigration(DecodePayload<HostMigrationMessage>(state.State));
                         break;
                     case NakamaOpCodes.RequestSnapshot:
-                        if (this.isHost)
+                        if (this.isOwner)
                             _ = SendSnapshotAsync();
                         break;
                 }
@@ -445,7 +445,7 @@ namespace PurrNet.Lobby.Nakama
             {
                 var p = _players[i];
                 var shouldBeHost = p.id == newHostUserId;
-                if (p.isHost != shouldBeHost)
+                if (p.isOwner != shouldBeHost)
                 {
                     p.SetIsHost(shouldBeHost);
                     p.TriggerOnPlayerUpdated();
@@ -468,7 +468,7 @@ namespace PurrNet.Lobby.Nakama
 
         private Task SendSnapshotAsync()
         {
-            if (!isHost)
+            if (!isOwner)
                 return Task.CompletedTask;
 
             var snapshot = new SnapshotMessage

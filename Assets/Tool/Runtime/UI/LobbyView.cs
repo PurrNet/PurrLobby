@@ -79,7 +79,7 @@ namespace PurrNet.Lobby
             _lobby.onPlayerLeft += OnPlayerLeft;
             _lobby.onPlayerUpdated += OnPlayerUpdated;
             _lobby.onLobbyDestroyed += OnLobbyDestroyed;
-            _lobby.onHostChanged += OnHostChanged;
+            _lobby.onOwnerChanged += OnOwnerChanged;
 
             if (_lobby.lobbyData.TryGetData(LOBBY_STATUS_STRING, out var lobbyStatus))
                 OnMetadata(LOBBY_STATUS_STRING, lobbyStatus);
@@ -100,7 +100,7 @@ namespace PurrNet.Lobby
 
         private void OnMetadata(string key, string value)
         {
-            if (_lobby.isHost)
+            if (_lobby.isOwner)
                 return;
 
             switch (key)
@@ -138,7 +138,7 @@ namespace PurrNet.Lobby
 
         private void Update()
         {
-            if (_lobby.localPlayer?.isHost == false)
+            if (_lobby.localPlayer?.isOwner == false)
                 return;
 
             if (_gameStarted)
@@ -365,7 +365,7 @@ namespace PurrNet.Lobby
                 _lobby.onPlayerLeft -= OnPlayerLeft;
                 _lobby.onPlayerUpdated -= OnPlayerUpdated;
                 _lobby.onLobbyDestroyed -= OnLobbyDestroyed;
-                _lobby.onHostChanged -= OnHostChanged;
+                _lobby.onOwnerChanged -= OnOwnerChanged;
                 _lobby.lobbyData.onDataChanged -= OnMetadata;
 
                 if (_lobbyConnected && _lobbyConnection)
@@ -376,7 +376,7 @@ namespace PurrNet.Lobby
             }
         }
 
-        private void OnHostChanged(IPlayer host)
+        private void OnOwnerChanged(IPlayer host)
         {
             if (_lobbyConnected && _lobbyConnection)
                 _lobbyConnection.OnHostChanged(_lobby, host, host == _lobby.localPlayer);

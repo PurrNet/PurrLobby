@@ -88,14 +88,14 @@ namespace PurrNet.Lobby
 
         private void UpdatePlayerInfo()
         {
-            _hostIndicator.enabled = _player.isHost;
+            _hostIndicator.enabled = _player.isOwner;
             _username.text = _player.displayName;
 
-            bool iAmHost = _localPlayer?.isHost == true;
+            bool iAmHost = _localPlayer?.isOwner == true;
             bool isMe = _localPlayer?.id == _player.id;
 
             _outline.outlineWidthNotSelected = isMe ? 1f : 0f;
-            _options.SetActive(iAmHost && !_player.isHost);
+            _options.SetActive(iAmHost && !_player.isOwner);
 
             _status.text = _player.isReady ? "Ready" : "Not Ready";
             _status.color = _player.isReady ? _statusReady : _statusUnready;

@@ -11,7 +11,7 @@ namespace PurrNet.Lobby
 
         IPlayer localPlayer { get; }
 
-        IPlayer host { get; }
+        IPlayer owner { get; }
 
         int maxPlayers { get; }
 
@@ -23,7 +23,7 @@ namespace PurrNet.Lobby
 
         ILobbyChat chat { get; }
 
-        bool isHost { get; }
+        bool isOwner { get; }
 
         void KickPlayer(IPlayer player);
 
@@ -37,7 +37,7 @@ namespace PurrNet.Lobby
 
         event Action<IPlayer> onPlayerUpdated;
 
-        event Action<IPlayer> onHostChanged;
+        event Action<IPlayer> onOwnerChanged;
 
         event Action onLobbyDestroyed;
     }

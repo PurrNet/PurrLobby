@@ -20,9 +20,6 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("Maximum number of users in a single match.")]
         [SerializeField] private int _maxCount = 4;
 
-        [Tooltip("How long to wait for the host's snapshot after Nakama forms the match, in milliseconds.")]
-        [SerializeField] private int _snapshotTimeoutMs = 4000;
-
         private MatchmakingTicket? _activeTicket;
         private string _activeNakamaTicketId;
         private bool _matchmakerSubscribed;

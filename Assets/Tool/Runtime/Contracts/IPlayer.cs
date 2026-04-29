@@ -15,7 +15,7 @@ namespace PurrNet.Lobby
 
         Texture2D avatar { get; }
 
-        bool isHost { get; }
+        bool isOwner { get; }
 
         bool isReady { get; }
 
