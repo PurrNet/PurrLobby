@@ -151,10 +151,6 @@ namespace PurrNet.Lobby.Nakama
                     hostUserId: hostUserId,
                     initialMetadata: null);
 
-                // Non-hosts wait for the host's initial snapshot before the lobby is handed back.
-                if (hostUserId != conn.session.UserId)
-                    await lobby.AwaitFirstSnapshotAsync(_snapshotTimeoutMs);
-
                 RaiseStatusChanged(publicTicket, MatchmakingStatus.Found);
                 RaiseMatchFound(publicTicket, new MatchResult { lobby = lobby });
             }

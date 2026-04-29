@@ -108,7 +108,6 @@ namespace PurrNet.Lobby.Nakama
                     hostUserId: hostHint,
                     initialMetadata: null);
 
-                await lobby.AwaitFirstSnapshotAsync(_snapshotTimeoutMs);
                 return LobbyResponse.Success(lobby);
             }
             catch (Exception ex)

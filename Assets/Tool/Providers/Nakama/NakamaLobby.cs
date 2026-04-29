@@ -12,18 +12,6 @@ namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
     /// Wraps a Nakama relayed match as an <see cref="ILobby"/>.
-    ///
-    /// Architecture:
-    /// - Match presences map 1:1 to players (one user = one presence).
-    /// - All mutable state (chat, metadata, joinable, kick) flows through match-state opcodes.
-    /// - The host is the source of truth. When a player joins, the host immediately sends them a full
-    ///   <see cref="SnapshotMessage"/> so they can rebuild local state.
-    /// - Host migration: when the current host's presence disappears, every client deterministically
-    ///   picks the new host (lowest user id among the remaining presences). The new host re-broadcasts
-    ///   a snapshot.
-    /// - There is intentionally no server-side discovery/listing. The match id is the only handle
-    ///   for joining, and code-based pairing is handled by the matchmaker provider rather than by
-    ///   stamping queryable labels (which would require a custom match handler module).
     /// </summary>
     public class NakamaLobby : ILobby, IDisposable
     {
@@ -87,12 +75,11 @@ namespace PurrNet.Lobby.Nakama
         private NakamaPlayer _localPlayer;
         private NakamaPlayer _host;
         private readonly List<NakamaPlayer> _players = new();
-        private readonly Dictionary<string, string> _displayNames = new(); // userId -> latest seen display name
+        private readonly Dictionary<string, string> _displayNames = new();
         private readonly NakamaMetadata _lobbyMetadata;
         private readonly NakamaChat _chat;
 
         private bool _disposed;
-        private TaskCompletionSource<bool> _firstSnapshotTcs;
 
         internal NakamaLobby(ISession session,
             ISocket socket,
@@ -121,10 +108,6 @@ namespace PurrNet.Lobby.Nakama
             // Seed local player + any presences already in the match.
             SeedFromMatch(match);
 
-            // If we're not the host we expect a snapshot from them to fill in lobby state.
-            if (_localPlayer != null && !_localPlayer.isHost)
-                _firstSnapshotTcs = new TaskCompletionSource<bool>();
-
             _socket.ReceivedMatchPresence += OnMatchPresence;
             _socket.ReceivedMatchState += OnMatchState;
             _socket.Closed += OnSocketDisconnect;
@@ -132,7 +115,6 @@ namespace PurrNet.Lobby.Nakama
 
         private void SeedFromMatch(IMatch match)
         {
-            // Self.
             var selfDisplay = !string.IsNullOrEmpty(match.Self?.Username) ? match.Self.Username : _session.Username;
             var selfId = match.Self?.UserId ?? _session.UserId;
             var selfPlayer = new NakamaPlayer(this, selfId, selfDisplay, isHost: selfId == _hostUserId, isLocal: true);
@@ -142,7 +124,6 @@ namespace PurrNet.Lobby.Nakama
             if (selfPlayer.isHost)
                 _host = selfPlayer;
 
-            // Others already present (we joined an existing match).
             if (match.Presences != null)
             {
                 foreach (var p in match.Presences)
@@ -160,10 +141,6 @@ namespace PurrNet.Lobby.Nakama
                 }
             }
         }
-
-        // ------------------------------------------------------------------------------------------
-        // Public API.
-        // ------------------------------------------------------------------------------------------
 
         public void KickPlayer(IPlayer player)
         {
@@ -190,14 +167,13 @@ namespace PurrNet.Lobby.Nakama
             _ = SendMatchStateAsync(NakamaOpCodes.SetJoinable, new JoinableMessage { joinable = isJoinable });
         }
 
-        // ReSharper disable once AsyncVoidMethod
         public async void LeaveLobby()
         {
-            if (_disposed)
-                return;
-
             try
             {
+                if (_disposed)
+                    return;
+
                 await _socket.LeaveMatchAsync(_matchId);
             }
             catch (Exception ex)
@@ -219,10 +195,6 @@ namespace PurrNet.Lobby.Nakama
             _socket.ReceivedMatchState -= OnMatchState;
             _socket.Closed -= OnSocketDisconnect;
         }
-
-        // ------------------------------------------------------------------------------------------
-        // Outbound helpers used by metadata + chat.
-        // ------------------------------------------------------------------------------------------
 
         internal void SubmitLobbyMetadataPatch(Dictionary<string, string> patch)
         {
@@ -254,16 +226,11 @@ namespace PurrNet.Lobby.Nakama
             return SendMatchStateBytesAsync(opCode, bytes);
         }
 
-        // ------------------------------------------------------------------------------------------
-        // Inbound socket events.
-        // ------------------------------------------------------------------------------------------
-
         private void OnMatchPresence(IMatchPresenceEvent evt)
         {
             if (evt == null || evt.MatchId != _matchId)
                 return;
 
-            // Joins.
             if (evt.Joins != null)
             {
                 foreach (var presence in evt.Joins)
@@ -292,7 +259,6 @@ namespace PurrNet.Lobby.Nakama
                 }
             }
 
-            // Leaves.
             if (evt.Leaves != null)
             {
                 foreach (var presence in evt.Leaves)
@@ -308,9 +274,6 @@ namespace PurrNet.Lobby.Nakama
                         HandleHostDisappeared();
                 }
             }
-
-            // The match handler tracks player count from presence events itself, so we don't need to
-            // push a label update for join/leave alone.
         }
 
         private void OnMatchState(IMatchState state)
@@ -364,10 +327,6 @@ namespace PurrNet.Lobby.Nakama
             Dispose();
         }
 
-        // ------------------------------------------------------------------------------------------
-        // State application.
-        // ------------------------------------------------------------------------------------------
-
         private void ApplySnapshot(SnapshotMessage msg)
         {
             if (msg == null)
@@ -402,28 +361,6 @@ namespace PurrNet.Lobby.Nakama
                     onPlayerUpdated?.Invoke(player);
                 }
             }
-
-            _firstSnapshotTcs?.TrySetResult(true);
-        }
-
-        /// <summary>
-        /// Awaits the first inbound snapshot from the host. Used by joiners to populate name/code/metadata
-        /// before <see cref="ILobby"/> is handed back to caller code. The host call is a no-op (it already
-        /// has authoritative state).
-        /// </summary>
-        internal async Task AwaitFirstSnapshotAsync(int timeoutMs)
-        {
-            if (isHost)
-                return;
-            if (_firstSnapshotTcs == null)
-                _firstSnapshotTcs = new TaskCompletionSource<bool>();
-
-            // Nudge the host in case our presence event was missed for some reason.
-            _ = SendMatchStateBytesAsync(NakamaOpCodes.RequestSnapshot, Array.Empty<byte>());
-
-            var completed = await Task.WhenAny(_firstSnapshotTcs.Task, Task.Delay(timeoutMs));
-            if (completed != _firstSnapshotTcs.Task)
-                Debug.LogWarning($"[NakamaLobby] Did not receive a snapshot within {timeoutMs}ms — proceeding with placeholder state.");
         }
 
         private void ApplyLobbyMetadataPatch(LobbyMetadataMessage msg)
@@ -450,7 +387,6 @@ namespace PurrNet.Lobby.Nakama
                 return;
             if (msg.userId == _session.UserId)
             {
-                // We were kicked.
                 onLobbyDestroyed?.Invoke();
                 _ = LeaveQuietlyAsync();
             }
@@ -469,10 +405,6 @@ namespace PurrNet.Lobby.Nakama
                 return;
             ChangeHost(msg.hostUserId);
         }
-
-        // ------------------------------------------------------------------------------------------
-        // Host migration helpers.
-        // ------------------------------------------------------------------------------------------
 
         private void HandleHostDisappeared()
         {
@@ -534,10 +466,6 @@ namespace PurrNet.Lobby.Nakama
             Dispose();
         }
 
-        // ------------------------------------------------------------------------------------------
-        // Snapshot sending — host only.
-        // ------------------------------------------------------------------------------------------
-
         private Task SendSnapshotAsync()
         {
             if (!isHost)
@@ -563,10 +491,6 @@ namespace PurrNet.Lobby.Nakama
 
             return SendMatchStateAsync(NakamaOpCodes.Snapshot, snapshot);
         }
-
-        // ------------------------------------------------------------------------------------------
-        // Helpers.
-        // ------------------------------------------------------------------------------------------
 
         private bool TryFindPlayer(string userId, out NakamaPlayer player)
         {
