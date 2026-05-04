@@ -9,11 +9,13 @@ namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
     /// Nakama lobby provider. Nakama has no built-in lobby directory, and discovery features
-    /// (browse / join-by-code / random-join) require a custom server-side match handler module.
-    /// To stay plugin-free this provider only exposes the operations Nakama supports out of the
-    /// box: creating a relayed match (used as a lobby) and joining one by its known match id.
-    /// Code-based pairing should be done through <see cref="NakamaMatchmakingProvider"/>, which
-    /// uses Nakama's native matchmaker.
+    /// (browse / random-join) require a custom server-side match handler module to carry live
+    /// state — the relayed-match label is set at create time and never updated, so anything
+    /// built on top of it goes stale the moment the owner toggles joinable or writes new
+    /// metadata. To stay plugin-free this provider only exposes operations Nakama supports
+    /// out of the box: creating a relayed match, joining one by its known match id, and
+    /// using that match id as the share code. Code-based pairing should be done through
+    /// <see cref="NakamaMatchmakingProvider"/>, which uses Nakama's native matchmaker.
     /// </summary>
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Lobby Provider", order = -202)]
     public class NakamaLobbyProvider : LobbyProvider

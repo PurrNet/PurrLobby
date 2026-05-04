@@ -40,11 +40,21 @@ namespace PurrNet.Lobby.Nakama
 
             try
             {
-                var match = await conn.socket.CreateMatchAsync();
-                return GameStartResponse.Success(new ConnectionInfo
+                if (lobby is NakamaLobby nakamaLobby)
                 {
-                    serverAddress = match.Id,
-                });
+                    return GameStartResponse.Success(new ConnectionInfo
+                    {
+                        serverAddress = nakamaLobby.id
+                    });
+                }
+                else
+                {
+                    var match = await conn.socket.CreateMatchAsync();
+                    return GameStartResponse.Success(new ConnectionInfo
+                    {
+                        serverAddress = match.Id,
+                    });
+                }
             }
             catch (Exception e)
             {

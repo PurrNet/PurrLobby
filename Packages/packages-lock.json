@@ -229,7 +229,7 @@
       "url": "https://packages.unity.com"
     },
     "dev.purrnet.purrnet": {
-      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.20.0-beta.108",
+      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.20.0-beta.123",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -237,7 +237,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.collections": "2.6.2"
       },
-      "hash": "0b11bed2b5cfb3c06efbd4feb6369471c11fa201"
+      "hash": "8b65d03e19af9941b1b2395ba3241b7ba7a0bd4b"
     },
     "dev.purrnet.services": {
       "version": "file:dev.purrnet.services",
