@@ -47,14 +47,12 @@ namespace PurrNet.Lobby.Nakama
                         serverAddress = nakamaLobby.id
                     });
                 }
-                else
+
+                var match = await conn.socket.CreateMatchAsync();
+                return GameStartResponse.Success(new ConnectionInfo
                 {
-                    var match = await conn.socket.CreateMatchAsync();
-                    return GameStartResponse.Success(new ConnectionInfo
-                    {
-                        serverAddress = match.Id,
-                    });
-                }
+                    serverAddress = match.Id,
+                });
             }
             catch (Exception e)
             {
