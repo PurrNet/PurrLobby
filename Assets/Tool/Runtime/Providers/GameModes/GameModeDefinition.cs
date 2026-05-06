@@ -9,9 +9,7 @@ namespace PurrNet.Lobby
 
         public bool HasSettings<T>() where T : SettingsDefinition
         {
-            if (TryGetSettings<T>(out _))
-                return true;
-            return false;
+            return TryGetSettings<T>(out _);
         }
 
         public bool TryGetSettings<T>(out T result) where T : SettingsDefinition

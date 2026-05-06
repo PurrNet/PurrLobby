@@ -3,13 +3,9 @@ using System;
 namespace PurrNet.Lobby
 {
     /// <summary>
-    /// Optional features a <see cref="LobbyProvider"/> may support. Backends differ in what they can
-    /// offer — Nakama for example has no built-in lobby directory, so it cannot list lobbies or join
-    /// by code. The UI uses these flags to hide buttons/views that would otherwise call into an
-    /// unsupported method.
-    ///
-    /// Providers should set <see cref="LobbyProvider.capabilities"/> to the union of features they
-    /// implement. The default is <see cref="All"/> so existing providers don't need updates.
+    /// Optional features a <see cref="LobbyProvider"/> may support.
+    /// The UI uses these flags to hide buttons for unsupported actions.
+    /// Defaults to <see cref="All"/> so providers only need to override when restricting capabilities.
     /// </summary>
     [Flags]
     public enum LobbyCapabilities

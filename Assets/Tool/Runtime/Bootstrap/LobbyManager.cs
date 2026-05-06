@@ -27,6 +27,9 @@ namespace PurrNet.Lobby
                 if (_orchestrator.matchmakingProvider)
                     await _orchestrator.matchmakingProvider.Login(_stack);
 
+                if (_orchestrator.gameAllocator)
+                    await _orchestrator.gameAllocator.Login(_stack);
+
                 _stack.Push<MainMenuView>().Setup(this, _orchestrator);
             }
             catch (Exception e)

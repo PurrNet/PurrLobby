@@ -15,7 +15,7 @@ namespace PurrNet.Lobby.PurrNet
         Web,
     }
 
-    [CreateAssetMenu(menuName = "PurrLobby/Edegap/Game Allocator", fileName = "Edgegap Game Allocator", order = -199)]
+    [CreateAssetMenu(menuName = "PurrLobby/Edgegap/Game Allocator", fileName = "Edgegap Game Allocator", order = -199)]
     public class EdgegapGameAllocator : GameAllocatorProvider
     {
         [SerializeField, PurrScene] private string _gameScene;
@@ -160,7 +160,6 @@ namespace PurrNet.Lobby.PurrNet
                     break;
             }
 
-            // Edgegap hosts the dedicated server, so every player — including the lobby host — joins as a client.
             manager.StartClient();
         }
 

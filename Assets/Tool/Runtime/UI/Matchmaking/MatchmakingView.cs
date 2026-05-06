@@ -1,3 +1,4 @@
+using System;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -41,8 +42,46 @@ namespace PurrNet.Lobby
 
         private void OnMatchFound(MatchmakingTicket ticket, MatchResult result)
         {
-            if (_orchestrator.lobbyProvider && result.lobby != null)
+            if (result.lobby != null)
+            {
                 parentStack.ReplaceOrPush<LobbyView>(this).Setup(result.lobby, _orchestrator);
+                return;
+            }
+
+            StartGameFromMatch(result);
+        }
+
+        private async void StartGameFromMatch(MatchResult result)
+        {
+            LoadingView loadingView = null;
+
+            try
+            {
+                loadingView = parentStack.Push<LoadingView>();
+                loadingView.Setup("Allocating game...");
+
+                var response = await _orchestrator.gameAllocator.AllocateGame(result);
+
+                if (!response.success)
+                    throw new Exception(response.error);
+
+                loadingView.Setup("Loading game...");
+                await _orchestrator.gameAllocator.LoadGame(result);
+
+                _orchestrator.gameAllocator.Connect(response.connection, result.isHost);
+            }
+            catch (Exception e)
+            {
+                Toaster.PushError("Failed to start game", e);
+                if (_orchestrator.gameAllocator)
+                    Debug.LogException(e, _orchestrator.gameAllocator);
+                PopMe();
+            }
+            finally
+            {
+                if (loadingView)
+                    loadingView.PopMe();
+            }
         }
 
         public void Cancel()
@@ -73,7 +112,7 @@ namespace PurrNet.Lobby
             _message.text = $"Matchmaking for {ticket.ticketId}: {status}";
             if (status is MatchmakingStatus.Failed)
             {
-                Toaster.PushError("Failed to matchmatch", $"{ticket.ticketId}");
+                Toaster.PushError("Failed to matchmake", $"{ticket.ticketId}");
                 PopMe();
             }
         }

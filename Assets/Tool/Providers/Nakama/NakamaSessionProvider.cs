@@ -14,9 +14,6 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("PlayerPrefs key used to cache the auth + refresh tokens when the user opts into 'Remember Me' on the device login view. Leave empty to disable persistence entirely. In the editor the project folder name is appended to the key so MPPM/clone instances do not share a session.")]
         [SerializeField] private string _sessionPlayerPrefKey = "purr_lobby.nakama.session";
 
-        // Per-clone scoping in editor: each Multiplayer Play Mode / ParrelSync clone has its own
-        // project folder (Application.dataPath differs), so suffixing with the folder name yields
-        // a distinct PlayerPrefs key per clone — same trick PurrServices.AuthService uses.
         private string ScopedPlayerPrefKey
         {
             get
@@ -54,8 +51,6 @@ namespace PurrNet.Lobby.Nakama
             var conn = NakamaConnection.instance;
             conn.EnsureClient(_config);
 
-            // Reuse a still-valid session (in-memory or persisted on disk) silently — same UX as
-            // PurrNet when ValidateSessionAsync succeeds.
             if (conn.isAuthenticated || TryRestorePersistedSession(conn))
             {
                 await conn.EnsureSocketAsync();

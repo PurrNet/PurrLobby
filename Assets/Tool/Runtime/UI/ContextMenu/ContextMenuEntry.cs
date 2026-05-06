@@ -17,7 +17,7 @@ namespace PurrNet.Lobby
 
         public void Setup(int index, ContextOption option, Action<int> onClicked)
         {
-            _onOptionSelected  = onClicked;
+            _onOptionSelected = onClicked;
             _index = index;
 
             _icon.text = string.IsNullOrWhiteSpace(option.icon) ? "" : $"<icon={option.icon}>";

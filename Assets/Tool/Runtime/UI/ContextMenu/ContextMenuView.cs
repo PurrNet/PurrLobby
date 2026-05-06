@@ -38,15 +38,15 @@ namespace PurrNet.Lobby
             _optionEntries.ResetCounter();
             _categoryEntries.ResetCounter();
 
-            string _currentCategory = null;
+            string currentCategory = null;
 
             for (int i = 0; i < options.Count; i++)
             {
                 var option = options[i];
 
-                if (_currentCategory != option.category)
+                if (currentCategory != option.category)
                 {
-                    _currentCategory = option.category;
+                    currentCategory = option.category;
                     if (!string.IsNullOrWhiteSpace(option.category))
                     {
                         var category = _categoryEntries.GetInstance();

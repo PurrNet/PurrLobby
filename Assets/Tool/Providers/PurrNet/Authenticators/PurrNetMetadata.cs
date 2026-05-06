@@ -53,7 +53,7 @@ namespace PurrNet.Lobby.PurrNet
         }
 
         public event Action<string, string> onDataChanged;
-        static readonly List<string> _tempKeys = new ();
+        readonly List<string> _tempKeys = new ();
 
         internal void Update(Dictionary<string, string> metadata)
         {
@@ -74,7 +74,6 @@ namespace PurrNet.Lobby.PurrNet
                 }
             }
 
-            // Check for removed keys
             _tempKeys.Clear();
 
             foreach (var key in _data.Keys)

@@ -259,19 +259,5 @@ namespace PurrNet.Lobby.PurrNet
             _connection.Disconnect();
         }
 
-        public bool TryGetPlayer(string playerId, out IPlayer player)
-        {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                if (_players[i].id == playerId)
-                {
-                    player = _players[i];
-                    return true;
-                }
-            }
-
-            player = null;
-            return false;
-        }
     }
 }

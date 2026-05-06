@@ -45,7 +45,6 @@ namespace PurrNet.Lobby.PurrNet
 
         static async Task<APIResponse> Login(string deviceId, string displayName, bool rememberMe)
         {
-            // PurrServices.auth manages its own session lifetime; rememberMe is unused here.
             var services = PurrServices.instance;
             var result = await services.auth.LoginAsync(deviceId, displayName);
             return result.success ? APIResponse.Success() : APIResponse.Failure(result.error);

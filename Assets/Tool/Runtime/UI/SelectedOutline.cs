@@ -15,7 +15,6 @@ namespace PurrNet.Lobby
 
         private float _timeSinceToggle;
         private bool _isSelected;
-        private bool _isFocused;
 
         public Color outlineColor
         {

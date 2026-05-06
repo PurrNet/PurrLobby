@@ -5,13 +5,8 @@ using System.Collections.Generic;
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
-    /// Metadata bag backed by Nakama match-state messages.
-    ///
-    /// For lobby metadata: only the host's writes are authoritative — non-host writes are sent as a request
-    /// and the host echoes the patch back to everyone.
-    ///
-    /// For player metadata: each player owns their own bag. Non-local writes are silently ignored — the local
-    /// player's writes broadcast a patch that everyone applies.
+    /// Metadata backed by Nakama match-state messages.
+    /// Lobby metadata is host-authoritative; player metadata is owner-authoritative.
     /// </summary>
     public class NakamaMetadata : IMetadata
     {
@@ -88,15 +83,11 @@ namespace PurrNet.Lobby.Nakama
 
         internal IReadOnlyDictionary<string, string> Snapshot() => _data;
 
-        /// <summary>
-        /// Replaces the bag wholesale and fires <see cref="onDataChanged"/> for any key that changed,
-        /// added or was removed. Used when a snapshot or full replacement arrives over the wire.
-        /// </summary>
+        /// <summary>Replaces all data and fires <see cref="onDataChanged"/> for any differences.</summary>
         internal void ReplaceFrom(Dictionary<string, string> replacement)
         {
             replacement ??= new Dictionary<string, string>();
 
-            // Removed keys.
             _scratchKeys.Clear();
             foreach (var key in _data.Keys)
             {
@@ -110,7 +101,6 @@ namespace PurrNet.Lobby.Nakama
             }
             _scratchKeys.Clear();
 
-            // Added / changed keys.
             foreach (var kvp in replacement)
             {
                 if (_data.TryGetValue(kvp.Key, out var existing) && existing == kvp.Value)
@@ -120,9 +110,7 @@ namespace PurrNet.Lobby.Nakama
             }
         }
 
-        /// <summary>
-        /// Applies a partial patch — null values delete the key.
-        /// </summary>
+        /// <summary>Applies a partial patch. Null values delete the key.</summary>
         internal void ApplyPatch(Dictionary<string, string> patch)
         {
             if (patch == null)
@@ -145,7 +133,7 @@ namespace PurrNet.Lobby.Nakama
             }
         }
 
-        private static readonly List<string> _scratchKeys = new();
+        private readonly List<string> _scratchKeys = new();
     }
 }
 #endif

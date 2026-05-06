@@ -11,7 +11,7 @@ namespace PurrNet.Lobby
 
         public override string ToString()
         {
-            return $"serverAddress: {serverAddress}, serverPort: {serverPort}, connectionToken: {connectionToken},  metadata: {metadata}";
+            return $"serverAddress: {serverAddress}, serverPort: {serverPort}, connectionToken: {connectionToken}, metadata: {metadata}";
         }
     }
 }

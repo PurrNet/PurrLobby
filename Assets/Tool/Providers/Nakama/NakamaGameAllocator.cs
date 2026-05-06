@@ -8,18 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace PurrNet.Lobby.Nakama
 {
-    /// <summary>
-    /// Hands off from the lobby to an in-game session using <see cref="PurrNet.Nakama.NakamaTransport"/>.
-    ///
-    /// Nakama itself does not allocate dedicated servers — peer-hosting via the Nakama relay is the
-    /// supported path here. The host pre-creates a fresh gameplay match in <see cref="AllocateGame"/>
-    /// using the shared session socket and passes its id through <see cref="ConnectionInfo.serverAddress"/>.
-    /// Both host and client then adopt that match via <see cref="PurrNet.Nakama.NakamaTransport.matchId"/>.
-    ///
-    /// If the NetworkManager has no transport (or a non-Nakama one) wired up, a NakamaTransport is
-    /// added automatically and assigned, mirroring how <c>PurrTransportGameAllocator</c> handles
-    /// PurrTransport.
-    /// </summary>
+    /// <summary>Game allocator using Nakama relayed matches for peer-hosted gameplay.</summary>
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Game Allocator", fileName = "Nakama Game Allocator", order = -202)]
     public class NakamaGameAllocator : GameAllocatorProvider
     {
@@ -65,7 +54,7 @@ namespace PurrNet.Lobby.Nakama
             if (string.IsNullOrEmpty(_gameScene))
                 throw new Exception($"Game scene is not set. Please set the game scene in the inspector of `{name}`.");
 
-            if (_waitForGameStartFlag && lobby.isOwner)
+            if (_waitForGameStartFlag && lobby != null && lobby.isOwner)
                 lobby.lobbyData.SetData(GameStartKeys.Status, "loading");
 
             var asyncOp = SceneManager.LoadSceneAsync(_gameScene);

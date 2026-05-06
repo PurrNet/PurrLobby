@@ -13,11 +13,7 @@ namespace PurrNet.Lobby.Nakama
         public string lobbyId;
     }
 
-    /// <summary>
-    /// Validates incoming game-time connections against the active lobby's roster, mirroring the
-    /// PurrNet provider's <c>LobbyAuthenticator</c>. Lives in the Nakama asmdef so the Nakama provider
-    /// is self-contained and does not need to reference the PurrNet provider.
-    /// </summary>
+    /// <summary>Validates incoming game connections against the active lobby's player roster.</summary>
     public class NakamaLobbyAuthenticator : AuthenticationBehaviour<NakamaLoginPayload>, IProvideConnectionToPlayerID
     {
         private readonly Dictionary<string, Connection> _authedPlayers = new();
@@ -52,20 +48,9 @@ namespace PurrNet.Lobby.Nakama
             });
         }
 
-        private bool LobbyContainsPlayer(string playerId)
-        {
-            var players = _lobby.players;
-            for (int i = 0; i < players.Count; i++)
-            {
-                if (players[i].id == playerId)
-                    return true;
-            }
-            return false;
-        }
-
         protected override Task<AuthenticationResponse> ValidateClientPayload(Connection conn, NakamaLoginPayload payload)
         {
-            if (LobbyContainsPlayer(payload.playerId) && payload.lobbyId == _lobby.id)
+            if (_lobby.TryGetPlayer(payload.playerId, out _) && payload.lobbyId == _lobby.id)
             {
                 _authedPlayers[payload.playerId] = conn;
                 _authedConnections[conn] = payload.playerId;

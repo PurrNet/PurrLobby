@@ -114,7 +114,6 @@ namespace PurrNet.Lobby.GenericProviders
             if (_cancelled)
                 return null;
 
-            // No available lobby found, create one
             var metadata = new Dictionary<string, string>();
             if (!string.IsNullOrEmpty(gameMode))
             {
@@ -122,7 +121,6 @@ namespace PurrNet.Lobby.GenericProviders
                 metadata["matchmaking"] = "y";
             }
 
-            // Merge any extra attributes from the request
             if (request.attributes != null)
             {
                 foreach (var kvp in request.attributes)

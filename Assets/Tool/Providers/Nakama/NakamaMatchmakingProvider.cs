@@ -12,7 +12,6 @@ namespace PurrNet.Lobby.Nakama
     public class NakamaMatchmakingProvider : MatchmakingProvider
     {
         [SerializeField] private NakamaSessionProvider _sessionProvider;
-        [SerializeField] private NakamaLobbyProvider _lobbyProvider;
 
         [Tooltip("Minimum number of users that must match before Nakama forms a match.")]
         [SerializeField] private int _minCount = 2;
@@ -31,13 +30,44 @@ namespace PurrNet.Lobby.Nakama
                 Debug.LogError($"[{name}] NakamaSessionProvider is not assigned.");
                 return;
             }
+
+            ResetState();
             await _sessionProvider.Login(stack);
             EnsureMatchmakerSubscribed();
         }
 
         public override void Logout()
         {
+            CancelActiveTicketSilently();
             UnsubscribeMatchmaker();
+        }
+
+        private void ResetState()
+        {
+            _matchmakerSubscribed = false;
+            _activeTicket = null;
+            _activeNakamaTicketId = null;
+        }
+
+        private async void CancelActiveTicketSilently()
+        {
+            var nakamaTicket = _activeNakamaTicketId;
+            _activeTicket = null;
+            _activeNakamaTicketId = null;
+
+            if (string.IsNullOrEmpty(nakamaTicket))
+                return;
+
+            try
+            {
+                var socket = NakamaConnection.instance.socket;
+                if (socket is { IsConnected: true })
+                    await socket.RemoveMatchmakerAsync(nakamaTicket);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[{name}] Failed to cancel matchmaker ticket on logout: {ex.Message}");
+            }
         }
 
         public override async void StartMatchmaking(MatchmakingRequest request, Action<MatchmakingTicketResponse> onComplete)
@@ -122,7 +152,6 @@ namespace PurrNet.Lobby.Nakama
             if (matched == null || _activeTicket == null)
                 return;
 
-            // Verify this matched event corresponds to our active ticket — Nakama may have multiple in flight.
             if (!string.IsNullOrEmpty(_activeNakamaTicketId) && matched.Ticket != _activeNakamaTicketId)
                 return;
 
@@ -135,8 +164,6 @@ namespace PurrNet.Lobby.Nakama
                 var conn = NakamaConnection.instance;
                 var match = await conn.socket.JoinMatchAsync(matched);
 
-                // Whoever has the lowest user id in the matched users list takes initial host. The lobby
-                // class deterministically agrees on this so every joiner converges on the same answer.
                 var hostUserId = ResolveLowestUserId(matched);
 
                 var lobby = new NakamaLobby(conn.session,
@@ -148,8 +175,10 @@ namespace PurrNet.Lobby.Nakama
                     hostUserId: hostUserId,
                     initialMetadata: null);
 
+                var isHost = hostUserId == conn.session.UserId;
+
                 RaiseStatusChanged(publicTicket, MatchmakingStatus.Found);
-                RaiseMatchFound(publicTicket, new MatchResult { lobby = lobby });
+                RaiseMatchFound(publicTicket, new MatchResult { lobby = lobby, isHost = isHost });
             }
             catch (Exception ex)
             {
@@ -175,10 +204,7 @@ namespace PurrNet.Lobby.Nakama
             return best;
         }
 
-        /// <summary>
-        /// Translate a <see cref="MatchmakingRequest"/> into a Nakama matchmaker query plus the property
-        /// bags every member of the match contributes. The query uses Lucene syntax.
-        /// </summary>
+        /// <summary>Translates a <see cref="MatchmakingRequest"/> into a Nakama Lucene query and property bags.</summary>
         private static (string query, Dictionary<string, string> stringProps, Dictionary<string, double> numericProps) BuildMatchmakerQuery(MatchmakingRequest request)
         {
             var stringProps = new Dictionary<string, string>();
@@ -201,6 +227,7 @@ namespace PurrNet.Lobby.Nakama
                     if (double.TryParse(kvp.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var num))
                     {
                         numericProps[kvp.Key] = num;
+                        queryParts.Add($"+properties.{kvp.Key}:{num.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
                     }
                     else
                     {

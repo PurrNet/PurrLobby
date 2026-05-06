@@ -89,7 +89,7 @@ namespace PurrNet.Lobby
             }
             finally
             {
-                _closeParentView.canClose = false;
+                _closeParentView.canClose = true;
                 _loadingOverlay.Toggle(false);
             }
         }

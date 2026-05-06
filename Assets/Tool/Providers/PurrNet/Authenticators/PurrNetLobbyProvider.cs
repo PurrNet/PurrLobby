@@ -53,51 +53,31 @@ namespace PurrNet.Lobby.PurrNet
 
         public override async Task<LobbyResponse> JoinLobby(string lobbyId)
         {
-            var services = PurrServices.instance;
-            var result = await services.lobbies.JoinAsync(lobbyId);
-
-            if (!result.success)
-                return LobbyResponse.Failure(result.error);
-
-            services.activePlayerToken = result.playerToken;
-            var snapshot = await services.lobbies.PollAsync(result.lobbyId);
-
-            if (!snapshot.success)
-                return LobbyResponse.Failure(snapshot.error);
-
-            var lobby = new PurrNetLobby(services.lobbies, snapshot.snapshot.lobby, result.playerToken);
-            return LobbyResponse.Success(lobby);
+            var result = await PurrServices.instance.lobbies.JoinAsync(lobbyId);
+            return await PollAndWrap(result);
         }
 
         public override async Task<LobbyResponse> JoinLobbyByCode(string code)
         {
-            var services = PurrServices.instance;
-            var result = await services.lobbies.JoinByCodeAsync(code);
-
-            if (!result.success)
-                return LobbyResponse.Failure(result.error);
-
-            services.activePlayerToken = result.playerToken;
-            var snapshot = await services.lobbies.PollAsync(result.lobbyId);
-
-            if (!snapshot.success)
-                return LobbyResponse.Failure(snapshot.error);
-
-            var lobby = new PurrNetLobby(services.lobbies, snapshot.snapshot.lobby, result.playerToken);
-            return LobbyResponse.Success(lobby);
+            var result = await PurrServices.instance.lobbies.JoinByCodeAsync(code);
+            return await PollAndWrap(result);
         }
 
         public override async Task<LobbyResponse> JoinRandom(LobbyQuery query = null)
         {
-            var services = PurrServices.instance;
-            var result = await services.lobbies.QuickJoinAsync(ToServicesQuery(query));
+            var result = await PurrServices.instance.lobbies.QuickJoinAsync(ToServicesQuery(query));
+            return await PollAndWrap(result);
+        }
 
+        private async Task<LobbyResponse> PollAndWrap(JoinResult result)
+        {
             if (!result.success)
                 return LobbyResponse.Failure(result.error);
 
+            var services = PurrServices.instance;
             services.activePlayerToken = result.playerToken;
-            var snapshot = await services.lobbies.PollAsync(result.lobbyId);
 
+            var snapshot = await services.lobbies.PollAsync(result.lobbyId);
             if (!snapshot.success)
                 return LobbyResponse.Failure(snapshot.error);
 

@@ -1,6 +1,3 @@
-#if PURR_VOICE
-using System;
-#endif
 using System;
 using System.Collections;
 using System.Collections.Generic;

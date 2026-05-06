@@ -43,13 +43,6 @@ namespace PurrNet.Lobby.Nakama
             isOwner = value;
         }
 
-        internal void SetDisplayName(string value)
-        {
-            if (displayName == value)
-                return;
-            displayName = value;
-        }
-
         internal NakamaMetadata GetMetadata() => _metadata;
 
         public void SetReady(bool isReady)

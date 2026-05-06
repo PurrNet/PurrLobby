@@ -8,14 +8,10 @@ using UnityEngine;
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
-    /// Nakama lobby provider. Nakama has no built-in lobby directory, and discovery features
-    /// (browse / random-join) require a custom server-side match handler module to carry live
-    /// state — the relayed-match label is set at create time and never updated, so anything
-    /// built on top of it goes stale the moment the owner toggles joinable or writes new
-    /// metadata. To stay plugin-free this provider only exposes operations Nakama supports
-    /// out of the box: creating a relayed match, joining one by its known match id, and
-    /// using that match id as the share code. Code-based pairing should be done through
-    /// <see cref="NakamaMatchmakingProvider"/>, which uses Nakama's native matchmaker.
+    /// Lobby provider backed by Nakama relayed matches. Only supports create, join-by-id, and
+    /// join-by-code (which maps to the match id). Browse and random-join are unsupported because
+    /// Nakama relayed-match labels are immutable after creation. Use <see cref="NakamaMatchmakingProvider"/>
+    /// for discovery instead.
     /// </summary>
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Lobby Provider", order = -202)]
     public class NakamaLobbyProvider : LobbyProvider

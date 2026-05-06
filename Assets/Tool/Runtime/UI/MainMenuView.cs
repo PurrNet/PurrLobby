@@ -77,9 +77,10 @@ namespace PurrNet.Lobby
             if (_orchestrator.matchmakingProvider)
                 _orchestrator.matchmakingProvider.Logout();
 
-            CloseMe();
+            if (_orchestrator.gameAllocator)
+                _orchestrator.gameAllocator.Logout();
 
-            // restart loop
+            CloseMe();
             _manager.Initialize();
         }
 

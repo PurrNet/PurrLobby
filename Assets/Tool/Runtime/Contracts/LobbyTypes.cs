@@ -91,9 +91,7 @@ namespace PurrNet.Lobby
             return this;
         }
 
-        /// <summary>
-        /// Convenience method: adds an exact-match string filter.
-        /// </summary>
+        /// <summary>Adds an exact-match string filter.</summary>
         public LobbyQuery AddDataFilter(string key, string value)
         {
             return AddStringFilter(key, FilterComparison.Equal, value);

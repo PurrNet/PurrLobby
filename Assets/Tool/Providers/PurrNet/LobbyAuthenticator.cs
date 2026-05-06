@@ -46,20 +46,9 @@ namespace PurrNet.Lobby.PurrNet
             });
         }
 
-        private bool LobbyContainsPlayer(string playerId)
-        {
-            var players = _lobby.players;
-            for (int i = 0; i < players.Count; i++)
-            {
-                if (players[i].id == playerId)
-                    return true;
-            }
-            return false;
-        }
-
         protected override Task<AuthenticationResponse> ValidateClientPayload(Connection conn, LoginPayload payload)
         {
-            if (LobbyContainsPlayer(payload.playerId) && payload.lobbyId == _lobby.id)
+            if (_lobby.TryGetPlayer(payload.playerId, out _) && payload.lobbyId == _lobby.id)
             {
                 _authedPlayers[payload.playerId] = conn;
                 _authedConnections[conn] = payload.playerId;

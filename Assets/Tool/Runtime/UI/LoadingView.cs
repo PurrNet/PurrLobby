@@ -11,10 +11,5 @@ namespace PurrNet.Lobby
         {
             _messageText.text = message;
         }
-
-        public void SetMessage(string message)
-        {
-            _messageText.text = message;
-        }
     }
 }

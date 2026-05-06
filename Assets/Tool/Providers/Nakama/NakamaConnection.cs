@@ -7,12 +7,8 @@ using UnityEngine;
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
-    /// Singleton holder for the Nakama <see cref="IClient"/>, <see cref="ISession"/> and <see cref="ISocket"/>.
-    /// Mirrors the role played by <c>PurrServices</c> in the PurrNet provider — every Nakama provider asset
-    /// reads from a single shared connection so a session/socket established by the SessionProvider is
-    /// reused by the LobbyProvider, MatchmakingProvider, etc. Persistence policy (PlayerPrefs caching of
-    /// auth tokens) is owned by <see cref="NakamaSessionProvider"/>; this class only knows how to import
-    /// and export raw token pairs.
+    /// Singleton holder for the shared Nakama client, session, and socket.
+    /// All Nakama providers read from this instance so a single authenticated session is reused across providers.
     /// </summary>
     public sealed class NakamaConnection
     {
@@ -58,10 +54,7 @@ namespace PurrNet.Lobby.Nakama
             return session;
         }
 
-        /// <summary>
-        /// Adopts a previously-issued session given its auth + refresh tokens. Returns false if the tokens
-        /// are missing, malformed, or the resulting session is already expired.
-        /// </summary>
+        /// <summary>Restores a session from cached auth/refresh tokens. Returns false if expired or invalid.</summary>
         public bool TryRestoreFromTokens(string auth, string refresh)
         {
             if (string.IsNullOrEmpty(auth))

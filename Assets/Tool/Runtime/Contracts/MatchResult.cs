@@ -4,5 +4,6 @@ namespace PurrNet.Lobby
     {
         public ILobby lobby;
         public ConnectionInfo connection;
+        public bool isHost;
     }
 }

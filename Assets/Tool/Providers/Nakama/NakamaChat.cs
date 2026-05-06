@@ -5,11 +5,7 @@ using UnityEngine;
 
 namespace PurrNet.Lobby.Nakama
 {
-    /// <summary>
-    /// Chat is broadcast as a UTF-8 byte payload using <see cref="NakamaOpCodes.Chat"/>. The sender is
-    /// identified by the <c>UserPresence</c> field on the inbound match-state message, so we only encode
-    /// the message body itself.
-    /// </summary>
+    /// <summary>Chat implementation using Nakama match-state messages.</summary>
     public class NakamaChat : ILobbyChat
     {
         private readonly NakamaLobby _lobby;
@@ -31,9 +27,7 @@ namespace PurrNet.Lobby.Nakama
                 var bytes = Encoding.UTF8.GetBytes(data);
                 _ = _lobby.SendMatchStateBytesAsync(NakamaOpCodes.Chat, bytes);
 
-                // Nakama's relayed SendMatchStateAsync does not echo to the sender, so fire
-                // the local message ourselves to match the PurrNet chat contract where the
-                // sender sees their own messages.
+                // Nakama relayed matches don't echo to sender; fire locally
                 if (_lobby.localPlayer != null)
                     onMessageReceived?.Invoke(_lobby.localPlayer, data);
             }

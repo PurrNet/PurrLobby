@@ -4,9 +4,7 @@ using Newtonsoft.Json;
 
 namespace PurrNet.Lobby.Nakama
 {
-    /// <summary>
-    /// Match-state op codes used by the Nakama lobby. All payloads are UTF-8 encoded JSON.
-    /// </summary>
+    /// <summary>Match-state op codes for Nakama lobby messages. Payloads are UTF-8 JSON.</summary>
     internal static class NakamaOpCodes
     {
         public const long Snapshot = 1;
@@ -19,9 +17,7 @@ namespace PurrNet.Lobby.Nakama
         public const long RequestSnapshot = 8;
     }
 
-    /// <summary>
-    /// Full lobby snapshot the host sends to a player when they join, and to everyone after a host migration.
-    /// </summary>
+    /// <summary>Full lobby snapshot sent by the host on join and after host migration.</summary>
     internal class SnapshotMessage
     {
         [JsonProperty("hostUserId")] public string hostUserId;

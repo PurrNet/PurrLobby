@@ -7,9 +7,8 @@ using UnityEngine;
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
-    /// Drives the in-game NetworkManager lifecycle when joining/leaving a Nakama lobby and during host
-    /// migration. Equivalent to <c>PurrTransportLobbyConnection</c> but transport-agnostic — host
-    /// migration sets a configurable string field on whatever transport is wired.
+    /// Manages the NetworkManager lifecycle for Nakama lobbies, including host migration.
+    /// Transport-agnostic: sets a configurable field on whatever transport is wired.
     /// </summary>
     public class NakamaLobbyConnection : LobbyConnectionProvider
     {

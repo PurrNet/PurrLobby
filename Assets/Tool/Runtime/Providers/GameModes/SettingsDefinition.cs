@@ -3,8 +3,5 @@ using UnityEngine;
 
 namespace PurrNet.Lobby
 {
-    public abstract class SettingsDefinition : ScriptableObject, IPackedAuto
-    {
-
-    }
+    public abstract class SettingsDefinition : ScriptableObject, IPackedAuto { }
 }
