@@ -18,6 +18,11 @@ namespace PurrNet.Lobby.PurrNet
     [CustomEditor(typeof(EdgegapMatchmakingProvider))]
     public class EdgegapMatchmakingProviderEditor : Editor
     {
+        private static readonly HttpClient client = new()
+        {
+            Timeout = TimeSpan.FromSeconds(15)
+        };
+
         private const string DashboardUrl = "https://app.edgegap.com/";
         private const string DocsUrl = "https://docs.edgegap.com/learn/matchmaking";
         private const string ShowHintsKey = "PurrLobby.Edgegap.ShowHints";
@@ -397,7 +402,6 @@ namespace PurrNet.Lobby.PurrNet
 
             try
             {
-                using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
                 using var request = new HttpRequestMessage(HttpMethod.Get, swaggerUrl);
 
                 if (!string.IsNullOrEmpty(token))
@@ -457,7 +461,6 @@ namespace PurrNet.Lobby.PurrNet
             {
                 var swaggerUrl = $"{url.TrimEnd('/')}/swagger/v1/swagger.json";
 
-                using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
                 using var request = new HttpRequestMessage(HttpMethod.Get, swaggerUrl);
 
                 if (!string.IsNullOrEmpty(token))
@@ -503,7 +506,6 @@ namespace PurrNet.Lobby.PurrNet
 
             try
             {
-                using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
                 using var request = new HttpRequestMessage(HttpMethod.Options, ticketsUrl);
                 request.Headers.TryAddWithoutValidation("Origin", ProbeOrigin);
                 request.Headers.TryAddWithoutValidation("Access-Control-Request-Method", "POST");
