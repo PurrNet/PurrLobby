@@ -30,6 +30,16 @@ namespace PurrNet.Lobby.PurrNet
         [Tooltip("Polling interval in milliseconds while waiting for the deployment to become ready.")]
         [SerializeField] private int _pollIntervalMs = 2_000;
 
+        /// <summary>
+        /// Transport this allocator connects with. The single source of truth for
+        /// the transport - an <see cref="EdgegapMatchmakingProvider"/> paired with
+        /// this allocator reads it from here rather than holding its own copy.
+        /// </summary>
+        public EdgegapAllocatorTransport Transport => _transport;
+
+        /// <summary>Optional named port to connect through; empty means pick by protocol.</summary>
+        public string PortName => _portName;
+
         public override Task Login(ViewStack stack) => Task.CompletedTask;
 
         public override void Logout() { }

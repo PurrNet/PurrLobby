@@ -11,6 +11,7 @@ namespace PurrNet.Lobby
         private GameOrchestrator _orchestrator;
         private MatchmakingProvider _provider;
         private bool _cancelling;
+        private bool _failed;
 
         public void Setup(GameOrchestrator orchestrator, MatchmakingRequest request)
         {
@@ -20,9 +21,10 @@ namespace PurrNet.Lobby
 
             if (_provider)
             {
-                _provider.StartMatchmaking(request, OnComplete);
                 _provider.onStatusChanged += OnStatusChanged;
                 _provider.onMatchFound += OnMatchFound;
+                _provider.onMatchmakingError += OnMatchmakingError;
+                _provider.StartMatchmaking(request, OnComplete);
             }
             else
             {
@@ -37,6 +39,7 @@ namespace PurrNet.Lobby
             {
                 _provider.onStatusChanged -= OnStatusChanged;
                 _provider.onMatchFound -= OnMatchFound;
+                _provider.onMatchmakingError -= OnMatchmakingError;
             }
         }
 
@@ -109,12 +112,27 @@ namespace PurrNet.Lobby
 
         private void OnStatusChanged(MatchmakingTicket ticket, MatchmakingStatus status)
         {
-            _message.text = $"Matchmaking for {ticket.ticketId}: {status}";
-            if (status is MatchmakingStatus.Failed)
+            _message.text = $"Matchmaking: {status}";
+
+            // A provider that reports a failure should also raise onMatchmakingError
+            // with the reason; OnMatchmakingError handles those. This is the fallback
+            // for providers that only flip the status.
+            if (status is MatchmakingStatus.Failed && !_failed)
             {
-                Toaster.PushError("Failed to matchmake", $"{ticket.ticketId}");
+                _failed = true;
+                Toaster.PushError("Matchmaking failed", "The matchmaker reported a failure.");
                 PopMe();
             }
+        }
+
+        private void OnMatchmakingError(MatchmakingTicket ticket, string error)
+        {
+            if (_failed)
+                return;
+
+            _failed = true;
+            Toaster.Push("Matchmaking failed", string.IsNullOrEmpty(error) ? "Unknown error." : error, true);
+            PopMe();
         }
 
         private MatchmakingTicket? _currentTicket;

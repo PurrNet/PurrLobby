@@ -18,18 +18,35 @@ namespace PurrNet.Lobby
             _instance = this;
         }
 
+        private void OnDestroy()
+        {
+            if (_instance == this)
+                _instance = null;
+        }
+
         public static void PushError(string title, Exception exception)
         {
-            _instance.InternalPush(title, exception.Message, true);
+            PushError(title, exception.Message);
         }
 
         public static void PushError(string title, string message)
         {
-            _instance.InternalPush(title, message, true);
+            Push(title, message, true);
         }
 
         public static void Push(string title, string message, bool error = false)
         {
+            // There's no Toaster in the active scene (e.g. we moved to the game
+            // scene). Don't blow up - just log it so the message isn't lost.
+            if (_instance == null)
+            {
+                if (error)
+                    Debug.LogError($"{title}: {message}");
+                else
+                    Debug.Log($"{title}: {message}");
+                return;
+            }
+
             _instance.InternalPush(title, message, error);
         }
 

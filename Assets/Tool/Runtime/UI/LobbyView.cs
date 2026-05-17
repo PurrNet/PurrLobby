@@ -135,7 +135,7 @@ namespace PurrNet.Lobby
 
         private void Update()
         {
-            if (_lobby.localPlayer?.isOwner == false)
+            if (_lobby.localPlayer == null || !_lobby.localPlayer.isOwner)
                 return;
 
             if (_gameStarted)
@@ -310,19 +310,32 @@ namespace PurrNet.Lobby
 
         private void RenderPlayerList(ILobby lobby)
         {
+            // Make sure every player currently in the lobby has an entry. Players who
+            // were already here when we opened the view won't have fired onPlayerJoined,
+            // so we can't rely on that event alone.
+            foreach (var player in lobby.players)
+            {
+                if (!_uiPlayerEntry.ContainsKey(player))
+                    CreatePlayerEntry(player);
+            }
+
             _playerPlaceholderPool.ResetCounter();
 
-            for (int i = 0; i < lobby.maxPlayers; i++)
-            {
-                var player = i < lobby.players.Count ? lobby.players[i] : null;
-
-                if (player == null)
-                    _playerPlaceholderPool.GetInstance().SetAsLastSibling();
-            }
+            int emptySlots = Mathf.Max(0, lobby.maxPlayers - lobby.players.Count);
+            for (int i = 0; i < emptySlots; i++)
+                _playerPlaceholderPool.GetInstance().SetAsLastSibling();
 
             _playerPlaceholderPool.DiscardRest();
 
             UpdateLocalPlayerData(lobby);
+        }
+
+        private PlayerEntry CreatePlayerEntry(IPlayer player)
+        {
+            var entry = Instantiate(_playerPrefab, _playerContent);
+            entry.Setup(_lobby, player, OnKickPlayer);
+            _uiPlayerEntry.Add(player, entry);
+            return entry;
         }
 
         private void UpdateLocalPlayerData(ILobby lobby)
@@ -394,10 +407,7 @@ namespace PurrNet.Lobby
 
         private void OnPlayerJoined(IPlayer player)
         {
-            var entry = Instantiate(_playerPrefab, _playerContent);
-            entry.Setup(_lobby, player, OnKickPlayer);
-            _uiPlayerEntry.Add(player, entry);
-
+            // RenderPlayerList creates the entry if it doesn't exist yet.
             RenderPlayerList(_lobby);
             ConnectToLobby(_lobby);
 

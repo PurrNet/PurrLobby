@@ -1,0 +1,19 @@
+{
+    "name": "PurrNet.Lobby.Edgegap.Editor",
+    "rootNamespace": "PurrNet.Lobby.PurrNet",
+    "references": [
+        "GUID:2adece59b0dab0c48a908fc445e93fc0",
+        "GUID:fb5aa70e09e0db742957de215ef97d5b"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
