@@ -69,8 +69,6 @@ namespace PurrNet.Lobby.Nakama
                 var lobby = new NakamaLobby(conn.session,
                     conn.socket,
                     match,
-                    code: match.Id,
-                    name: string.IsNullOrEmpty(settings.name) ? "Lobby" : settings.name,
                     maxPlayers: maxPlayers,
                     hostUserId: conn.session.UserId,
                     initialMetadata: settings.metadata);
@@ -108,8 +106,6 @@ namespace PurrNet.Lobby.Nakama
                 lobby = new NakamaLobby(conn.session,
                     conn.socket,
                     match,
-                    code: match.Id,
-                    name: string.Empty,
                     maxPlayers: 0,
                     hostUserId: null,
                     initialMetadata: null);

@@ -20,13 +20,10 @@ namespace PurrNet.Lobby.Nakama
     internal struct SnapshotMessage : IPackedAuto
     {
         public string hostUserId;
-        public string lobbyName;
-        public string code;
         public int maxPlayers;
         public bool joinable;
         public Dictionary<string, string> metadata;
         public Dictionary<string, Dictionary<string, string>> playerMetadata;
-        public Dictionary<string, string> displayNames;
     }
 
     internal struct LobbyMetadataMessage : IPackedAuto

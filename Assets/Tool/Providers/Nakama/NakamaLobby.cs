@@ -12,7 +12,7 @@ namespace PurrNet.Lobby.Nakama
     public class NakamaLobby : ILobby, IDisposable
     {
         public string id => _matchId;
-        public string joinCode => _code;
+        public string joinCode => _matchId;
         public IPlayer localPlayer => _localPlayer;
         public IPlayer owner => _host;
         public int maxPlayers => _maxPlayers;
@@ -58,8 +58,6 @@ namespace PurrNet.Lobby.Nakama
         private readonly ISession _session;
         private readonly string _matchId;
 
-        private string _code;
-        private string _name;
         private int _maxPlayers;
         private bool _joinable;
         private string _hostUserId;
@@ -67,7 +65,6 @@ namespace PurrNet.Lobby.Nakama
         private NakamaPlayer _localPlayer;
         private NakamaPlayer _host;
         private readonly List<NakamaPlayer> _players = new();
-        private readonly Dictionary<string, string> _displayNames = new();
         private readonly NakamaMetadata _lobbyMetadata;
         private readonly NakamaChat _chat;
 
@@ -79,8 +76,6 @@ namespace PurrNet.Lobby.Nakama
         internal NakamaLobby(ISession session,
             ISocket socket,
             IMatch match,
-            string code,
-            string name,
             int maxPlayers,
             string hostUserId,
             Dictionary<string, string> initialMetadata)
@@ -88,8 +83,6 @@ namespace PurrNet.Lobby.Nakama
             _session = session;
             _socket = socket;
             _matchId = match.Id;
-            _code = code;
-            _name = name;
             _maxPlayers = maxPlayers;
             _joinable = true;
             // null = owner unknown until snapshot arrives; falling back to self would mis-gate kick/metadata
@@ -114,7 +107,6 @@ namespace PurrNet.Lobby.Nakama
             var selfId = match.Self?.UserId ?? _session.UserId;
             var selfPlayer = new NakamaPlayer(this, selfId, selfDisplay, isHost: selfId == _hostUserId, isLocal: true);
             _players.Add(selfPlayer);
-            _displayNames[selfId] = selfDisplay;
             _localPlayer = selfPlayer;
             if (selfPlayer.isOwner)
                 _host = selfPlayer;
@@ -130,7 +122,6 @@ namespace PurrNet.Lobby.Nakama
                     var isPlayerHost = p.UserId == _hostUserId;
                     var player = new NakamaPlayer(this, p.UserId, p.Username, isPlayerHost, isLocal: false);
                     _players.Add(player);
-                    _displayNames[p.UserId] = p.Username;
                     if (isPlayerHost)
                         _host = player;
                 }
@@ -301,7 +292,6 @@ namespace PurrNet.Lobby.Nakama
                     var isPlayerHost = presence.UserId == _hostUserId;
                     var player = new NakamaPlayer(this, presence.UserId, presence.Username, isPlayerHost, isLocal: false);
                     _players.Add(player);
-                    _displayNames[presence.UserId] = presence.Username;
 
                     _onPlayerJoined?.Invoke(player);
 
@@ -399,16 +389,8 @@ namespace PurrNet.Lobby.Nakama
         {
             SetSnapshotReceived();
 
-            _name = msg.lobbyName;
-            _code = msg.code;
             _maxPlayers = msg.maxPlayers > 0 ? msg.maxPlayers : _maxPlayers;
             _joinable = msg.joinable;
-
-            if (msg.displayNames != null)
-            {
-                foreach (var kvp in msg.displayNames)
-                    _displayNames[kvp.Key] = kvp.Value;
-            }
 
             if (!string.IsNullOrEmpty(msg.hostUserId) && msg.hostUserId != _hostUserId)
                 ChangeHost(msg.hostUserId);
@@ -561,13 +543,10 @@ namespace PurrNet.Lobby.Nakama
             var snapshot = new SnapshotMessage
             {
                 hostUserId = _hostUserId,
-                lobbyName = _name,
-                code = _code,
                 maxPlayers = _maxPlayers,
                 joinable = _joinable,
                 metadata = new Dictionary<string, string>(_lobbyMetadata.Snapshot()),
                 playerMetadata = new Dictionary<string, Dictionary<string, string>>(),
-                displayNames = new Dictionary<string, string>(_displayNames),
             };
 
             for (int i = 0; i < _players.Count; i++)
