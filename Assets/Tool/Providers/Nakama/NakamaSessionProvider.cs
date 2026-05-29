@@ -14,7 +14,7 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("PlayerPrefs key used to cache the auth + refresh tokens when the user opts into 'Remember Me' on the device login view. Leave empty to disable persistence entirely. In the editor the project folder name is appended to the key so MPPM/clone instances do not share a session.")]
         [SerializeField] private string _sessionPlayerPrefKey = "purr_lobby.nakama.session";
 
-        private string ScopedPlayerPrefKey
+        private string scopedPlayerPrefKey
         {
             get
             {
@@ -99,7 +99,7 @@ namespace PurrNet.Lobby.Nakama
 
         private bool TryRestorePersistedSession(NakamaConnection conn)
         {
-            var key = ScopedPlayerPrefKey;
+            var key = scopedPlayerPrefKey;
             if (string.IsNullOrEmpty(key) || !PlayerPrefs.HasKey(key))
                 return false;
 
@@ -113,7 +113,7 @@ namespace PurrNet.Lobby.Nakama
 
         private void PersistSession(NakamaConnection conn)
         {
-            var key = ScopedPlayerPrefKey;
+            var key = scopedPlayerPrefKey;
             if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(conn.authToken))
                 return;
             PlayerPrefs.SetString(key, $"{conn.authToken}|{conn.refreshToken}");
@@ -122,7 +122,7 @@ namespace PurrNet.Lobby.Nakama
 
         private void ClearPersistedSession()
         {
-            var key = ScopedPlayerPrefKey;
+            var key = scopedPlayerPrefKey;
             if (string.IsNullOrEmpty(key) || !PlayerPrefs.HasKey(key))
                 return;
             PlayerPrefs.DeleteKey(key);

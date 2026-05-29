@@ -32,8 +32,19 @@ namespace PurrNet.Lobby
         private void Awake()
         {
 #if UNITY_EDITOR
+            // Fold in MPPM's -name (Player1/Player2/...) so virtual players get distinct device ids.
+            var salt = Application.dataPath;
+            var args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (args[i] != "-name")
+                    continue;
+                salt += "|" + args[i + 1];
+                break;
+            }
+
             using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(Application.dataPath));
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(salt));
             _deviceId = BitConverter.ToString(bytes).Replace("-", "")[..32].ToLowerInvariant();
 #else
             _deviceId = SystemInfo.deviceUniqueIdentifier;

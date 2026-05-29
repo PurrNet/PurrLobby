@@ -33,7 +33,8 @@ namespace PurrNet.Lobby.Nakama
                 {
                     return GameStartResponse.Success(new ConnectionInfo
                     {
-                        serverAddress = nakamaLobby.id
+                        serverAddress = nakamaLobby.id,
+                        hostId = nakamaLobby.owner?.id,
                     });
                 }
 
@@ -110,6 +111,7 @@ namespace PurrNet.Lobby.Nakama
 
             nakamaTransport.socket = conn.socket;
             nakamaTransport.matchId = connection.serverAddress;
+            nakamaTransport.hostUserId = connection.hostId;
 
             if (shouldBeHost)
                 manager.StartHost();

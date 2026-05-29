@@ -1,10 +1,9 @@
 #if NAKAMA
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Nakama;
-using Newtonsoft.Json;
+using PurrNet.Packing;
 using UnityEngine;
 
 namespace PurrNet.Lobby.Nakama
@@ -274,11 +273,15 @@ namespace PurrNet.Lobby.Nakama
             return _socket.SendMatchStateAsync(_matchId, opCode, data ?? Array.Empty<byte>());
         }
 
-        private Task SendMatchStateAsync<T>(long opCode, T payload)
+        private Task SendMatchStateAsync<T>(long opCode, T payload) where T : struct, INakamaPayload
         {
-            var json = JsonConvert.SerializeObject(payload);
-            var bytes = Encoding.UTF8.GetBytes(json);
-            return SendMatchStateBytesAsync(opCode, bytes);
+            if (_disposed || !_socket.IsConnected)
+                return Task.CompletedTask;
+
+            using var packer = BitPackerPool.Get();
+            payload.Write(packer);
+            var bytes = packer.ToByteData().span.ToArray();
+            return _socket.SendMatchStateAsync(_matchId, opCode, bytes);
         }
 
         private void OnMatchPresence(IMatchPresenceEvent evt)
@@ -331,9 +334,12 @@ namespace PurrNet.Lobby.Nakama
                 }
 
                 // If all other players left before snapshot arrived, fail fast
-                if (anyLeaves && !_firstSnapshotReceived && _players.Count <= 1)
-                    SetSnapshotFailed(new InvalidOperationException(
-                        "Nakama lobby drained while waiting for the first snapshot."));
+                lock (_snapshotGate)
+                {
+                    if (anyLeaves && !_firstSnapshotReceived && _players.Count <= 1)
+                        SetSnapshotFailed(new InvalidOperationException(
+                            "Nakama lobby drained while waiting for the first snapshot."));
+                }
             }
         }
 
@@ -347,26 +353,26 @@ namespace PurrNet.Lobby.Nakama
                 switch (state.OpCode)
                 {
                     case NakamaOpCodes.Snapshot:
-                        ApplySnapshot(DecodePayload<SnapshotMessage>(state.State));
+                        ApplySnapshot(Decode(state.State, SnapshotMessage.Read));
                         break;
                     case NakamaOpCodes.LobbyMetadataPatch:
-                        ApplyLobbyMetadataPatch(DecodePayload<LobbyMetadataMessage>(state.State));
+                        ApplyLobbyMetadataPatch(Decode(state.State, LobbyMetadataMessage.Read));
                         break;
                     case NakamaOpCodes.PlayerMetadataPatch:
-                        ApplyPlayerMetadataPatch(DecodePayload<PlayerMetadataMessage>(state.State));
+                        ApplyPlayerMetadataPatch(Decode(state.State, PlayerMetadataMessage.Read));
                         break;
                     case NakamaOpCodes.Chat:
                         if (TryFindPlayer(state.UserPresence?.UserId, out var sender))
                             _chat.DispatchIncoming(sender, state.State);
                         break;
                     case NakamaOpCodes.Kick:
-                        ApplyKick(DecodePayload<KickMessage>(state.State));
+                        ApplyKick(Decode(state.State, KickMessage.Read));
                         break;
                     case NakamaOpCodes.SetJoinable:
-                        ApplySetJoinable(DecodePayload<JoinableMessage>(state.State));
+                        ApplySetJoinable(Decode(state.State, JoinableMessage.Read));
                         break;
                     case NakamaOpCodes.HostMigration:
-                        ApplyHostMigration(DecodePayload<HostMigrationMessage>(state.State));
+                        ApplyHostMigration(Decode(state.State, HostMigrationMessage.Read));
                         break;
                     case NakamaOpCodes.RequestSnapshot:
                         if (this.isOwner)
@@ -391,9 +397,6 @@ namespace PurrNet.Lobby.Nakama
 
         private void ApplySnapshot(SnapshotMessage msg)
         {
-            if (msg == null)
-                return;
-
             SetSnapshotReceived();
 
             _name = msg.lobbyName;
@@ -428,14 +431,14 @@ namespace PurrNet.Lobby.Nakama
 
         private void ApplyLobbyMetadataPatch(LobbyMetadataMessage msg)
         {
-            if (msg?.metadata == null)
+            if (msg.metadata == null)
                 return;
             _lobbyMetadata.ApplyPatch(msg.metadata);
         }
 
         private void ApplyPlayerMetadataPatch(PlayerMetadataMessage msg)
         {
-            if (msg == null || string.IsNullOrEmpty(msg.userId))
+            if (string.IsNullOrEmpty(msg.userId))
                 return;
             if (!TryFindPlayer(msg.userId, out var player))
                 return;
@@ -446,7 +449,7 @@ namespace PurrNet.Lobby.Nakama
 
         private void ApplyKick(KickMessage msg)
         {
-            if (msg == null || string.IsNullOrEmpty(msg.userId))
+            if (string.IsNullOrEmpty(msg.userId))
                 return;
             if (msg.userId == _session.UserId)
             {
@@ -457,14 +460,12 @@ namespace PurrNet.Lobby.Nakama
 
         private void ApplySetJoinable(JoinableMessage msg)
         {
-            if (msg == null)
-                return;
             _joinable = msg.joinable;
         }
 
         private void ApplyHostMigration(HostMigrationMessage msg)
         {
-            if (msg == null || string.IsNullOrEmpty(msg.hostUserId))
+            if (string.IsNullOrEmpty(msg.hostUserId))
                 return;
 
             // Skip stale migrations where the named host isn't a current presence
@@ -474,10 +475,13 @@ namespace PurrNet.Lobby.Nakama
             ChangeHost(msg.hostUserId);
 
             // We were elected owner before receiving the first snapshot — become authoritative now
-            if (msg.hostUserId == _session.UserId && !_firstSnapshotReceived)
+            lock (_snapshotGate)
             {
-                SetSnapshotReceived();
-                _ = SendSnapshotAsync();
+                if (msg.hostUserId == _session.UserId && !_firstSnapshotReceived)
+                {
+                    SetSnapshotReceived();
+                    _ = SendSnapshotAsync();
+                }
             }
         }
 
@@ -604,12 +608,12 @@ namespace PurrNet.Lobby.Nakama
             return false;
         }
 
-        private static T DecodePayload<T>(byte[] state) where T : class
+        private static T Decode<T>(byte[] state, Func<BitPacker, T> read) where T : struct
         {
             if (state == null || state.Length == 0)
-                return null;
-            var json = Encoding.UTF8.GetString(state);
-            return JsonConvert.DeserializeObject<T>(json);
+                return default;
+            using var packer = BitPackerPool.Get(state);
+            return read(packer);
         }
     }
 }

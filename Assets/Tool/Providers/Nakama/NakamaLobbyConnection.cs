@@ -81,7 +81,7 @@ namespace PurrNet.Lobby.Nakama
             yield return StopNetworkCoroutine();
 
             var transport = ResolveTransport();
-            if (transport != null)
+            if (transport)
             {
                 transport.socket = NakamaConnection.instance.socket;
                 transport.matchId = matchId;
@@ -150,15 +150,15 @@ namespace PurrNet.Lobby.Nakama
 
         public override void OnPlayerUnregistered(IPlayer player)
         {
-            if (_authenticator != null)
+            if (_authenticator)
                 _authenticator.OnPlayerLeftLobby(player.id);
         }
 
         private NakamaTransport ResolveTransport()
         {
-            if (_transport != null)
+            if (_transport)
                 return _transport;
-            if (_networkManager != null && _networkManager.transport is NakamaTransport t)
+            if (_networkManager && _networkManager.transport is NakamaTransport t)
                 _transport = t;
             return _transport;
         }

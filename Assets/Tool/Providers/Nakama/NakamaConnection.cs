@@ -35,6 +35,39 @@ namespace PurrNet.Lobby.Nakama
 
         private NakamaConnection() { }
 
+        // With Domain Reload disabled this static singleton outlives a play session with a dead
+        // socket/client; drop them on each play-mode boundary so they rebuild (session POCO is kept).
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetOnEnterPlayMode()
+        {
+            instance.DiscardConnection();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.playModeStateChanged -= instance.OnPlayModeStateChanged;
+            UnityEditor.EditorApplication.playModeStateChanged += instance.OnPlayModeStateChanged;
+#endif
+        }
+
+#if UNITY_EDITOR
+        private void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange change)
+        {
+            if (change == UnityEditor.PlayModeStateChange.ExitingPlayMode)
+                DiscardConnection();
+        }
+#endif
+
+        private void DiscardConnection()
+        {
+            if (socket != null)
+            {
+                socket.Closed -= OnSocketClosed;
+                socket.Connected -= OnSocketConnected;
+                try { _ = socket.CloseAsync(); } catch { /* already dead */ }
+                socket = null;
+            }
+            client = null;
+            _clientTarget = null;
+        }
+
         public void EnsureClient(NakamaConfig config)
         {
             if (config == null)
@@ -84,17 +117,21 @@ namespace PurrNet.Lobby.Nakama
             if (session == null)
                 throw new InvalidOperationException("Authenticate before opening a socket.");
 
-            switch (socket)
+            if (socket is { IsConnected: true })
+                return;
+
+            // A stale socket can't be reliably reconnected; replace it or sends fail with TaskCanceled.
+            if (socket != null)
             {
-                case { IsConnected: true }:
-                    return;
-                case null:
-                    socket = client.NewSocket(true);
-                    socket.Closed += OnSocketClosed;
-                    socket.Connected += OnSocketConnected;
-                    break;
+                socket.Closed -= OnSocketClosed;
+                socket.Connected -= OnSocketConnected;
+                try { await socket.CloseAsync(); } catch { /* already dead */ }
+                socket = null;
             }
 
+            socket = client.NewSocket(true);
+            socket.Closed += OnSocketClosed;
+            socket.Connected += OnSocketConnected;
             await socket.ConnectAsync(session, true);
         }
 

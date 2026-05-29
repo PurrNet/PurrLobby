@@ -23,17 +23,12 @@ namespace PurrNet.Lobby.PurrNet
             Timeout = TimeSpan.FromSeconds(15)
         };
 
-        private const string DashboardUrl = "https://app.edgegap.com/";
-        private const string DocsUrl = "https://docs.edgegap.com/learn/matchmaking";
-        private const string ShowHintsKey = "PurrLobby.Edgegap.ShowHints";
+        private const string DASHBOARD_URL = "https://app.edgegap.com/";
+        private const string DOCS_URL = "https://docs.edgegap.com/learn/matchmaking";
+        private const string SHOW_HINTS_KEY = "PurrLobby.Edgegap.ShowHints";
 
-        // Wait for the URL/token fields to settle before auto-fetching, so we don't
-        // fire a request on every keystroke.
-        private const double FetchDebounceSeconds = 0.8;
-
-        // The matchmaker echoes a permitted Origin back; the value itself doesn't
-        // matter for the probe, only whether the server answers it with CORS headers.
-        private const string ProbeOrigin = "https://purrlobby-cors-check.example.com";
+        private const double FETCH_DEBOUNCE_SECONDS = 0.8;
+        private const string PROBE_ORIGIN = "https://purrlobby-cors-check.example.com";
 
         private SerializedProperty _matchmakerUrl;
         private SerializedProperty _authToken;
@@ -80,7 +75,7 @@ namespace PurrNet.Lobby.PurrNet
             _pollIntervalMs = serializedObject.FindProperty("_pollIntervalMs");
             _timeoutMs = serializedObject.FindProperty("_timeoutMs");
 
-            _showHints = EditorPrefs.GetBool(ShowHintsKey, true);
+            _showHints = EditorPrefs.GetBool(SHOW_HINTS_KEY, true);
 
             EditorApplication.update += OnEditorUpdate;
             ScheduleProfileFetch(debounced: false);
@@ -153,7 +148,7 @@ namespace PurrNet.Lobby.PurrNet
 
             _pendingFetchUrl = url;
             _pendingFetchToken = token;
-            _pendingFetchAt = EditorApplication.timeSinceStartup + (debounced ? FetchDebounceSeconds : 0);
+            _pendingFetchAt = EditorApplication.timeSinceStartup + (debounced ? FETCH_DEBOUNCE_SECONDS : 0);
         }
 
         private void OnEditorUpdate()
@@ -208,7 +203,7 @@ namespace PurrNet.Lobby.PurrNet
             EditorGUI.BeginChangeCheck();
             _showHints = EditorGUILayout.Foldout(_showHints, "Inspector Hints", true);
             if (EditorGUI.EndChangeCheck())
-                EditorPrefs.SetBool(ShowHintsKey, _showHints);
+                EditorPrefs.SetBool(SHOW_HINTS_KEY, _showHints);
 
             if (!_showHints)
                 return;
@@ -381,9 +376,9 @@ namespace PurrNet.Lobby.PurrNet
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Edgegap Dashboard"))
-                    Application.OpenURL(DashboardUrl);
+                    Application.OpenURL(DASHBOARD_URL);
                 if (GUILayout.Button("Matchmaking Docs"))
-                    Application.OpenURL(DocsUrl);
+                    Application.OpenURL(DOCS_URL);
             }
         }
 
@@ -507,7 +502,7 @@ namespace PurrNet.Lobby.PurrNet
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Options, ticketsUrl);
-                request.Headers.TryAddWithoutValidation("Origin", ProbeOrigin);
+                request.Headers.TryAddWithoutValidation("Origin", PROBE_ORIGIN);
                 request.Headers.TryAddWithoutValidation("Access-Control-Request-Method", "POST");
                 request.Headers.TryAddWithoutValidation("Access-Control-Request-Headers", "authorization,content-type");
 

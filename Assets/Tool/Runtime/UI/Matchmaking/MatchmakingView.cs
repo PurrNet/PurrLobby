@@ -56,35 +56,42 @@ namespace PurrNet.Lobby
 
         private async void StartGameFromMatch(MatchResult result)
         {
-            _orchestrator.activeLobby = null;
-            LoadingView loadingView = null;
-
             try
             {
-                loadingView = parentStack.Push<LoadingView>();
-                loadingView.Setup("Allocating game...");
+                _orchestrator.activeLobby = null;
+                LoadingView loadingView = null;
 
-                var response = await _orchestrator.gameAllocator.AllocateGame(result);
+                try
+                {
+                    loadingView = parentStack.Push<LoadingView>();
+                    loadingView.Setup("Allocating game...");
 
-                if (!response.success)
-                    throw new Exception(response.error);
+                    var response = await _orchestrator.gameAllocator.AllocateGame(result);
 
-                loadingView.Setup("Loading game...");
-                await _orchestrator.gameAllocator.LoadGame(result);
+                    if (!response.success)
+                        throw new Exception(response.error);
 
-                _orchestrator.gameAllocator.Connect(response.connection, result.isHost);
+                    loadingView.Setup("Loading game...");
+                    await _orchestrator.gameAllocator.LoadGame(result);
+
+                    _orchestrator.gameAllocator.Connect(response.connection, result.isHost);
+                }
+                catch (Exception e)
+                {
+                    Toaster.PushError("Failed to start game", e);
+                    if (_orchestrator.gameAllocator)
+                        Debug.LogException(e, _orchestrator.gameAllocator);
+                    PopMe();
+                }
+                finally
+                {
+                    if (loadingView)
+                        loadingView.PopMe();
+                }
             }
             catch (Exception e)
             {
-                Toaster.PushError("Failed to start game", e);
-                if (_orchestrator.gameAllocator)
-                    Debug.LogException(e, _orchestrator.gameAllocator);
-                PopMe();
-            }
-            finally
-            {
-                if (loadingView)
-                    loadingView.PopMe();
+                Debug.LogException(e);
             }
         }
 

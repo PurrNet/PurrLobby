@@ -19,9 +19,6 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("Maximum number of users in a single match.")]
         [SerializeField] private int _maxCount = 4;
 
-        [Tooltip("How long a matchmade non-host client waits for the host's first snapshot before proceeding without it, in milliseconds.")]
-        [SerializeField] private int _snapshotTimeoutMs = 4000;
-
         private MatchmakingTicket? _activeTicket;
         private string _activeNakamaTicketId;
         private bool _matchmakerSubscribed;
@@ -54,22 +51,29 @@ namespace PurrNet.Lobby.Nakama
 
         private async void CancelActiveTicketSilently()
         {
-            var nakamaTicket = _activeNakamaTicketId;
-            _activeTicket = null;
-            _activeNakamaTicketId = null;
-
-            if (string.IsNullOrEmpty(nakamaTicket))
-                return;
-
             try
             {
-                var socket = NakamaConnection.instance.socket;
-                if (socket is { IsConnected: true })
-                    await socket.RemoveMatchmakerAsync(nakamaTicket);
+                var nakamaTicket = _activeNakamaTicketId;
+                _activeTicket = null;
+                _activeNakamaTicketId = null;
+
+                if (string.IsNullOrEmpty(nakamaTicket))
+                    return;
+
+                try
+                {
+                    var socket = NakamaConnection.instance.socket;
+                    if (socket is { IsConnected: true })
+                        await socket.RemoveMatchmakerAsync(nakamaTicket);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[{name}] Failed to cancel matchmaker ticket on logout: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"[{name}] Failed to cancel matchmaker ticket on logout: {ex.Message}");
+                Debug.LogException(ex);
             }
         }
 
@@ -104,24 +108,31 @@ namespace PurrNet.Lobby.Nakama
 
         public override async void CancelMatchmaking(MatchmakingTicket ticket, Action<APIResponse> onComplete)
         {
-            if (_activeTicket == null || _activeTicket.Value.ticketId != ticket.ticketId)
-            {
-                onComplete?.Invoke(APIResponse.Failure("No active matchmaking with that ticket."));
-                return;
-            }
-
-            var nakamaTicket = _activeNakamaTicketId;
-            var publicTicket = _activeTicket.Value;
-            _activeTicket = null;
-            _activeNakamaTicketId = null;
-
             try
             {
-                if (!string.IsNullOrEmpty(nakamaTicket))
-                    await NakamaConnection.instance.socket.RemoveMatchmakerAsync(nakamaTicket);
+                if (_activeTicket == null || _activeTicket.Value.ticketId != ticket.ticketId)
+                {
+                    onComplete?.Invoke(APIResponse.Failure("No active matchmaking with that ticket."));
+                    return;
+                }
 
-                RaiseStatusChanged(publicTicket, MatchmakingStatus.Cancelled);
-                onComplete?.Invoke(APIResponse.Success());
+                var nakamaTicket = _activeNakamaTicketId;
+                var publicTicket = _activeTicket.Value;
+                _activeTicket = null;
+                _activeNakamaTicketId = null;
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(nakamaTicket))
+                        await NakamaConnection.instance.socket.RemoveMatchmakerAsync(nakamaTicket);
+
+                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Cancelled);
+                    onComplete?.Invoke(APIResponse.Success());
+                }
+                catch (Exception ex)
+                {
+                    onComplete?.Invoke(APIResponse.Failure(ex.Message));
+                }
             }
             catch (Exception ex)
             {
@@ -152,53 +163,48 @@ namespace PurrNet.Lobby.Nakama
 
         private async void OnMatchmakerMatched(IMatchmakerMatched matched)
         {
-            if (matched == null || _activeTicket == null)
-                return;
-
-            if (!string.IsNullOrEmpty(_activeNakamaTicketId) && matched.Ticket != _activeNakamaTicketId)
-                return;
-
-            var publicTicket = _activeTicket.Value;
-            _activeTicket = null;
-            _activeNakamaTicketId = null;
-
             try
             {
-                var conn = NakamaConnection.instance;
-                var match = await conn.socket.JoinMatchAsync(matched);
+                if (matched == null || _activeTicket == null)
+                    return;
 
-                var hostUserId = ResolveLowestUserId(matched);
+                if (!string.IsNullOrEmpty(_activeNakamaTicketId) && matched.Ticket != _activeNakamaTicketId)
+                    return;
 
-                var lobby = new NakamaLobby(conn.session,
-                    conn.socket,
-                    match,
-                    code: string.Empty,
-                    name: "Matchmade",
-                    maxPlayers: _maxCount,
-                    hostUserId: hostUserId,
-                    initialMetadata: null);
+                var publicTicket = _activeTicket.Value;
+                _activeTicket = null;
+                _activeNakamaTicketId = null;
 
-                var isHost = hostUserId == conn.session.UserId;
-
-                if (!isHost)
+                try
                 {
-                    try
-                    {
-                        await lobby.AwaitFirstSnapshotAsync(_snapshotTimeoutMs);
-                    }
-                    catch (Exception snapshotEx)
-                    {
-                        Debug.LogWarning($"[{name}] Proceeding without host snapshot: {snapshotEx.Message}");
-                    }
-                }
+                    var conn = NakamaConnection.instance;
 
-                RaiseStatusChanged(publicTicket, MatchmakingStatus.Found);
-                RaiseMatchFound(publicTicket, new MatchResult { lobby = lobby, isHost = isHost });
+                    // Relayed matchmaker matches materialize on token-join; this also yields the match id.
+                    var match = await conn.socket.JoinMatchAsync(matched);
+
+                    var hostUserId = ResolveLowestUserId(matched);
+                    var isHost = hostUserId == conn.session.UserId;
+
+                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Found);
+                    RaiseMatchFound(publicTicket, new MatchResult
+                    {
+                        isHost = isHost,
+                        connection = new ConnectionInfo
+                        {
+                            serverAddress = match.Id,
+                            hostId = hostUserId,
+                        },
+                    });
+                }
+                catch (Exception ex)
+                {
+                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Failed);
+                    RaiseMatchmakingError(publicTicket, ex.Message);
+                }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                RaiseStatusChanged(publicTicket, MatchmakingStatus.Failed);
-                RaiseMatchmakingError(publicTicket, ex.Message);
+                Debug.LogException(e);
             }
         }
 
@@ -260,7 +266,20 @@ namespace PurrNet.Lobby.Nakama
         {
             if (string.IsNullOrEmpty(raw))
                 return "\"\"";
-            // Quote the term to handle whitespace and special chars; escape embedded quotes.
+
+            bool needsQuoting = false;
+            foreach (var c in raw)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '_' && c != '-')
+                {
+                    needsQuoting = true;
+                    break;
+                }
+            }
+
+            if (!needsQuoting)
+                return raw;
+
             return $"\"{raw.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
         }
     }
