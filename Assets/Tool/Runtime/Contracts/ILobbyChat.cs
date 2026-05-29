@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 
 namespace PurrNet.Lobby
 {
     public interface ILobbyChat
     {
-        void SendMessage(string data);
+        void SendMessage(byte[] data);
 
-        event Action<IPlayer, string> onMessageReceived;
+        event Action<IPlayer, byte[]> onMessageReceived;
     }
 }

@@ -273,13 +273,13 @@ namespace PurrNet.Lobby.Nakama
             return _socket.SendMatchStateAsync(_matchId, opCode, data ?? Array.Empty<byte>());
         }
 
-        private Task SendMatchStateAsync<T>(long opCode, T payload) where T : struct, INakamaPayload
+        private Task SendMatchStateAsync<T>(long opCode, T payload) where T : struct, IPackedAuto
         {
             if (_disposed || !_socket.IsConnected)
                 return Task.CompletedTask;
 
             using var packer = BitPackerPool.Get();
-            payload.Write(packer);
+            Packer<T>.Write(packer, payload);
             var bytes = packer.ToByteData().span.ToArray();
             return _socket.SendMatchStateAsync(_matchId, opCode, bytes);
         }
@@ -353,26 +353,26 @@ namespace PurrNet.Lobby.Nakama
                 switch (state.OpCode)
                 {
                     case NakamaOpCodes.Snapshot:
-                        ApplySnapshot(Decode(state.State, SnapshotMessage.Read));
+                        ApplySnapshot(Decode<SnapshotMessage>(state.State));
                         break;
                     case NakamaOpCodes.LobbyMetadataPatch:
-                        ApplyLobbyMetadataPatch(Decode(state.State, LobbyMetadataMessage.Read));
+                        ApplyLobbyMetadataPatch(Decode<LobbyMetadataMessage>(state.State));
                         break;
                     case NakamaOpCodes.PlayerMetadataPatch:
-                        ApplyPlayerMetadataPatch(Decode(state.State, PlayerMetadataMessage.Read));
+                        ApplyPlayerMetadataPatch(Decode<PlayerMetadataMessage>(state.State));
                         break;
                     case NakamaOpCodes.Chat:
                         if (TryFindPlayer(state.UserPresence?.UserId, out var sender))
                             _chat.DispatchIncoming(sender, state.State);
                         break;
                     case NakamaOpCodes.Kick:
-                        ApplyKick(Decode(state.State, KickMessage.Read));
+                        ApplyKick(Decode<KickMessage>(state.State));
                         break;
                     case NakamaOpCodes.SetJoinable:
-                        ApplySetJoinable(Decode(state.State, JoinableMessage.Read));
+                        ApplySetJoinable(Decode<JoinableMessage>(state.State));
                         break;
                     case NakamaOpCodes.HostMigration:
-                        ApplyHostMigration(Decode(state.State, HostMigrationMessage.Read));
+                        ApplyHostMigration(Decode<HostMigrationMessage>(state.State));
                         break;
                     case NakamaOpCodes.RequestSnapshot:
                         if (this.isOwner)
@@ -608,12 +608,12 @@ namespace PurrNet.Lobby.Nakama
             return false;
         }
 
-        private static T Decode<T>(byte[] state, Func<BitPacker, T> read) where T : struct
+        private static T Decode<T>(byte[] state) where T : struct, IPackedAuto
         {
             if (state == null || state.Length == 0)
                 return default;
             using var packer = BitPackerPool.Get(state);
-            return read(packer);
+            return Packer<T>.Read(packer);
         }
     }
 }

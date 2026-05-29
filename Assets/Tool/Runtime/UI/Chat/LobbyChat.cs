@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -95,7 +96,7 @@ namespace PurrNet.Lobby
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                _lobby.chat.SendMessage(message);
+                _lobby.chat.SendMessage(Encoding.UTF8.GetBytes(message));
             }
         }
 
@@ -120,8 +121,9 @@ namespace PurrNet.Lobby
             entry.Setup(null, final);
         }
 
-        private void OnMessageReceived(IPlayer player, string message)
+        private void OnMessageReceived(IPlayer player, byte[] data)
         {
+            var message = Encoding.UTF8.GetString(data);
             bool wasScrolledToBottom = IsScrolledToBottom() || !CanScrollVertically();
 
             if (_lastChatEntry && _lastChatEntry.player == player)

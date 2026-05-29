@@ -1,6 +1,5 @@
 #if NAKAMA
 using System;
-using System.Text;
 using UnityEngine;
 
 namespace PurrNet.Lobby.Nakama
@@ -10,22 +9,21 @@ namespace PurrNet.Lobby.Nakama
     {
         private readonly NakamaLobby _lobby;
 
-        public event Action<IPlayer, string> onMessageReceived;
+        public event Action<IPlayer, byte[]> onMessageReceived;
 
         internal NakamaChat(NakamaLobby lobby)
         {
             _lobby = lobby;
         }
 
-        public void SendMessage(string data)
+        public void SendMessage(byte[] data)
         {
-            if (string.IsNullOrEmpty(data))
+            if (data == null || data.Length == 0)
                 return;
 
             try
             {
-                var bytes = Encoding.UTF8.GetBytes(data);
-                _ = _lobby.SendMatchStateBytesAsync(NakamaOpCodes.Chat, bytes);
+                _ = _lobby.SendMatchStateBytesAsync(NakamaOpCodes.Chat, data);
 
                 // Nakama relayed matches don't echo to sender; fire locally
                 if (_lobby.localPlayer != null)
@@ -41,15 +39,7 @@ namespace PurrNet.Lobby.Nakama
         {
             if (sender == null || state == null)
                 return;
-            try
-            {
-                var text = Encoding.UTF8.GetString(state);
-                onMessageReceived?.Invoke(sender, text);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
+            onMessageReceived?.Invoke(sender, state);
         }
     }
 }

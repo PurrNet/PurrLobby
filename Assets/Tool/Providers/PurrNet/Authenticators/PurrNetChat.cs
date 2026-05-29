@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using PurrNet.Services;
 using UnityEngine;
 
@@ -21,18 +20,14 @@ namespace PurrNet.Lobby.PurrNet
         private void OnChatMessage(ChatMessage obj)
         {
             if (_lobby.TryGetPlayer(obj.playerId, out var player))
-            {
-                var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(obj.data));
-                onMessageReceived?.Invoke(player, decoded);
-            }
+                onMessageReceived?.Invoke(player, Convert.FromBase64String(obj.data));
         }
 
-        public void SendMessage(string data)
+        public void SendMessage(byte[] data)
         {
             try
             {
-                var bytes = Encoding.UTF8.GetBytes(data);
-                _ = PurrServices.instance.lobbies.SendChatAsync(_lobby.id, bytes);
+                _ = PurrServices.instance.lobbies.SendChatAsync(_lobby.id, data);
             }
             catch (Exception ex)
             {
@@ -40,6 +35,6 @@ namespace PurrNet.Lobby.PurrNet
             }
         }
 
-        public event Action<IPlayer, string> onMessageReceived;
+        public event Action<IPlayer, byte[]> onMessageReceived;
     }
 }
