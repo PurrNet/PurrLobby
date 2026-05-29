@@ -1,3 +1,10 @@
+# [1.0.0-beta.3](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2026-05-29)
+
+
+### Bug Fixes
+
+* Nakama stuff + GameOver ([5234af5](https://github.com/PurrNet/PurrLobby/commit/5234af531f8a8835743f4fb3f98f8acd3e466080))
+
 # [1.0.0-beta.2](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2026-05-17)
 
 
