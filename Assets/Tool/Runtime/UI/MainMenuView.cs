@@ -49,6 +49,23 @@ namespace PurrNet.Lobby
                 orchestrator.sessionProvider.playerName : "Guest";
 
             _profileDisplayName.text = $"<icon=account_outline> {username}";
+
+            ReportLastExit();
+        }
+
+        private void ReportLastExit()
+        {
+            switch (_orchestrator.lastExitReason)
+            {
+                case GameExitReason.GameOver:
+                    Toaster.Push("Game Over", "The match has ended.");
+                    break;
+                case GameExitReason.ConnectionLost:
+                    Toaster.PushError("Disconnected", "Lost connection to the game.");
+                    break;
+            }
+
+            _orchestrator.lastExitReason = GameExitReason.None;
         }
 
         public void Matchmake()

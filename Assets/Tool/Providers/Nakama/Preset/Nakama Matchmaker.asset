@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Nakama Matchmaker
   m_EditorClassIdentifier: PurrNet.Lobby.Nakama::PurrNet.Lobby.Nakama.NakamaMatchmakingProvider
   _sessionProvider: {fileID: 11400000, guid: 94aa18cd7da221f4caa3845b8f00a5ef, type: 2}
-  _lobbyProvider: {fileID: 11400000, guid: 944c1489509942a4598d5af34570c48b, type: 2}
   _minCount: 2
   _maxCount: 4
   _snapshotTimeoutMs: 4000

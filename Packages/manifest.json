@@ -49,6 +49,6 @@
     "com.unity.modules.xr": "1.0.0",
     "dev.purrnet.ui": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.5.0-beta.4",
     "com.heroiclabs.nakama-unity": "https://github.com/heroiclabs/nakama-unity.git?path=/Packages/Nakama",
-    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.20.0-beta.123"
+    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.20.0-beta.200"
   }
 }

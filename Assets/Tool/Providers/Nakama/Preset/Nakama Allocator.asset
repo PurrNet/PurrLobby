@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: Nakama Allocator
   m_EditorClassIdentifier: PurrNet.Lobby.Nakama::PurrNet.Lobby.Nakama.NakamaGameAllocator
   _gameScene: GameScene
-  _transportRoomField: roomName
   _waitForGameStartFlag: 0

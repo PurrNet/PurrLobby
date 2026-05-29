@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Nakama Session
   m_EditorClassIdentifier: PurrNet.Lobby.Nakama::PurrNet.Lobby.Nakama.NakamaSessionProvider
   _config: {fileID: 11400000, guid: 931b386fe514ee5459415795cf3a84f2, type: 2}
-  _displayNameOverride: 
+  _sessionPlayerPrefKey: purr_lobby.nakama.session

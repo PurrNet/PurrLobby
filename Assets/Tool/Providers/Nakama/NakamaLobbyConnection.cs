@@ -1,6 +1,6 @@
 #if NAKAMA
 using System.Collections;
-using System.Reflection;
+using PurrNet.Nakama;
 using PurrNet.Transports;
 using UnityEngine;
 
@@ -8,15 +8,14 @@ namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
     /// Manages the NetworkManager lifecycle for Nakama lobbies, including host migration.
-    /// Transport-agnostic: sets a configurable field on whatever transport is wired.
+    /// The lobby and gameplay share a single Nakama match, so migration reuses the match id and
+    /// only re-designates which peer acts as the PurrNet host.
     /// </summary>
     public class NakamaLobbyConnection : LobbyConnectionProvider
     {
         [SerializeField] private NetworkManager _networkManager;
+        [SerializeField] private NakamaTransport _transport;
         [SerializeField] private NakamaLobbyAuthenticator _authenticator;
-
-        [Tooltip("Field/property name on the active transport that receives the new room id during host migration.")]
-        [SerializeField] private string _transportRoomField = "roomName";
 
         public override void JoinedLobby(ILobby lobby)
         {
@@ -77,11 +76,17 @@ namespace PurrNet.Lobby.Nakama
                 yield return null;
         }
 
-        private IEnumerator ChangeHostCoroutine(string roomName, bool isHost)
+        private IEnumerator ChangeHostCoroutine(string matchId, string hostUserId, bool isHost)
         {
             yield return StopNetworkCoroutine();
 
-            ApplyRoomField(roomName);
+            var transport = ResolveTransport();
+            if (transport != null)
+            {
+                transport.socket = NakamaConnection.instance.socket;
+                transport.matchId = matchId;
+                transport.hostUserId = hostUserId;
+            }
 
             if (isHost)
             {
@@ -100,12 +105,14 @@ namespace PurrNet.Lobby.Nakama
 
         public override void OnHostChanged(ILobby lobby, IPlayer host, bool isLocalPlayer)
         {
+            if (_networkManager == null || lobby == null || host == null)
+                return;
+
             if (_ongoingMigration != null) StopCoroutine(_ongoingMigration);
             if (_restartingServerCoroutine != null) StopCoroutine(_restartingServerCoroutine);
             if (_restartingClientCoroutine != null) StopCoroutine(_restartingClientCoroutine);
 
-            var roomName = $"{lobby.id}_{host.id}";
-            _ongoingMigration = StartCoroutine(ChangeHostCoroutine(roomName, isLocalPlayer));
+            _ongoingMigration = StartCoroutine(ChangeHostCoroutine(lobby.id, host.id, isLocalPlayer));
         }
 
         private IEnumerator RestartServerCoroutine()
@@ -147,25 +154,13 @@ namespace PurrNet.Lobby.Nakama
                 _authenticator.OnPlayerLeftLobby(player.id);
         }
 
-        private void ApplyRoomField(string value)
+        private NakamaTransport ResolveTransport()
         {
-            if (_networkManager == null || _networkManager.transport == null || string.IsNullOrEmpty(_transportRoomField))
-                return;
-
-            var transport = _networkManager.transport;
-            var type = transport.GetType();
-            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-            var prop = type.GetProperty(_transportRoomField, flags);
-            if (prop != null && prop.CanWrite && prop.PropertyType == typeof(string))
-            {
-                prop.SetValue(transport, value);
-                return;
-            }
-
-            var field = type.GetField(_transportRoomField, flags);
-            if (field != null && field.FieldType == typeof(string))
-                field.SetValue(transport, value);
+            if (_transport != null)
+                return _transport;
+            if (_networkManager != null && _networkManager.transport is NakamaTransport t)
+                _transport = t;
+            return _transport;
         }
     }
 }

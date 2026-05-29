@@ -69,6 +69,7 @@ namespace PurrNet.Lobby
             _playerPlaceholderPool ??= new UIPool<Transform>(_playerPlaceholderPrefab.transform, _playerContent);
 
             _lobby = lobby;
+            _orchestrator.activeLobby = lobby;
 
             RenderPlayerList(lobby);
 
@@ -367,23 +368,39 @@ namespace PurrNet.Lobby
             _lobby.KickPlayer(target);
         }
 
+        private bool _lobbyEventsUnsubscribed;
+
+        private void UnsubscribeLobbyEvents()
+        {
+            if (_lobbyEventsUnsubscribed || _lobby == null)
+                return;
+
+            _lobbyEventsUnsubscribed = true;
+            _lobby.onPlayerJoined -= OnPlayerJoined;
+            _lobby.onPlayerLeft -= OnPlayerLeft;
+            _lobby.onPlayerUpdated -= OnPlayerUpdated;
+            _lobby.onLobbyDestroyed -= OnLobbyDestroyed;
+            _lobby.onOwnerChanged -= OnOwnerChanged;
+            _lobby.lobbyData.onDataChanged -= OnMetadata;
+        }
+
         public override void OnPopped()
         {
-            if (_lobby != null)
-            {
-                _lobby.onPlayerJoined -= OnPlayerJoined;
-                _lobby.onPlayerLeft -= OnPlayerLeft;
-                _lobby.onPlayerUpdated -= OnPlayerUpdated;
-                _lobby.onLobbyDestroyed -= OnLobbyDestroyed;
-                _lobby.onOwnerChanged -= OnOwnerChanged;
-                _lobby.lobbyData.onDataChanged -= OnMetadata;
+            UnsubscribeLobbyEvents();
 
-                if (_lobbyConnected && _lobbyConnection)
-                {
-                    _lobbyConnection.LeftLobby(_lobby);
-                    _lobbyConnected = false;
-                }
+            if (_orchestrator != null && _orchestrator.activeLobby == _lobby)
+                _orchestrator.activeLobby = null;
+
+            if (_lobby != null && _lobbyConnected && _lobbyConnection)
+            {
+                _lobbyConnection.LeftLobby(_lobby);
+                _lobbyConnected = false;
             }
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeLobbyEvents();
         }
 
         private void OnOwnerChanged(IPlayer host)

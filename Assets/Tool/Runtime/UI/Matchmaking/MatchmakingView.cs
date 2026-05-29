@@ -56,6 +56,7 @@ namespace PurrNet.Lobby
 
         private async void StartGameFromMatch(MatchResult result)
         {
+            _orchestrator.activeLobby = null;
             LoadingView loadingView = null;
 
             try

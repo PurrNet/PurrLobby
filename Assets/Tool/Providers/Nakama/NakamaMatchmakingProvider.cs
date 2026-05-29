@@ -19,6 +19,9 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("Maximum number of users in a single match.")]
         [SerializeField] private int _maxCount = 4;
 
+        [Tooltip("How long a matchmade non-host client waits for the host's first snapshot before proceeding without it, in milliseconds.")]
+        [SerializeField] private int _snapshotTimeoutMs = 4000;
+
         private MatchmakingTicket? _activeTicket;
         private string _activeNakamaTicketId;
         private bool _matchmakerSubscribed;
@@ -176,6 +179,18 @@ namespace PurrNet.Lobby.Nakama
                     initialMetadata: null);
 
                 var isHost = hostUserId == conn.session.UserId;
+
+                if (!isHost)
+                {
+                    try
+                    {
+                        await lobby.AwaitFirstSnapshotAsync(_snapshotTimeoutMs);
+                    }
+                    catch (Exception snapshotEx)
+                    {
+                        Debug.LogWarning($"[{name}] Proceeding without host snapshot: {snapshotEx.Message}");
+                    }
+                }
 
                 RaiseStatusChanged(publicTicket, MatchmakingStatus.Found);
                 RaiseMatchFound(publicTicket, new MatchResult { lobby = lobby, isHost = isHost });

@@ -31,6 +31,8 @@ namespace PurrNet.Lobby.Nakama
         public event Action onSocketConnected;
         public event Action onSocketDisconnected;
 
+        private string _clientTarget;
+
         private NakamaConnection() { }
 
         public void EnsureClient(NakamaConfig config)
@@ -38,10 +40,13 @@ namespace PurrNet.Lobby.Nakama
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            if (client != null)
+            var target = $"{config.scheme}://{config.host}:{config.port}/{config.serverKey}";
+
+            if (client != null && _clientTarget == target)
                 return;
 
             client = new Client(config.scheme, config.host, config.port, config.serverKey, UnityWebRequestAdapter.Instance, true);
+            _clientTarget = target;
         }
 
         public async Task<ISession> AuthenticateDeviceAsync(string deviceId, string displayName)
@@ -110,6 +115,8 @@ namespace PurrNet.Lobby.Nakama
                 catch (Exception ex) { Debug.LogWarning($"[Nakama] Session logout failed: {ex.Message}"); }
             }
 
+            client = null;
+            _clientTarget = null;
             session = null;
             onSessionChanged?.Invoke();
         }
