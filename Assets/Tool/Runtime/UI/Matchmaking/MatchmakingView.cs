@@ -59,11 +59,10 @@ namespace PurrNet.Lobby
             try
             {
                 _orchestrator.activeLobby = null;
-                LoadingView loadingView = null;
+                var loadingView = parentStack.ReplaceOrPush<LoadingView>(this);
 
                 try
                 {
-                    loadingView = parentStack.Push<LoadingView>();
                     loadingView.Setup("Allocating game...");
 
                     var response = await _orchestrator.gameAllocator.AllocateGame(result);
@@ -81,7 +80,6 @@ namespace PurrNet.Lobby
                     Toaster.PushError("Failed to start game", e);
                     if (_orchestrator.gameAllocator)
                         Debug.LogException(e, _orchestrator.gameAllocator);
-                    PopMe();
                 }
                 finally
                 {
