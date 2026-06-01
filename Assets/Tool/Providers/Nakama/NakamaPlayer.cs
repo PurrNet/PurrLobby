@@ -48,7 +48,7 @@ namespace PurrNet.Lobby.Nakama
         public void SetReady(bool isReady)
         {
             userData.SetData(IPlayer.READY_KEY, isReady ? IPlayer.READY_TRUTHY_VALUE : "0");
-            TriggerOnPlayerUpdated(); // optimistic
+            TriggerOnPlayerUpdated();
         }
 
         internal void TriggerOnPlayerUpdated() => onPlayerUpdated?.Invoke();

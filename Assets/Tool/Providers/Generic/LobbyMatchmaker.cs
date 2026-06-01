@@ -50,8 +50,8 @@ namespace PurrNet.Lobby.GenericProviders
                     if (lobby == null)
                     {
                         _activeTicket = null;
-                        RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
                         RaiseMatchmakingError(ticket, "Failed to find or create a lobby.");
+                        RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
                         return;
                     }
 
@@ -68,8 +68,8 @@ namespace PurrNet.Lobby.GenericProviders
                         return;
 
                     _activeTicket = null;
-                    RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
                     RaiseMatchmakingError(ticket, e.Message);
+                    RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
                 }
             }
             catch (Exception e)

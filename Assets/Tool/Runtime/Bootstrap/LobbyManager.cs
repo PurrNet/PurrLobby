@@ -18,6 +18,8 @@ namespace PurrNet.Lobby
         {
             try
             {
+                GameOrchestrator.active = _orchestrator;
+
                 if (_orchestrator.sessionProvider)
                     await _orchestrator.sessionProvider.Login(_stack);
 

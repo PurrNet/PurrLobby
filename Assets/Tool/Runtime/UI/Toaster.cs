@@ -36,8 +36,6 @@ namespace PurrNet.Lobby
 
         public static void Push(string title, string message, bool error = false)
         {
-            // There's no Toaster in the active scene (e.g. we moved to the game
-            // scene). Don't blow up - just log it so the message isn't lost.
             if (_instance == null)
             {
                 if (error)

@@ -25,7 +25,6 @@ namespace PurrNet.Lobby.Nakama
             {
                 _ = _lobby.SendMatchStateBytesAsync(NakamaOpCodes.Chat, data);
 
-                // Nakama relayed matches don't echo to sender; fire locally
                 if (_lobby.localPlayer != null)
                     onMessageReceived?.Invoke(_lobby.localPlayer, data);
             }

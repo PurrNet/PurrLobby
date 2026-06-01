@@ -22,8 +22,6 @@ namespace PurrNet.Lobby.Nakama
         public ILobbyChat chat => _chat;
         public bool isOwner => _localPlayer != null && _localPlayer.isOwner;
 
-        // Replay-on-subscribe: new handlers are immediately invoked for existing players/host
-        // to avoid race conditions between construction and the consumer's Setup call.
         private Action<IPlayer> _onPlayerJoined;
         public event Action<IPlayer> onPlayerJoined
         {
@@ -85,7 +83,6 @@ namespace PurrNet.Lobby.Nakama
             _matchId = match.Id;
             _maxPlayers = maxPlayers;
             _joinable = true;
-            // null = owner unknown until snapshot arrives; falling back to self would mis-gate kick/metadata
             _hostUserId = hostUserId;
 
             _lobbyMetadata = new NakamaMetadata(this, ownerId: null, isLocalOwner: true);
@@ -323,7 +320,6 @@ namespace PurrNet.Lobby.Nakama
                         HandleHostDisappeared();
                 }
 
-                // If all other players left before snapshot arrived, fail fast
                 lock (_snapshotGate)
                 {
                     if (anyLeaves && !_firstSnapshotReceived && _players.Count <= 1)
@@ -450,13 +446,11 @@ namespace PurrNet.Lobby.Nakama
             if (string.IsNullOrEmpty(msg.hostUserId))
                 return;
 
-            // Skip stale migrations where the named host isn't a current presence
             if (!TryFindPlayer(msg.hostUserId, out _))
                 return;
 
             ChangeHost(msg.hostUserId);
 
-            // We were elected owner before receiving the first snapshot — become authoritative now
             lock (_snapshotGate)
             {
                 if (msg.hostUserId == _session.UserId && !_firstSnapshotReceived)
@@ -469,7 +463,6 @@ namespace PurrNet.Lobby.Nakama
 
         private void HandleHostDisappeared()
         {
-            // Deterministically elect the lowest user id among remaining players.
             if (_players.Count == 0)
             {
                 onLobbyDestroyed?.Invoke();
@@ -505,7 +498,6 @@ namespace PurrNet.Lobby.Nakama
 
             _hostUserId = newHostUserId;
 
-            // May be null if the presence hasn't arrived yet — OnMatchPresence will backfill
             NakamaPlayer resolved = null;
             if (!string.IsNullOrEmpty(newHostUserId))
                 TryFindPlayer(newHostUserId, out resolved);
@@ -531,7 +523,7 @@ namespace PurrNet.Lobby.Nakama
         private async Task LeaveQuietlyAsync()
         {
             try { await _socket.LeaveMatchAsync(_matchId); }
-            catch { /* swallow */ }
+            catch { /* ignored */ }
             Dispose();
         }
 

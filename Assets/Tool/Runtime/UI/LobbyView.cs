@@ -205,6 +205,8 @@ namespace PurrNet.Lobby
                 loadingView.Setup("Allocating game ...");
 
                 var joinInfo = await _orchestrator.gameAllocator.AllocateGame(lobby);
+                if (!this || _lobby == null)
+                    return;
 
                 if (!joinInfo.success)
                     throw new Exception(joinInfo.error);
@@ -214,6 +216,8 @@ namespace PurrNet.Lobby
 
                 loadingView.Setup("Loading game ...");
                 await _orchestrator.gameAllocator.LoadGame(lobby);
+                if (!this || _lobby == null)
+                    return;
 
                 _orchestrator.gameAllocator.Connect(joinInfo.connection, true);
             }
@@ -247,6 +251,8 @@ namespace PurrNet.Lobby
 
                 loadingView.Setup("Loading game ...");
                 await _orchestrator.gameAllocator.LoadGame(lobby);
+                if (!this || _lobby == null)
+                    return;
 
                 _orchestrator.gameAllocator.Connect(info, false);
             }
@@ -311,9 +317,6 @@ namespace PurrNet.Lobby
 
         private void RenderPlayerList(ILobby lobby)
         {
-            // Make sure every player currently in the lobby has an entry. Players who
-            // were already here when we opened the view won't have fired onPlayerJoined,
-            // so we can't rely on that event alone.
             foreach (var player in lobby.players)
             {
                 if (!_uiPlayerEntry.ContainsKey(player))
@@ -424,7 +427,6 @@ namespace PurrNet.Lobby
 
         private void OnPlayerJoined(IPlayer player)
         {
-            // RenderPlayerList creates the entry if it doesn't exist yet.
             RenderPlayerList(_lobby);
             ConnectToLobby(_lobby);
 

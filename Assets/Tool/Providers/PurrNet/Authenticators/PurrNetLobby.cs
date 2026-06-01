@@ -50,6 +50,8 @@ namespace PurrNet.Lobby.PurrNet
 
         private readonly List<PurrNetPlayer> _players = new ();
 
+        private bool _disposed;
+
         public PurrNetLobby(LobbyService service, LobbyData data, string playerToken)
         {
             _localPlayerId = PurrServices.instance.auth.playerId;
@@ -61,8 +63,6 @@ namespace PurrNet.Lobby.PurrNet
             _connection.onDestroyed += OnLobbyDestroyed;
             _connection.onKicked += OnLobbyDestroyed;
             _connection.onSnapshot += OnLobbySnapshot;
-            _connection.onPlayerJoined += OnPlayerJoined;
-            _connection.onPlayerLeft += OnPlayerLeft;
             _connection.onPlayerMetadataUpdated += OnPlayerMetadataUpdated;
             _connection.onMetadataUpdated += OnMetadataUpdated;
         }
@@ -88,62 +88,10 @@ namespace PurrNet.Lobby.PurrNet
             }
         }
 
-        private void OnPlayerJoined(LobbyPlayer playerInfo)
-        {
-            var player = new PurrNetPlayer(_service, id);
-            player.Update(_lastData.hostPlayerId, playerInfo);
-            _players.Add(player);
-            if (player.id == _localPlayerId)
-                localPlayer = player;
-
-            onPlayerJoined?.Invoke(player);
-
-            if (player.isOwner)
-            {
-                owner = player;
-                onOwnerChanged?.Invoke(player);
-            }
-        }
-
-        private void OnPlayerLeft(string playerId, string newHostId)
-        {
-            if (!string.IsNullOrEmpty(newHostId))
-            {
-                _lastData.hostPlayerId = newHostId;
-                for (int i = 0; i < _players.Count; i++)
-                {
-                    if (_players[i].isOwner && _players[i].id != newHostId)
-                    {
-                        _players[i].SetIsHost(false);
-                        _players[i].TriggerOnPlayerUpdated();
-                        onPlayerUpdated?.Invoke(_players[i]);
-                    }
-                    else if (_players[i].id == newHostId)
-                    {
-                        _players[i].SetIsHost(true);
-                        owner = _players[i];
-                        onOwnerChanged?.Invoke(_players[i]);
-                        _players[i].TriggerOnPlayerUpdated();
-                        onPlayerUpdated?.Invoke(_players[i]);
-                    }
-                }
-            }
-
-            for (int i = 0; i < _players.Count; i++)
-            {
-                if (_players[i].id == playerId)
-                {
-                    var removed = _players[i];
-                    _players.RemoveAt(i);
-                    onPlayerLeft?.Invoke(removed);
-                    break;
-                }
-            }
-        }
-
         private void OnLobbySnapshot(LobbySnapshot snapshot)
         {
             _lastData = snapshot.lobby;
+            var previousOwner = owner;
 
             if (snapshot.metadata != null)
                 _metadata.Update(snapshot.metadata);
@@ -160,8 +108,6 @@ namespace PurrNet.Lobby.PurrNet
                         found = true;
                         if (_players[i].Update(_lastData.hostPlayerId, p))
                         {
-                            if (_players[i].isOwner)
-                                owner = _players[i];
                             if (_players[i].id == _localPlayerId)
                                 localPlayer = _players[i];
                             _players[i].TriggerOnPlayerUpdated();
@@ -184,36 +130,38 @@ namespace PurrNet.Lobby.PurrNet
             for (var j = 0; j < snapshot.players.Count; j++)
             {
                 var p = snapshot.players[j];
-                bool found = false;
-                for (int i = 0; i < _players.Count; i++)
+                if (TryGetPlayer(p.id, out _))
+                    continue;
+
+                var player = new PurrNetPlayer(_service, id);
+                player.Update(_lastData.hostPlayerId, p);
+                _players.Add(player);
+
+                if (player.id == _localPlayerId)
+                    localPlayer = player;
+
+                ApplyPlayerMetadataFromSnapshot(player, snapshot);
+
+                onPlayerJoined?.Invoke(player);
+            }
+
+            owner = TryGetPlayer(_lastData.hostPlayerId, out var host) ? host : null;
+            if (owner != null && owner != previousOwner)
+                onOwnerChanged?.Invoke(owner);
+        }
+
+        private bool TryGetPlayer(string playerId, out PurrNetPlayer player)
+        {
+            for (int i = 0; i < _players.Count; i++)
+            {
+                if (_players[i].id == playerId)
                 {
-                    if (_players[i].id == p.id)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    var player = new PurrNetPlayer(_service, id);
-                    player.Update(_lastData.hostPlayerId, p);
-                    _players.Add(player);
-
-                    if (player.id == _localPlayerId)
-                        localPlayer = player;
-
-                    ApplyPlayerMetadataFromSnapshot(player, snapshot);
-
-                    onPlayerJoined?.Invoke(player);
-
-                    if (player.isOwner)
-                    {
-                        owner = player;
-                        onOwnerChanged?.Invoke(player);
-                    }
+                    player = _players[i];
+                    return true;
                 }
             }
+            player = null;
+            return false;
         }
 
         private static void ApplyPlayerMetadataFromSnapshot(PurrNetPlayer player, LobbySnapshot snapshot)
@@ -228,15 +176,20 @@ namespace PurrNet.Lobby.PurrNet
         private void OnLobbyDestroyed()
         {
             onLobbyDestroyed?.Invoke();
+            Dispose();
         }
 
         public void KickPlayer(IPlayer player)
         {
+            if (!isOwner)
+                return;
             _ = _service.KickAsync(_lastData.id, player.id);
         }
 
         public void SetIsLobbyJoinable(bool isJoinable)
         {
+            if (!isOwner)
+                return;
             _lastData.joinable = isJoinable;
             _ = _service.SetJoinableAsync(_lastData.id, isJoinable);
         }
@@ -249,11 +202,13 @@ namespace PurrNet.Lobby.PurrNet
 
         public void Dispose()
         {
+            if (_disposed)
+                return;
+            _disposed = true;
+
             _connection.onDestroyed -= OnLobbyDestroyed;
             _connection.onKicked -= OnLobbyDestroyed;
             _connection.onSnapshot -= OnLobbySnapshot;
-            _connection.onPlayerJoined -= OnPlayerJoined;
-            _connection.onPlayerLeft -= OnPlayerLeft;
             _connection.onPlayerMetadataUpdated -= OnPlayerMetadataUpdated;
             _connection.onMetadataUpdated -= OnMetadataUpdated;
             _connection.Disconnect();

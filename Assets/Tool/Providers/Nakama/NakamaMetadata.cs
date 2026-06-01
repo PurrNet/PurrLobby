@@ -11,7 +11,7 @@ namespace PurrNet.Lobby.Nakama
     public class NakamaMetadata : IMetadata
     {
         private readonly NakamaLobby _lobby;
-        private readonly string _ownerId; // null = lobby metadata, non-null = player metadata
+        private readonly string _ownerId;
         private readonly bool _isLocalOwner;
         private readonly Dictionary<string, string> _data = new();
 

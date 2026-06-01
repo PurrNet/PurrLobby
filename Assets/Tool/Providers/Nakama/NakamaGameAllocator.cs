@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using PurrNet.Logging;
 using PurrNet.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace PurrNet.Lobby.Nakama
 {
@@ -52,22 +51,10 @@ namespace PurrNet.Lobby.Nakama
 
         public override Task LoadGame(ILobby lobby)
         {
-            if (string.IsNullOrEmpty(_gameScene))
-                throw new Exception($"Game scene is not set. Please set the game scene in the inspector of `{name}`.");
-
             if (_waitForGameStartFlag && lobby != null && lobby.isOwner)
                 lobby.lobbyData.SetData(GameStartKeys.Status, "loading");
 
-            var asyncOp = SceneManager.LoadSceneAsync(_gameScene);
-            if (asyncOp == null)
-            {
-                PurrLogger.LogError($"Loading scene `{_gameScene}` failed.");
-                return Task.CompletedTask;
-            }
-
-            var tcs = new TaskCompletionSource<bool>();
-            asyncOp.completed += _ => tcs.SetResult(true);
-            return tcs.Task;
+            return LoadGameScene(_gameScene);
         }
 
         public override void Connect(ConnectionInfo connection, bool shouldBeHost)

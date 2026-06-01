@@ -22,12 +22,36 @@ namespace PurrNet.Lobby
 
         public void Setup(ILobby lobby)
         {
+            if (_lobby != null)
+                Unsubscribe();
+
             _lobby = lobby;
+            if (isActiveAndEnabled)
+                Subscribe();
+            _scrollRect.verticalNormalizedPosition = 0f;
+        }
+
+        private void Subscribe()
+        {
+            if (_lobby == null || _subscribed)
+                return;
+            _subscribed = true;
             _lobby.chat.onMessageReceived += OnMessageReceived;
             _lobby.onPlayerJoined += OnPlayerJoined;
             _lobby.onPlayerLeft += OnPlayerLeft;
-            _scrollRect.verticalNormalizedPosition = 0f;
         }
+
+        private void Unsubscribe()
+        {
+            if (_lobby == null || !_subscribed)
+                return;
+            _subscribed = false;
+            _lobby.chat.onMessageReceived -= OnMessageReceived;
+            _lobby.onPlayerJoined -= OnPlayerJoined;
+            _lobby.onPlayerLeft -= OnPlayerLeft;
+        }
+
+        private bool _subscribed;
 
         private void Update()
         {
@@ -54,18 +78,13 @@ namespace PurrNet.Lobby
         private void OnEnable()
         {
             _input.onSubmit.AddListener(OnSubmit);
+            Subscribe();
         }
 
         private void OnDisable()
         {
             _input.onSubmit.RemoveListener(OnSubmit);
-
-            if (_lobby != null)
-            {
-                _lobby.chat.onMessageReceived -= OnMessageReceived;
-                _lobby.onPlayerJoined -= OnPlayerJoined;
-                _lobby.onPlayerLeft -= OnPlayerLeft;
-            }
+            Unsubscribe();
         }
 
         private void OnPlayerJoined(IPlayer player)
@@ -94,7 +113,7 @@ namespace PurrNet.Lobby
             if (message.Length > MAX_LEN)
                 message = $"{message[..MAX_LEN]}...";
 
-            if (!string.IsNullOrWhiteSpace(message))
+            if (_lobby != null && !string.IsNullOrWhiteSpace(message))
             {
                 _lobby.chat.SendMessage(Encoding.UTF8.GetBytes(message));
             }

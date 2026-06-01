@@ -9,8 +9,10 @@ namespace PurrNet.Lobby
     /// </summary>
     public class GameOverBroadcaster : NetworkIdentity
     {
-        [Tooltip("GameSession that performs the return to menu. Optional - falls back to GameSession.Instance.")]
+        [Tooltip("Optional - auto-resolved from the GameSession in this scene.")]
         [SerializeField] private GameSession _session;
+
+        private GameSession _resolved;
 
         /// <summary>
         /// Server-only. Ends the game and returns every player to the menu.
@@ -35,12 +37,25 @@ namespace PurrNet.Lobby
         [ObserversRpc(runLocally: true)]
         private void EndGameRpc()
         {
-            var session = _session ? _session : GameSession.Instance;
+            var session = ResolveSession();
 
             if (session)
                 session.GameEnded();
             else
                 PurrLogger.LogError("`GameOverBroadcaster` could not find a `GameSession` to end the game.", this);
+        }
+
+        /// <summary>Resolves the GameSession in this broadcaster's own scene, so a server hosting several scenes ends the right one.</summary>
+        private GameSession ResolveSession()
+        {
+            if (_session)
+                return _session;
+            if (_resolved)
+                return _resolved;
+            if (GameSession.TryGet(gameObject.scene, out _resolved))
+                return _resolved;
+
+            return GameSession.instance;
         }
     }
 }

@@ -35,8 +35,6 @@ namespace PurrNet.Lobby.Nakama
 
         private NakamaConnection() { }
 
-        // With Domain Reload disabled this static singleton outlives a play session with a dead
-        // socket/client; drop them on each play-mode boundary so they rebuild (session POCO is kept).
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOnEnterPlayMode()
         {
@@ -61,7 +59,7 @@ namespace PurrNet.Lobby.Nakama
             {
                 socket.Closed -= OnSocketClosed;
                 socket.Connected -= OnSocketConnected;
-                try { _ = socket.CloseAsync(); } catch { /* already dead */ }
+                try { _ = socket.CloseAsync(); } catch { /* ignored */ }
                 socket = null;
             }
             client = null;
@@ -120,12 +118,11 @@ namespace PurrNet.Lobby.Nakama
             if (socket is { IsConnected: true })
                 return;
 
-            // A stale socket can't be reliably reconnected; replace it or sends fail with TaskCanceled.
             if (socket != null)
             {
                 socket.Closed -= OnSocketClosed;
                 socket.Connected -= OnSocketConnected;
-                try { await socket.CloseAsync(); } catch { /* already dead */ }
+                try { await socket.CloseAsync(); } catch { /* ignored */ }
                 socket = null;
             }
 

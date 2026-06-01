@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Transports;
 using UnityEngine;
@@ -15,10 +16,10 @@ namespace PurrNet.Lobby
     /// </summary>
     public class GameSession : MonoBehaviour
     {
-        [Tooltip("The orchestrator asset shared with the menu scene. Carries the active lobby and the exit reason.")]
+        [Tooltip("Optional override. The orchestrator asset shared with the menu scene; auto-resolved from GameOrchestrator.Active when empty.")]
         [SerializeField] private GameOrchestrator _orchestrator;
 
-        [Tooltip("Scene to return to when leaving the game.")]
+        [Tooltip("Optional override. Scene to return to when leaving the game; auto-resolved from the launch scene when empty.")]
         [SerializeField, PurrScene] private string _menuScene;
 
         [Header("Reconnect (clients only)")]
@@ -28,13 +29,43 @@ namespace PurrNet.Lobby
         [Tooltip("Delay between reconnect attempts.")]
         [SerializeField] private float _reconnectInterval = 2f;
 
-        /// <summary>The active <see cref="GameSession"/> in the loaded game scene, if any.</summary>
-        public static GameSession Instance { get; private set; }
+        /// <summary>The most recently registered <see cref="GameSession"/>. For the common single-session case; prefer <see cref="TryGet"/> when the scene is known.</summary>
+        public static GameSession instance { get; private set; }
+
+        private static readonly Dictionary<int, GameSession> _byScene = new();
+
+        /// <summary>Gets the <see cref="GameSession"/> living in the given scene, if any.</summary>
+        public static bool TryGet(Scene scene, out GameSession session)
+        {
+            if (_byScene.TryGetValue(scene.handle, out session) && session)
+                return true;
+            session = null;
+            return false;
+        }
+
+        /// <summary>Returns the scene's <see cref="GameSession"/>, creating one if absent.</summary>
+        public static GameSession EnsureInScene(Scene scene)
+        {
+            if (TryGet(scene, out var existing))
+                return existing;
+
+            var go = new GameObject(nameof(GameSession));
+            if (go.scene != scene)
+                SceneManager.MoveGameObjectToScene(go, scene);
+            return go.AddComponent<GameSession>();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            _byScene.Clear();
+            instance = null;
+        }
 
         /// <summary>True while reconnect attempts are in progress after an unexpected disconnect.</summary>
-        public bool IsReconnecting { get; private set; }
+        public bool isReconnecting { get; private set; }
 
-        /// <summary>Raised when <see cref="IsReconnecting"/> changes.</summary>
+        /// <summary>Raised when <see cref="isReconnecting"/> changes.</summary>
         public event Action<bool> onReconnectingChanged;
 
         /// <summary>Raised once when the session begins exiting, with the reason for the exit.</summary>
@@ -46,18 +77,26 @@ namespace PurrNet.Lobby
 
         private void Awake()
         {
-            if (Instance && Instance != this)
+            var scene = gameObject.scene;
+            if (TryGet(scene, out var existing) && existing != this)
             {
-                PurrLogger.LogError("Multiple `GameSession` components in the scene; disabling the extra one.", this);
+                PurrLogger.LogError("Multiple `GameSession` components in the same scene; disabling the extra one.", this);
                 enabled = false;
                 return;
             }
 
-            Instance = this;
+            _byScene[scene.handle] = this;
+            instance = this;
         }
 
         private void Start()
         {
+            if (!_orchestrator)
+                _orchestrator = GameOrchestrator.active;
+
+            if (string.IsNullOrEmpty(_menuScene) && _orchestrator)
+                _menuScene = _orchestrator.menuScene;
+
             if (!_orchestrator)
                 PurrLogger.LogError("`GameSession` has no `GameOrchestrator` assigned - it cannot leave the lobby.", this);
 
@@ -84,8 +123,11 @@ namespace PurrNet.Lobby
                 _manager.onServerConnectionState -= OnServerConnectionState;
             }
 
-            if (Instance == this)
-                Instance = null;
+            if (_byScene.TryGetValue(gameObject.scene.handle, out var s) && s == this)
+                _byScene.Remove(gameObject.scene.handle);
+
+            if (instance == this)
+                instance = null;
         }
 
         /// <summary>The player chose to leave. Returns to the menu immediately, with no reconnect.</summary>
@@ -105,7 +147,7 @@ namespace PurrNet.Lobby
                 return;
             }
 
-            if (!IsReconnecting)
+            if (!isReconnecting)
             {
                 SetReconnecting(true);
                 _reconnectRoutine = StartCoroutine(ReconnectRoutine());
@@ -130,15 +172,21 @@ namespace PurrNet.Lobby
                 if (_exiting)
                     yield break;
 
-                if (_manager.clientState == ConnectionState.Connected)
+                switch (_manager.clientState)
                 {
-                    SetReconnecting(false);
-                    _reconnectRoutine = null;
-                    yield break;
+                    case ConnectionState.Connected:
+                        SetReconnecting(false);
+                        _reconnectRoutine = null;
+                        yield break;
+                    case ConnectionState.Disconnected:
+                        _manager.StartClient();
+                        break;
+                    case ConnectionState.Connecting:
+                    case ConnectionState.Disconnecting:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-
-                if (_manager.clientState == ConnectionState.Disconnected)
-                    _manager.StartClient();
 
                 yield return new WaitForSecondsRealtime(interval);
                 elapsed += interval;
@@ -151,10 +199,10 @@ namespace PurrNet.Lobby
 
         private void SetReconnecting(bool value)
         {
-            if (IsReconnecting == value)
+            if (isReconnecting == value)
                 return;
 
-            IsReconnecting = value;
+            isReconnecting = value;
             onReconnectingChanged?.Invoke(value);
         }
 

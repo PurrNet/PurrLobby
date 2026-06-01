@@ -73,7 +73,7 @@ MonoBehaviour:
       m_Calls: []
   _shader: {fileID: 4800000, guid: 0758f85608bde4543a44ac4b9ba345e6, type: 3}
   _texture: {fileID: 0}
-  _graphicColor: {r: 0.09019608, g: 0.09411766, b: 0.10196079, a: 1}
+  _graphicColor: {r: 1, g: 1, b: 1, a: 0.5019608}
   _gradientType: 0
   _gradientColor: {r: 1, g: 1, b: 1, a: 1}
   _gradientQuality: 8
@@ -201,11 +201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df50b8c11070da042bfb67716b57cd31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.ClickSounds
-  _clickSounds:
-  - {fileID: 8300000, guid: 24300c13439bdc34ba6a448b09876de8, type: 3}
-  - {fileID: 8300000, guid: 0f09be60e6734a54bb3ddf2e8581e374, type: 3}
-  - {fileID: 8300000, guid: 10c49e10c6d59ca4b86070f3374b69ff, type: 3}
-  - {fileID: 8300000, guid: 3da018ea9941fab498be0a1753490ef2, type: 3}
+  _clickSound: {fileID: 0}
 --- !u!1001 &2228858366911370161
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -293,6 +289,22 @@ PrefabInstance:
     - target: {fileID: 5040737113958996952, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.101960786
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.09411765
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.09019608
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4279900183
       objectReference: {fileID: 0}
     - target: {fileID: 8967047083258821514, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_Name
@@ -412,8 +424,20 @@ PrefabInstance:
       value: Label
       objectReference: {fileID: 0}
     - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.33962262
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.33962262
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.33962262
+      objectReference: {fileID: 0}
+    - target: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
       propertyPath: m_fontColor32.rgba
-      value: 4288848031
+      value: 4283914071
       objectReference: {fileID: 0}
     - target: {fileID: 8967047083258821514, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
       propertyPath: m_Name

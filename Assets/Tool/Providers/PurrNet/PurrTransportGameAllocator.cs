@@ -1,10 +1,8 @@
-using System;
 using System.Threading.Tasks;
 using PurrNet.Logging;
 using PurrNet.Transports;
 using PurrNet.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace PurrNet.Lobby.GenericProviders
 {
@@ -27,20 +25,7 @@ namespace PurrNet.Lobby.GenericProviders
 
         public override Task LoadGame(ILobby lobby)
         {
-            if (string.IsNullOrEmpty(_gameScene))
-                throw new Exception($"Game scene is not set. Please set the game scene in the inspector of `{name}`.");
-
-            var asyncOp = SceneManager.LoadSceneAsync(_gameScene);
-
-            if (asyncOp == null)
-            {
-                PurrLogger.LogError($"Loading scene `{_gameScene}` failed.");
-                return Task.CompletedTask;
-            }
-
-            var tcs = new TaskCompletionSource<bool>();
-            asyncOp.completed += _ => tcs.SetResult(true);
-            return tcs.Task;
+            return LoadGameScene(_gameScene);
         }
 
         private T GetOrAddComponent<T>(GameObject gameObject) where T : Component

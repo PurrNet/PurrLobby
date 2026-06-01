@@ -1,6 +1,9 @@
+using System;
 using System.Threading.Tasks;
+using PurrNet.Logging;
 using PurrNet.UI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PurrNet.Lobby
 {
@@ -45,6 +48,35 @@ namespace PurrNet.Lobby
         public virtual Task LoadGame(MatchResult matchResult)
         {
             return LoadGame(matchResult.lobby);
+        }
+
+        /// <summary>
+        /// Loads the game scene and captures the menu scene to return to. Concrete allocators call this
+        /// from their <see cref="LoadGame(ILobby)"/> instead of loading the scene themselves.
+        /// </summary>
+        protected Task LoadGameScene(string gameScene)
+        {
+            if (string.IsNullOrEmpty(gameScene))
+                throw new Exception($"Game scene is not set. Please set the game scene in the inspector of `{name}`.");
+
+            var orch = GameOrchestrator.active;
+            if (orch && string.IsNullOrEmpty(orch.menuScene))
+                orch.menuScene = SceneManager.GetActiveScene().name;
+
+            var asyncOp = SceneManager.LoadSceneAsync(gameScene);
+            if (asyncOp == null)
+            {
+                PurrLogger.LogError($"Loading scene `{gameScene}` failed.");
+                return Task.CompletedTask;
+            }
+
+            var tcs = new TaskCompletionSource<bool>();
+            asyncOp.completed += _ =>
+            {
+                GameSession.EnsureInScene(SceneManager.GetActiveScene());
+                tcs.SetResult(true);
+            };
+            return tcs.Task;
         }
     }
 }

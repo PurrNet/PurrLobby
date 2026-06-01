@@ -168,8 +168,7 @@ namespace PurrNet.Lobby.PurrNet
                 await Task.Delay(_pollIntervalMs);
                 elapsed += _pollIntervalMs;
 
-                // Cancelled, or a newer matchmaking session replaced this one.
-                if (_cancelled || _activeTicket?.ticketId != ticket.ticketId)
+                if (IsStale(ticket))
                     return;
 
                 (bool ok, string body, string error) poll;
@@ -179,11 +178,12 @@ namespace PurrNet.Lobby.PurrNet
                 }
                 catch (Exception e)
                 {
-                    FailTicket(ticket, e.Message);
+                    if (!IsStale(ticket))
+                        FailTicket(ticket, e.Message);
                     return;
                 }
 
-                if (_cancelled)
+                if (IsStale(ticket))
                     return;
 
                 if (!poll.ok)
@@ -216,15 +216,17 @@ namespace PurrNet.Lobby.PurrNet
                         return;
 
                     default:
-                        // SEARCHING, TEAM_FOUND, MATCH_FOUND - still on the way to a host.
                         RaiseStatusChanged(ticket, MatchmakingStatus.Searching);
                         break;
                 }
             }
 
-            if (!_cancelled)
+            if (!IsStale(ticket))
                 FailTicket(ticket, $"Matchmaking timed out after {_timeoutMs / 1000}s.");
         }
+
+        private bool IsStale(MatchmakingTicket ticket) =>
+            _cancelled || _activeTicket?.ticketId != ticket.ticketId;
 
         private void CompleteTicket(MatchmakingTicket ticket, TicketResponse status)
         {
@@ -256,9 +258,6 @@ namespace PurrNet.Lobby.PurrNet
         {
             _activeTicket = null;
             _activeTicketId = null;
-            // Raise the descriptive error first: the Failed status causes the
-            // matchmaking view to close and unsubscribe, so an error sent after it
-            // would land on no listener.
             RaiseMatchmakingError(ticket, error);
             RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
         }
@@ -281,8 +280,6 @@ namespace PurrNet.Lobby.PurrNet
             {
                 serverAddress = address,
                 serverPort = port.external,
-                // Edgegap expects the player to hand its ticket id to the game
-                // server for authentication; carry it through so the game can.
                 connectionToken = ticketId
             };
             return true;
@@ -391,8 +388,6 @@ namespace PurrNet.Lobby.PurrNet
 
             return (true, request.downloadHandler.text, null);
         }
-
-        // --- Edgegap ticket API JSON shapes (https://docs.edgegap.com/learn/matchmaking) ---
 
         [Serializable, UsedImplicitly]
         private class TicketRequest

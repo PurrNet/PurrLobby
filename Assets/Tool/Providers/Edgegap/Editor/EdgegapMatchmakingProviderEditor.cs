@@ -49,12 +49,8 @@ namespace PurrNet.Lobby.PurrNet
         private MessageType _corsResultType;
         private string _corsMessage;
 
-        // Profile names recovered from the matchmaker's OpenAPI document, if it
-        // encodes them as an enum. Null until a fetch finds them.
         private string[] _profiles;
 
-        // Auto-fetch bookkeeping: the creds we last fetched for, and a debounced
-        // pending fetch so editing the URL doesn't fire a request per keystroke.
         private string _autoFetchedUrl;
         private string _autoFetchedToken;
         private string _pendingFetchUrl;
@@ -62,8 +58,6 @@ namespace PurrNet.Lobby.PurrNet
         private double _pendingFetchAt;
         private bool _autoFetching;
 
-        // Set when an orchestrator pairs this matchmaker with a different allocator
-        // than the one it references. Null when consistent.
         private string _allocatorMismatch;
 
         private void OnEnable()
@@ -142,7 +136,6 @@ namespace PurrNet.Lobby.PurrNet
             if (url == _autoFetchedUrl && token == _autoFetchedToken)
                 return;
 
-            // A different matchmaker - drop the old dropdown until the fetch lands.
             if (url != _autoFetchedUrl)
                 _profiles = null;
 
@@ -180,7 +173,6 @@ namespace PurrNet.Lobby.PurrNet
             var options = _profiles.ToList();
             var current = _defaultProfile.stringValue;
 
-            // Keep a value that isn't one of the known profiles selectable.
             if (!string.IsNullOrEmpty(current) && !options.Contains(current))
                 options.Insert(0, current);
 
@@ -258,7 +250,6 @@ namespace PurrNet.Lobby.PurrNet
             }
             catch
             {
-                // A pairing check failure shouldn't break the inspector.
                 _allocatorMismatch = null;
             }
         }
@@ -437,7 +428,6 @@ namespace PurrNet.Lobby.PurrNet
             finally
             {
                 _testing = false;
-                // The inspector may have been closed while the request was in flight.
                 if (this != null)
                     Repaint();
             }
@@ -468,15 +458,10 @@ namespace PurrNet.Lobby.PurrNet
                     _profiles = ExtractProfiles(body);
                 }
 
-                // Remember the creds either way so we don't refetch them; a transient
-                // failure is retried only when the user edits the fields again.
                 _autoFetchedUrl = url;
                 _autoFetchedToken = token;
             }
-            catch
-            {
-                // Silent by design - see summary above.
-            }
+            catch { /* ignored */ }
             finally
             {
                 _autoFetching = false;
@@ -619,10 +604,7 @@ namespace PurrNet.Lobby.PurrNet
                     }
                 }
             }
-            catch
-            {
-                // Not a blocker - the profile field just stays a text field.
-            }
+            catch { /* ignored */ }
 
             return null;
         }

@@ -53,7 +53,6 @@ namespace PurrNet.Lobby.Nakama
             IMatch match;
             try
             {
-                // Relayed match — no server module required.
                 match = await conn.socket.CreateMatchAsync();
             }
             catch (Exception ex)
@@ -116,13 +115,11 @@ namespace PurrNet.Lobby.Nakama
             catch (Exception ex)
             {
                 lobby?.Dispose();
-                try { await conn.socket.LeaveMatchAsync(match.Id); } catch { /* swallow */ }
+                try { await conn.socket.LeaveMatchAsync(match.Id); } catch { /* ignored */ }
                 return LobbyResponse.Failure($"Failed to join Nakama match: {ex.Message}");
             }
         }
 
-        // The "code" surfaced through ILobby.joinCode is the underlying Nakama match id, so
-        // join-by-code is just join-by-id under the hood.
         public override Task<LobbyResponse> JoinLobbyByCode(string code) => JoinLobby(code);
 
         public override Task<LobbyResponse> JoinRandom(LobbyQuery query = null) =>

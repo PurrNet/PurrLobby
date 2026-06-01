@@ -21,7 +21,7 @@ namespace PurrNet.Lobby.PurrNet
 
         public override void Logout()
         {
-            _sessionProvider.Logout();
+            _ = _sessionProvider.Logout();
         }
 
         public override async Task<LobbyResponse> CreateLobby(LobbySettings settings)

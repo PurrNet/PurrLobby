@@ -12,11 +12,15 @@ namespace PurrNet.Lobby.PurrNet
 
         public override void JoinedLobby(ILobby lobby)
         {
-            _authenticator.Setup(_networkManager, lobby);
+            if (_authenticator != null && _networkManager != null)
+                _authenticator.Setup(_networkManager, lobby);
         }
 
         private void OnDisable()
         {
+            if (_networkManager == null)
+                return;
+
             _networkManager.onServerConnectionState -= OnHostConnectionState;
             _networkManager.onClientConnectionState -= OnClientConnectionState;
 
@@ -34,6 +38,9 @@ namespace PurrNet.Lobby.PurrNet
                 StopCoroutine(_restartingServerCoroutine);
             if (_restartingClientCoroutine != null)
                 StopCoroutine(_restartingClientCoroutine);
+
+            if (_networkManager == null)
+                return;
 
             _networkManager.onServerConnectionState -= OnHostConnectionState;
             _networkManager.onClientConnectionState -= OnClientConnectionState;
@@ -88,6 +95,9 @@ namespace PurrNet.Lobby.PurrNet
 
         public override void OnHostChanged(ILobby lobby, IPlayer host, bool isLocalPlayer)
         {
+            if (_networkManager == null || lobby == null || host == null)
+                return;
+
             if (_ongoingMigration != null)
                 StopCoroutine(_ongoingMigration);
             if (_restartingServerCoroutine != null)

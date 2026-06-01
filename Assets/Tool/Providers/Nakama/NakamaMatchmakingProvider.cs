@@ -179,7 +179,6 @@ namespace PurrNet.Lobby.Nakama
                 {
                     var conn = NakamaConnection.instance;
 
-                    // Relayed matchmaker matches materialize on token-join; this also yields the match id.
                     var match = await conn.socket.JoinMatchAsync(matched);
 
                     var hostUserId = ResolveLowestUserId(matched);
@@ -198,8 +197,8 @@ namespace PurrNet.Lobby.Nakama
                 }
                 catch (Exception ex)
                 {
-                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Failed);
                     RaiseMatchmakingError(publicTicket, ex.Message);
+                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Failed);
                 }
             }
             catch (Exception e)

@@ -35,12 +35,25 @@ namespace PurrNet.Lobby
 
         public override void OnPopped()
         {
-            if (_provider)
-            {
-                _provider.onStatusChanged -= OnStatusChanged;
-                _provider.onMatchFound -= OnMatchFound;
-                _provider.onMatchmakingError -= OnMatchmakingError;
-            }
+            Unsubscribe();
+        }
+
+        private void OnDestroy()
+        {
+            Unsubscribe();
+        }
+
+        private bool _unsubscribed;
+
+        private void Unsubscribe()
+        {
+            if (_unsubscribed || !_provider)
+                return;
+
+            _unsubscribed = true;
+            _provider.onStatusChanged -= OnStatusChanged;
+            _provider.onMatchFound -= OnMatchFound;
+            _provider.onMatchmakingError -= OnMatchmakingError;
         }
 
         private void OnMatchFound(MatchmakingTicket ticket, MatchResult result)
@@ -120,9 +133,6 @@ namespace PurrNet.Lobby
         {
             _message.text = $"Matchmaking: {status}";
 
-            // A provider that reports a failure should also raise onMatchmakingError
-            // with the reason; OnMatchmakingError handles those. This is the fallback
-            // for providers that only flip the status.
             if (status is MatchmakingStatus.Failed && !_failed)
             {
                 _failed = true;
