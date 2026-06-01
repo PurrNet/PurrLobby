@@ -2705,7 +2705,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_TargetGraphic
@@ -2713,11 +2713,11 @@ PrefabInstance:
       objectReference: {fileID: 6696518394907344687}
     - target: {fileID: 9188611237920211996, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Size
-      value: 0.99999976
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9188611237920211996, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2853,7 +2853,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4093494571155517460, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: SendMessage
+      value: SendChatMessage
       objectReference: {fileID: 0}
     - target: {fileID: 4093494571155517460, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -4421,7 +4421,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_TargetGraphic

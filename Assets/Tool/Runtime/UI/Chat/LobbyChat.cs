@@ -99,11 +99,11 @@ namespace PurrNet.Lobby
 
         public void OnSubmit(string _)
         {
-            SendMessage();
+            SendChatMessage();
             _input.ActivateInputField();
         }
 
-        public void SendMessage()
+        public void SendChatMessage()
         {
             const int MAX_LEN = 200;
 

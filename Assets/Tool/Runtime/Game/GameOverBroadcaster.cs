@@ -1,5 +1,4 @@
 using PurrNet.Logging;
-using UnityEngine;
 
 namespace PurrNet.Lobby
 {
@@ -9,9 +8,6 @@ namespace PurrNet.Lobby
     /// </summary>
     public class GameOverBroadcaster : NetworkIdentity
     {
-        [Tooltip("Optional - auto-resolved from the GameSession in this scene.")]
-        [SerializeField] private GameSession _session;
-
         private GameSession _resolved;
 
         /// <summary>
@@ -48,11 +44,7 @@ namespace PurrNet.Lobby
         /// <summary>Resolves the GameSession in this broadcaster's own scene, so a server hosting several scenes ends the right one.</summary>
         private GameSession ResolveSession()
         {
-            if (_session)
-                return _session;
-            if (_resolved)
-                return _resolved;
-            if (GameSession.TryGet(gameObject.scene, out _resolved))
+            if (_resolved || GameSession.TryGet(gameObject.scene, out _resolved))
                 return _resolved;
 
             return GameSession.instance;
