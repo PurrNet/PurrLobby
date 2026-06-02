@@ -39,6 +39,7 @@ namespace PurrNet.Lobby.Nakama
         public NakamaConfig config => _config;
 
         private TaskCompletionSource<bool> _loggingIn;
+        private Task _loggingOut;
 
         public override async Task Login(ViewStack stack)
         {
@@ -65,10 +66,26 @@ namespace PurrNet.Lobby.Nakama
             await _loggingIn.Task;
         }
 
-        public override async Task Logout()
+        public override Task Logout()
         {
-            ClearPersistedSession();
-            await NakamaConnection.instance.LogoutAsync();
+            if (_loggingOut != null && !_loggingOut.IsCompleted)
+                return _loggingOut;
+
+            _loggingOut = LogoutAsync();
+            return _loggingOut;
+        }
+
+        private async Task LogoutAsync()
+        {
+            try
+            {
+                ClearPersistedSession();
+                await NakamaConnection.instance.LogoutAsync();
+            }
+            finally
+            {
+                _loggingOut = null;
+            }
         }
 
         private void SetFlag()

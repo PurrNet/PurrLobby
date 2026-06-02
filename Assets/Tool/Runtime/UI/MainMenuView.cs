@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using PurrNet.UI;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace PurrNet.Lobby
 
         private LobbyManager _manager;
         private GameOrchestrator _orchestrator;
+        private bool _loggingOut;
 
         protected override IEnumerator OnEnterTransition() => ViewTransitions.FadeIn(this);
 
@@ -86,19 +88,36 @@ namespace PurrNet.Lobby
             parentStack.Push<LobbyBrowserView>().Setup(_orchestrator);
         }
 
-        public void Logout()
+        public async void Logout()
         {
-            if (_orchestrator.lobbyProvider)
-                _orchestrator.lobbyProvider.Logout();
+            if (_loggingOut)
+                return;
 
-            if (_orchestrator.matchmakingProvider)
-                _orchestrator.matchmakingProvider.Logout();
+            _loggingOut = true;
 
-            if (_orchestrator.gameAllocator)
-                _orchestrator.gameAllocator.Logout();
+            try
+            {
+                if (_orchestrator.matchmakingProvider)
+                    _orchestrator.matchmakingProvider.Logout();
 
-            CloseMe();
-            _manager.Initialize();
+                if (_orchestrator.gameAllocator)
+                    _orchestrator.gameAllocator.Logout();
+
+                if (_orchestrator.lobbyProvider)
+                    _orchestrator.lobbyProvider.Logout();
+
+                if (_orchestrator.sessionProvider)
+                    await _orchestrator.sessionProvider.Logout();
+
+                CloseMe();
+                _manager.Initialize();
+            }
+            catch (Exception e)
+            {
+                _loggingOut = false;
+                Debug.LogException(e);
+                Toaster.PushError("Failed to log out", e);
+            }
         }
 
         public void CreateLobby()

@@ -1,71 +1,96 @@
 # PurrLobby
 
-A lobby and matchmaking front-end for [PurrNet](https://purrnet.dev/).
+A drop-in lobby and matchmaking front-end for [PurrNet](https://purrnet.dev/).
 
-PurrLobby gives you the part of a multiplayer game that's tedious to build but
-every game needs: a menu where players create a lobby, share a code or browse
-open ones, chat, ready up, and drop into a match together. The UI is already
-built. You wire in a backend and your own game scene, and you're done.
+PurrLobby gives you the multiplayer menu flow most games need: create a lobby,
+share a code, browse open lobbies when the selected backend supports it, chat,
+ready up, matchmake, and move everyone into a game scene together. The UI is
+already built. You choose a backend, assign your game scene, and customize the
+prefabs as needed.
 
-> **Status:** beta (`1.0.0-beta.1`). The API is close to stable but may still
-> shift before 1.0. Worth pinning a version if you depend on it.
+> **Status:** beta (`1.0.0-beta.3`). The API is close to stable but may still
+> shift before 1.0. Pin a version if you depend on it.
 
-## What's in the box
+## Requirements
 
-- Menu flow: main menu, create lobby, join by code, lobby browser, matchmaking,
-  and the in-lobby view with a player list and chat.
-- An owner-driven game start: once everyone is ready, a short countdown runs,
-  the owner allocates a server, and everyone connects.
-- Swappable backends. The UI talks to provider interfaces, not a specific
-  service, so you can change where lobbies live without touching the menus.
-
-Backends included:
-
-| Provider | Lobbies | Matchmaking | Game servers |
-|----------|:-------:|:-----------:|:------------:|
-| PurrNet (PurrServices) | yes | — | yes (PurrTransport) |
-| Nakama | yes | yes | yes |
-| Edgegap | — | yes | yes |
-
-Edgegap matchmaking uses Edgegap's managed matchmaker, which forms the match
-and spins up the game server in one step — pair the Edgegap matchmaker with the
-Edgegap game allocator and players go straight from the queue into the match.
-
-A provider only advertises what it actually supports through
-`LobbyCapabilities`, and the menu hides buttons for anything missing — so a
-backend without a lobby browser simply won't show that button.
+- Unity `6000.0` or newer.
+- [PurrNet](https://github.com/PurrNet/PurrNet) and
+  [PurrUI](https://github.com/PurrNet/PurrUI).
+- PurrServices when using the PurrNet Services lobby provider or Edgegap game
+  allocator.
+- Optional provider packages:
+  - [Nakama Unity](https://github.com/heroiclabs/nakama-unity) for Nakama
+    providers.
+  - [Edgegap Unity plugin](https://github.com/edgegap/edgegap-unity-plugin) for
+    Edgegap workflows.
 
 ## Installing
 
 In Unity, open **Window > Package Manager**, choose **Add package from git
 URL**, and paste:
 
-```
+```text
 https://github.com/PurrNet/PurrLobby.git?path=/Assets/Tool#dev
 ```
 
-Requires Unity 6000.0 or newer and the PurrNet package. Tested on 6000.3.
+For local development, clone the repository and open it with a supported Unity
+version. The checked-in `Packages/manifest.json` points at the dependency
+versions used by the sample project.
 
-## Getting started
+## What's Included
+
+- Menu flow: main menu, create lobby, join by code, lobby browser, matchmaking,
+  and an in-lobby view with a player list and chat.
+- Ready-up and owner-driven game start.
+- A scene handoff that loads the game scene, connects the network transport,
+  and returns to the menu on leave, game over, or connection loss.
+- Swappable provider interfaces for sessions, lobbies, matchmaking, and game
+  allocation.
+- Prefabs and sample scenes under `Assets/Tool`.
+
+## Providers
+
+| Provider | Lobbies | Lobby Browser | Matchmaking | Game Allocation |
+|----------|---------|---------------|-------------|-----------------|
+| PurrNet Services | yes | yes | via generic lobby matchmaker | PurrTransport |
+| Nakama | create/join by id or code | no | yes | Nakama relayed match |
+| Edgegap | no | no | yes | managed server assignment |
+
+Providers advertise optional lobby actions through `LobbyCapabilities`. The
+menu hides unsupported buttons automatically, so a backend without lobby
+browsing will not show the browser entry point.
+
+Edgegap matchmaking forms the match and returns ready-to-use connection info in
+one step. Pair `EdgegapMatchmakingProvider` with `EdgegapGameAllocator` so the
+matchmaker and allocator agree on transport and port selection.
+
+## Getting Started
 
 1. Open `Assets/Tool/Scenes/MenuScene.unity` for a working example.
-2. The `LobbyManager` in the scene references a `GameOrchestrator` asset. That
-   asset is just four slots: a session, lobby, matchmaking and game-allocator
-   provider. There are preset orchestrators for PurrNet and Nakama under
-   `Assets/Tool/Providers/.../Preset`.
-3. Point the orchestrator at the providers for the backend you want, set your
-   own game scene as the one the allocator loads, and press play.
+2. Select the `LobbyManager` in the scene and assign a `GameOrchestrator`.
+   Preset orchestrators live under `Assets/Tool/Providers/.../Preset`.
+3. Choose the session, lobby, matchmaking, and game allocator providers for
+   your backend.
+4. Set the allocator's game scene to your gameplay scene.
+5. In the gameplay scene, keep the `NetworkManager` auto-start flags disabled.
+   The allocator starts the host or client after loading the scene.
 
-To customise the look, the views are plain prefabs under
-`Assets/Tool/Prefabs/Views` — edit them like any other UI.
+To customize the UI, edit the prefabs under `Assets/Tool/Prefabs/Views` and
+the smaller elements under `Assets/Tool/Prefabs/Elements`.
 
-## Writing your own backend
+## Writing A Backend
 
-Implement the provider base classes in `Runtime/Providers` (`SessionProvider`,
-`LobbyProvider`, `MatchmakingProvider`, `GameAllocatorProvider`) and the
-`ILobby` / `IPlayer` interfaces in `Runtime/Contracts`. The PurrNet provider
-under `Assets/Tool/Providers/PurrNet` is the smallest complete example to copy
-from.
+Implement the provider base classes in `Assets/Tool/Runtime/Providers`:
+
+- `SessionProvider`
+- `LobbyProvider`
+- `MatchmakingProvider`
+- `GameAllocatorProvider`
+
+Lobby objects should implement the contracts in `Assets/Tool/Runtime/Contracts`,
+especially `ILobby`, `IPlayer`, `IMetadata`, and `ILobbyChat`. The PurrNet
+provider under `Assets/Tool/Providers/PurrNet` is the smallest complete
+example; Nakama is a fuller reference for relayed-match lobby state.
 
 ## License
 
