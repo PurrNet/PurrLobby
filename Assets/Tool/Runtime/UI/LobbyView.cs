@@ -62,8 +62,14 @@ namespace PurrNet.Lobby
 
         public void Setup(ILobby lobby, GameOrchestrator orchestrator)
         {
+            UnsubscribeLobbyEvents();
+            ClearPlayerEntries();
+
             _orchestrator = orchestrator;
             _allReadyTimer = _timeToStartGame;
+            _lobbyEventsUnsubscribed = false;
+            _gameStarted = false;
+            _wasAllReady = false;
             ResetStatusLabels();
 
             _playerPlaceholderPool ??= new UIPool<Transform>(_playerPlaceholderPrefab.transform, _playerContent);
@@ -136,7 +142,7 @@ namespace PurrNet.Lobby
 
         private void Update()
         {
-            if (_lobby.localPlayer == null || !_lobby.localPlayer.isOwner)
+            if (_lobby?.localPlayer == null || !_lobby.localPlayer.isOwner)
                 return;
 
             if (_gameStarted)
@@ -181,8 +187,8 @@ namespace PurrNet.Lobby
 
                 if (text != _lobbyStatusDetails.text)
                 {
-                    _lobbyStatusDetails.text = $"{secondsLeft} ...";
-                    _lobby.lobbyData.SetData(LOBBY_STATUS_DETAILS_STRING, _lobbyStatusDetails.text);
+                    _lobbyStatusDetails.text = text;
+                    _lobby.lobbyData.SetData(LOBBY_STATUS_DETAILS_STRING, text);
                 }
             }
             else if (_wasAllReady)
@@ -229,7 +235,7 @@ namespace PurrNet.Lobby
                 _wasAllReady = false;
                 _gameStarted = false;
                 _allReadyTimer = _timeToStartGame;
-                _lobby.localPlayer?.SetReady(false);
+                _lobby?.localPlayer?.SetReady(false);
             }
             finally
             {
@@ -264,7 +270,7 @@ namespace PurrNet.Lobby
                 _wasAllReady = false;
                 _gameStarted = false;
                 _allReadyTimer = _timeToStartGame;
-                _lobby.localPlayer?.SetReady(false);
+                _lobby?.localPlayer?.SetReady(false);
             }
             finally
             {
@@ -424,6 +430,16 @@ namespace PurrNet.Lobby
         }
 
         private readonly Dictionary<IPlayer, PlayerEntry> _uiPlayerEntry = new();
+
+        private void ClearPlayerEntries()
+        {
+            foreach (var entry in _uiPlayerEntry.Values)
+            {
+                if (entry)
+                    Destroy(entry.gameObject);
+            }
+            _uiPlayerEntry.Clear();
+        }
 
         private void OnPlayerJoined(IPlayer player)
         {

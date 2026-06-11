@@ -22,9 +22,10 @@ namespace PurrNet.Lobby.PurrNet
         public void SetData(string key, string value)
         {
             _data[key] = value;
-            _ = _isPlayerMetadata ?
+            (_isPlayerMetadata ?
                 _service.SetPlayerMetadataAsync(_lobbyId, _data) :
-                _service.SetMetadataAsync(_lobbyId, _data);
+                _service.SetMetadataAsync(_lobbyId, _data))
+                .Forget("[PurrNetMetadata] Metadata update failed");
         }
 
         public string GetData(string key)
@@ -41,9 +42,10 @@ namespace PurrNet.Lobby.PurrNet
         {
             if (_data.Remove(key))
             {
-                _ = _isPlayerMetadata ?
+                (_isPlayerMetadata ?
                     _service.SetPlayerMetadataAsync(_lobbyId, _data) :
-                    _service.SetMetadataAsync(_lobbyId, _data);
+                    _service.SetMetadataAsync(_lobbyId, _data))
+                    .Forget("[PurrNetMetadata] Metadata update failed");
             }
         }
 

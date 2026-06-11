@@ -134,7 +134,8 @@ namespace PurrNet.Lobby.Nakama
                 Debug.LogWarning("[NakamaLobby] Only the host can kick players.");
                 return;
             }
-            _ = SendMatchStateAsync(NakamaOpCodes.Kick, new KickMessage { userId = player.id });
+            SendMatchStateAsync(NakamaOpCodes.Kick, new KickMessage { userId = player.id })
+                .Forget("[NakamaLobby] Kick failed");
         }
 
         public void SetIsLobbyJoinable(bool isJoinable)
@@ -147,7 +148,8 @@ namespace PurrNet.Lobby.Nakama
             if (_joinable == isJoinable)
                 return;
             _joinable = isJoinable;
-            _ = SendMatchStateAsync(NakamaOpCodes.SetJoinable, new JoinableMessage { joinable = isJoinable });
+            SendMatchStateAsync(NakamaOpCodes.SetJoinable, new JoinableMessage { joinable = isJoinable })
+                .Forget("[NakamaLobby] SetJoinable failed");
         }
 
         /// <summary>Blocks until the owner's authoritative snapshot arrives.</summary>
@@ -165,7 +167,8 @@ namespace PurrNet.Lobby.Nakama
                         "Joined Nakama lobby has no other presences; the owner is gone."));
                 tcs = _firstSnapshotTcs ??= new TaskCompletionSource<bool>();
             }
-            _ = SendMatchStateBytesAsync(NakamaOpCodes.RequestSnapshot, null);
+            SendMatchStateBytesAsync(NakamaOpCodes.RequestSnapshot, null)
+                .Forget("[NakamaLobby] Snapshot request failed");
             return AwaitWithTimeoutAsync(tcs.Task, timeoutMs);
         }
 
@@ -242,16 +245,17 @@ namespace PurrNet.Lobby.Nakama
         {
             if (patch == null || patch.Count == 0 || !isOwner)
                 return;
-            _ = SendMatchStateAsync(NakamaOpCodes.LobbyMetadataPatch, new LobbyMetadataMessage { metadata = patch });
+            SendMatchStateAsync(NakamaOpCodes.LobbyMetadataPatch, new LobbyMetadataMessage { metadata = patch })
+                .Forget("[NakamaLobby] Lobby metadata patch failed");
         }
 
         internal void BroadcastLocalPlayerMetadata(Dictionary<string, string> snapshot)
         {
-            _ = SendMatchStateAsync(NakamaOpCodes.PlayerMetadataPatch, new PlayerMetadataMessage
+            SendMatchStateAsync(NakamaOpCodes.PlayerMetadataPatch, new PlayerMetadataMessage
             {
                 userId = _localPlayer?.id ?? _session.UserId,
                 metadata = snapshot
-            });
+            }).Forget("[NakamaLobby] Player metadata patch failed");
         }
 
         internal Task SendMatchStateBytesAsync(long opCode, byte[] data)
@@ -299,7 +303,7 @@ namespace PurrNet.Lobby.Nakama
                     }
 
                     if (this.isOwner)
-                        _ = SendSnapshotAsync();
+                        SendSnapshotAsync().Forget("[NakamaLobby] Snapshot broadcast failed");
                 }
             }
 
@@ -362,7 +366,7 @@ namespace PurrNet.Lobby.Nakama
                         break;
                     case NakamaOpCodes.RequestSnapshot:
                         if (this.isOwner)
-                            _ = SendSnapshotAsync();
+                            SendSnapshotAsync().Forget("[NakamaLobby] Snapshot broadcast failed");
                         break;
                 }
             }
@@ -456,7 +460,7 @@ namespace PurrNet.Lobby.Nakama
                 if (msg.hostUserId == _session.UserId && !_firstSnapshotReceived)
                 {
                     SetSnapshotReceived();
-                    _ = SendSnapshotAsync();
+                    SendSnapshotAsync().Forget("[NakamaLobby] Snapshot broadcast failed");
                 }
             }
         }
@@ -486,8 +490,9 @@ namespace PurrNet.Lobby.Nakama
 
             if (newHostId == _session.UserId)
             {
-                _ = SendMatchStateAsync(NakamaOpCodes.HostMigration, new HostMigrationMessage { hostUserId = newHostId });
-                _ = SendSnapshotAsync();
+                SendMatchStateAsync(NakamaOpCodes.HostMigration, new HostMigrationMessage { hostUserId = newHostId })
+                    .Forget("[NakamaLobby] Host migration broadcast failed");
+                SendSnapshotAsync().Forget("[NakamaLobby] Snapshot broadcast failed");
             }
         }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PurrNet.Lobby.PurrNet
 {
-    public class PurrNetChat : ILobbyChat
+    public class PurrNetChat : ILobbyChat, IDisposable
     {
         private readonly LobbyConnection _connection;
 
@@ -27,12 +27,18 @@ namespace PurrNet.Lobby.PurrNet
         {
             try
             {
-                _ = PurrServices.instance.lobbies.SendChatAsync(_lobby.id, data);
+                PurrServices.instance.lobbies.SendChatAsync(_lobby.id, data)
+                    .Forget("[PurrNetChat] SendChat failed");
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
             }
+        }
+
+        public void Dispose()
+        {
+            _connection.onChat -= OnChatMessage;
         }
 
         public event Action<IPlayer, byte[]> onMessageReceived;

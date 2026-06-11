@@ -34,8 +34,13 @@ namespace PurrNet.Lobby
 #endif
 
         private ILobby _lobby;
-        private IPlayer _localPlayer => _lobby.localPlayer;
+        private IPlayer _localPlayer => _lobby?.localPlayer;
         private IPlayer _player;
+
+        // The exact references we subscribed to, so we can unsubscribe even if
+        // the lobby's localPlayer changes between Setup and teardown.
+        private IPlayer _subscribedLocal;
+        private IPlayer _subscribedPlayer;
 
         private Action<IPlayer>  _onKickPlayer;
 
@@ -50,17 +55,22 @@ namespace PurrNet.Lobby
 
         public void Setup(ILobby lobby, IPlayer player, Action<IPlayer> onKick)
         {
+            Unsubscribe();
+
             _onKickPlayer = onKick;
             _lobby = lobby;
             _player = player;
             UpdatePlayerInfo();
 
-            if (_localPlayer != null)
+            var local = _localPlayer;
+            if (local != null && !ReferenceEquals(local, player))
             {
-                _localPlayer.onPlayerUpdated += UpdatePlayerInfo;
-                _localPlayer.onPlayerMetadataUpdated += UpdatePlayerInfo;
+                _subscribedLocal = local;
+                local.onPlayerUpdated += UpdatePlayerInfo;
+                local.onPlayerMetadataUpdated += UpdatePlayerInfo;
             }
 
+            _subscribedPlayer = player;
             player.onPlayerUpdated += UpdatePlayerInfo;
             player.onPlayerMetadataUpdated += UpdatePlayerInfo;
         }
@@ -71,18 +81,25 @@ namespace PurrNet.Lobby
                 _onKickPlayer?.Invoke(_player);
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            if (_player != null)
+            Unsubscribe();
+        }
+
+        private void Unsubscribe()
+        {
+            if (_subscribedPlayer != null)
             {
-                _player.onPlayerUpdated -= UpdatePlayerInfo;
-                _player.onPlayerMetadataUpdated -= UpdatePlayerInfo;
+                _subscribedPlayer.onPlayerUpdated -= UpdatePlayerInfo;
+                _subscribedPlayer.onPlayerMetadataUpdated -= UpdatePlayerInfo;
+                _subscribedPlayer = null;
             }
 
-            if (_localPlayer != null)
+            if (_subscribedLocal != null)
             {
-                _localPlayer.onPlayerUpdated -= UpdatePlayerInfo;
-                _localPlayer.onPlayerMetadataUpdated -= UpdatePlayerInfo;
+                _subscribedLocal.onPlayerUpdated -= UpdatePlayerInfo;
+                _subscribedLocal.onPlayerMetadataUpdated -= UpdatePlayerInfo;
+                _subscribedLocal = null;
             }
         }
 

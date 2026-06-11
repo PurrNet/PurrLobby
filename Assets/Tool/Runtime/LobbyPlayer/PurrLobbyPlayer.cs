@@ -35,23 +35,37 @@ namespace PurrNet.Lobby
             {
                 if (_purrVoicePlayer)
                     _purrVoicePlayer.muted = false;
-            }
-            else
-            {
-                if (_purrVoicePlayer)
-                    _purrVoicePlayer.muted = !lobbyView.localMicEnabled;
-                lobbyView.onLocalMicEnabledChanged += OnLocalMicEnabledChanged;
+                return;
             }
 
-            if (isOwner && _purrVoicePlayer && _lipSync)
-                lobbyView.EnableMicrophoneFeature();
+            // The buffered Setup RPC that assigns lobbyView can arrive after
+            // OnSpawned on remote clients; wire from whichever lands last.
+            WireLocalVoice();
 #endif
         }
 
 #if PURR_VOICE
+        private bool _voiceWired;
+
+        private void WireLocalVoice()
+        {
+            if (_voiceWired || !isOwner || !lobbyView)
+                return;
+
+            _voiceWired = true;
+
+            if (_purrVoicePlayer)
+                _purrVoicePlayer.muted = !lobbyView.localMicEnabled;
+            lobbyView.onLocalMicEnabledChanged += OnLocalMicEnabledChanged;
+
+            if (_purrVoicePlayer && _lipSync)
+                lobbyView.EnableMicrophoneFeature();
+        }
+
         private void OnLocalMicEnabledChanged(bool micEnabled)
         {
-            _purrVoicePlayer.muted = !micEnabled;
+            if (_purrVoicePlayer)
+                _purrVoicePlayer.muted = !micEnabled;
         }
 #endif
 
@@ -75,6 +89,10 @@ namespace PurrNet.Lobby
             else PurrLogger.LogError($"Player `{playerId}` not found in lobby.");
 
             playerUIEntry = lobbyView.TryGetPlayerEntry(player, out var entry) ? entry : null;
+
+#if PURR_VOICE
+            WireLocalVoice();
+#endif
         }
 
         private void OnEnable()
@@ -84,6 +102,7 @@ namespace PurrNet.Lobby
             {
                 _lipSync.onPhonemeChanged += OnPhonemeChanged;
             }
+            WireLocalVoice();
 #endif
         }
 
@@ -92,8 +111,11 @@ namespace PurrNet.Lobby
 #if PURR_VOICE
             if (_lipSync)
                 _lipSync.onPhonemeChanged -= OnPhonemeChanged;
-            if (lobbyView)
+            if (_voiceWired && lobbyView)
+            {
                 lobbyView.onLocalMicEnabledChanged -= OnLocalMicEnabledChanged;
+                _voiceWired = false;
+            }
 #endif
         }
 

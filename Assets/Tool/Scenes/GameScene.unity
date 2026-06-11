@@ -519,8 +519,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.NetworkManager
   _stopPlayingOnDisconnect: 0
-  _startServerFlags: 0
-  _startClientFlags: 0
+  _startServerFlags: 1
+  _startClientFlags: 1
   _cookieScope: 1
   _dontDestroyOnLoad: 0
   _transport: {fileID: 1349514671}

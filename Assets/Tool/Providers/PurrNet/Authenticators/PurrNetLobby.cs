@@ -183,7 +183,7 @@ namespace PurrNet.Lobby.PurrNet
         {
             if (!isOwner)
                 return;
-            _ = _service.KickAsync(_lastData.id, player.id);
+            _service.KickAsync(_lastData.id, player.id).Forget("[PurrNetLobby] Kick failed");
         }
 
         public void SetIsLobbyJoinable(bool isJoinable)
@@ -191,12 +191,12 @@ namespace PurrNet.Lobby.PurrNet
             if (!isOwner)
                 return;
             _lastData.joinable = isJoinable;
-            _ = _service.SetJoinableAsync(_lastData.id, isJoinable);
+            _service.SetJoinableAsync(_lastData.id, isJoinable).Forget("[PurrNetLobby] SetJoinable failed");
         }
 
         public void LeaveLobby()
         {
-            _ = _service.LeaveAsync(_lastData.id);
+            _service.LeaveAsync(_lastData.id).Forget("[PurrNetLobby] Leave failed");
             Dispose();
         }
 
@@ -211,6 +211,7 @@ namespace PurrNet.Lobby.PurrNet
             _connection.onSnapshot -= OnLobbySnapshot;
             _connection.onPlayerMetadataUpdated -= OnPlayerMetadataUpdated;
             _connection.onMetadataUpdated -= OnMetadataUpdated;
+            _chat.Dispose();
             _connection.Disconnect();
         }
 

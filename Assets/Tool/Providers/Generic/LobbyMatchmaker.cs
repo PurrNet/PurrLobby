@@ -45,7 +45,11 @@ namespace PurrNet.Lobby.GenericProviders
                     var lobby = await FindOrCreateLobby(request);
 
                     if (_cancelled)
+                    {
+                        // The cancel landed while we were joining; don't squat in the lobby.
+                        lobby?.LeaveLobby();
                         return;
+                    }
 
                     if (lobby == null)
                     {

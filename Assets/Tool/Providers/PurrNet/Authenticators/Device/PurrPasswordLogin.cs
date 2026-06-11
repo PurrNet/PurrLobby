@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections;
-using System.Security.Cryptography;
-using System.Text;
+using System.Threading.Tasks;
 using PurrNet.Services;
 using PurrNet.UI;
 using UnityEngine;
@@ -20,23 +19,12 @@ namespace PurrNet.Lobby.PurrNet
         [SerializeField] private LoadingOverlay _loadingOverlay;
         [SerializeField] private CloseParentView _closeParentView;
 
-        private string _deviceId;
         private Action _onDone;
+        private bool _busy;
 
         protected override IEnumerator OnEnterTransition() => ViewTransitions.SlideFromBottom(_content);
 
         protected override IEnumerator OnExitTransition() => ViewTransitions.SlideToTop(_content);
-
-        private void Awake()
-        {
-#if UNITY_EDITOR
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(Application.dataPath));
-            _deviceId = BitConverter.ToString(bytes).Replace("-", "")[..32].ToLowerInvariant();
-#else
-            _deviceId = SystemInfo.deviceUniqueIdentifier;
-#endif
-        }
 
         public void Setup(Action onDone)
         {
@@ -46,9 +34,36 @@ namespace PurrNet.Lobby.PurrNet
                 _username.text = PlayerPrefs.GetString(KEY_PREFIX + nameof(_username), "");
         }
 
-        public void Register() => Login();
+        public void Register()
+        {
+            var auth = PurrServices.instance.auth;
+            HandleAuthAsync(() => auth.RegisterAsync(_username.text, _password.text, _username.text), "Registration Failed");
+        }
 
         public void Login()
+        {
+            var auth = PurrServices.instance.auth;
+            HandleAuthAsync(() => auth.LoginWithPasswordAsync(_username.text, _password.text), "Login Failed");
+        }
+
+        private bool ValidateInputs()
+        {
+            if (string.IsNullOrWhiteSpace(_username.text))
+            {
+                Toaster.Push("Missing Username", "Enter a username first.", true);
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(_password.text))
+            {
+                Toaster.Push("Missing Password", "Enter a password first.", true);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void SaveRememberMe()
         {
             if (_rememberMe.value)
             {
@@ -60,23 +75,26 @@ namespace PurrNet.Lobby.PurrNet
                 PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_username));
                 PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_rememberMe));
             }
-
-            HandleLoginAsync();
         }
 
-        private async void HandleLoginAsync()
+        private async void HandleAuthAsync(Func<Task<AuthResult>> authenticate, string failureTitle)
         {
+            if (_busy || !ValidateInputs())
+                return;
+
+            SaveRememberMe();
+
             try
             {
+                _busy = true;
                 _closeParentView.canClose = false;
                 _loadingOverlay.Toggle(true);
 
-                var services = PurrServices.instance;
-                var response = await services.auth.LoginAsync(_deviceId, _username.text);
+                var response = await authenticate();
 
                 if (!response.success)
                 {
-                    Toaster.Push("Login Failed", response.error, true);
+                    Toaster.Push(failureTitle, response.error, true);
                     return;
                 }
 
@@ -85,10 +103,12 @@ namespace PurrNet.Lobby.PurrNet
             }
             catch (Exception e)
             {
+                Toaster.Push(failureTitle, e.Message, true);
                 Debug.LogException(e);
             }
             finally
             {
+                _busy = false;
                 _closeParentView.canClose = true;
                 _loadingOverlay.Toggle(false);
             }

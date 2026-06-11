@@ -38,7 +38,7 @@ namespace PurrNet.Lobby.Nakama
 
         public override void Logout()
         {
-            CancelActiveTicketSilently();
+            CancelActiveTicketAsync().Forget($"[{name}] Failed to cancel matchmaker ticket on logout");
             UnsubscribeMatchmaker();
         }
 
@@ -49,31 +49,24 @@ namespace PurrNet.Lobby.Nakama
             _activeNakamaTicketId = null;
         }
 
-        private async void CancelActiveTicketSilently()
+        private async Task CancelActiveTicketAsync()
         {
+            var nakamaTicket = _activeNakamaTicketId;
+            _activeTicket = null;
+            _activeNakamaTicketId = null;
+
+            if (string.IsNullOrEmpty(nakamaTicket))
+                return;
+
             try
             {
-                var nakamaTicket = _activeNakamaTicketId;
-                _activeTicket = null;
-                _activeNakamaTicketId = null;
-
-                if (string.IsNullOrEmpty(nakamaTicket))
-                    return;
-
-                try
-                {
-                    var socket = NakamaConnection.instance.socket;
-                    if (socket is { IsConnected: true })
-                        await socket.RemoveMatchmakerAsync(nakamaTicket);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"[{name}] Failed to cancel matchmaker ticket on logout: {ex.Message}");
-                }
+                var socket = NakamaConnection.instance.socket;
+                if (socket is { IsConnected: true })
+                    await socket.RemoveMatchmakerAsync(nakamaTicket);
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Debug.LogWarning($"[{name}] Failed to cancel matchmaker ticket: {ex.Message}");
             }
         }
 
@@ -87,6 +80,10 @@ namespace PurrNet.Lobby.Nakama
                     onComplete?.Invoke(MatchmakingTicketResponse.Failure("Nakama socket is not connected."));
                     return;
                 }
+
+                // A previous ticket would keep matching server-side; drop it first.
+                if (!string.IsNullOrEmpty(_activeNakamaTicketId))
+                    await CancelActiveTicketAsync();
 
                 EnsureMatchmakerSubscribed();
 

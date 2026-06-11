@@ -428,7 +428,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrServices.Runtime::PurrNet.Services.PurrServices
   _serverUrl: https://purrnet.dev/
-  _apiKey: pk_pub_cbb27721ac9a9b1bd8abb2469ce68554ad8688e7aea20fe304ae067cf10ab096
+  _apiKey: pk_pub_1f1501ee74cc86321512e96bf9a0d8f49f279d8206b35e206dde429056dd7e59
 --- !u!1 &1058843092
 GameObject:
   m_ObjectHideFlags: 0
