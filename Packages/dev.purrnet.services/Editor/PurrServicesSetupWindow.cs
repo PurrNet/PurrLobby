@@ -7,9 +7,6 @@ namespace PurrNet.Services.Editor
 {
     public class PurrServicesSetupWindow : EditorWindow
     {
-        static string LinkedProjectIdKey => "PurrServices_LinkedProjectId_" + Application.dataPath;
-        static string LinkedProjectNameKey => "PurrServices_LinkedProjectName_" + Application.dataPath;
-
         PurrUserProfile _profile;
         ProjectInfo[] _projects;
         string _error;
@@ -108,8 +105,8 @@ namespace PurrNet.Services.Editor
             _profile.Refresh();
             PurrPackageManagerAuth.onAuthChanged += OnAuthChanged;
 
-            _linkedProjectId = EditorPrefs.GetString(LinkedProjectIdKey, "");
-            _linkedProjectName = EditorPrefs.GetString(LinkedProjectNameKey, "");
+            _linkedProjectId = PurrServicesProjectLink.projectId;
+            _linkedProjectName = PurrServicesProjectLink.projectName;
 
             if (PurrPackageManagerAuth.HasApiKey())
                 RefreshProjects();
@@ -152,6 +149,7 @@ namespace PurrNet.Services.Editor
                             if (_projects[i].id == _linkedProjectId)
                             {
                                 _selectedIndex = i;
+                                PurrServicesProjectLink.Link(_projects[i]);
                                 break;
                             }
                         }
@@ -233,16 +231,14 @@ namespace PurrNet.Services.Editor
         {
             _linkedProjectId = project.id;
             _linkedProjectName = project.name;
-            EditorPrefs.SetString(LinkedProjectIdKey, project.id);
-            EditorPrefs.SetString(LinkedProjectNameKey, project.name);
+            PurrServicesProjectLink.Link(project);
         }
 
         void UnlinkProject()
         {
             _linkedProjectId = "";
             _linkedProjectName = "";
-            EditorPrefs.DeleteKey(LinkedProjectIdKey);
-            EditorPrefs.DeleteKey(LinkedProjectNameKey);
+            PurrServicesProjectLink.Unlink();
         }
 
         void OnGUI()

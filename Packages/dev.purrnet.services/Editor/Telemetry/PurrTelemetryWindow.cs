@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
 using System.Text;
 using PurrNet.Editor;
 using PurrNet.Services.Telemetry;
-using PurrNet.Utils;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -13,9 +11,6 @@ namespace PurrNet.Services.Editor.Telemetry
     public class PurrTelemetryWindow : EditorWindow
     {
         PurrUserProfile _profile;
-        ProjectInfo[] _projects;
-        string _error;
-        bool _isBusy;
         Vector2 _scrollPos;
         Texture2D _logo;
 
@@ -37,7 +32,7 @@ namespace PurrNet.Services.Editor.Telemetry
             var window = GetWindow<PurrTelemetryWindow>();
             var icon = Resources.Load<Texture2D>("purricon");
             window.titleContent = new GUIContent("PurrTelemetry", icon);
-            window.minSize = new Vector2(460, 360);
+            window.minSize = new Vector2(460, 300);
         }
 
         void OnEnable()
@@ -46,9 +41,6 @@ namespace PurrNet.Services.Editor.Telemetry
             _profile = new PurrUserProfile(Repaint);
             _profile.Refresh();
             PurrPackageManagerAuth.onAuthChanged += OnAuthChanged;
-
-            if (PurrPackageManagerAuth.IsLoggedIn)
-                RefreshProjects();
         }
 
         void OnDisable()
@@ -59,10 +51,6 @@ namespace PurrNet.Services.Editor.Telemetry
         void OnAuthChanged()
         {
             _profile.Refresh();
-            _projects = null;
-            _error = null;
-            if (PurrPackageManagerAuth.IsLoggedIn)
-                RefreshProjects();
             Repaint();
         }
 
@@ -85,40 +73,6 @@ namespace PurrNet.Services.Editor.Telemetry
                 wordWrap = true,
                 normal = { textColor = new Color(0.78f, 0.78f, 0.78f, 1f) }
             };
-        }
-
-        async void RefreshProjects()
-        {
-            if (_isBusy) return;
-            _isBusy = true;
-            _error = null;
-
-            try
-            {
-                if (!PurrPackageManagerAuth.TryGetApiKey(out var apiKey))
-                {
-                    _projects = null;
-                    return;
-                }
-
-                var result = await PurrServicesAPI.GetProjects(apiKey);
-                if (result.Success)
-                    _projects = result.Value.projects;
-                else
-                {
-                    _error = result.Error;
-                    _projects = null;
-                }
-            }
-            catch (Exception e)
-            {
-                _error = e.Message;
-            }
-            finally
-            {
-                _isBusy = false;
-                Repaint();
-            }
         }
 
         void OnGUI()
@@ -148,21 +102,15 @@ namespace PurrNet.Services.Editor.Telemetry
             var labelRect = new Rect(logoRect.xMax + 8, headerRect.y + 4, 220, 20);
             GUI.Label(labelRect, "PurrTelemetry", new GUIStyle(EditorStyles.boldLabel) { fontSize = 14 });
 
-            if (PurrTelemetrySettings.isLinked)
+            if (PurrTelemetrySettings.isLinked && !string.IsNullOrEmpty(PurrTelemetrySettings.projectName))
             {
                 var linkedRect = new Rect(labelRect.x, labelRect.yMax - 2, 220, 16);
                 GUI.Label(linkedRect, PurrTelemetrySettings.projectName, _smallLabelStyle);
             }
 
-            var refreshRect = new Rect(headerRect.xMax - 78, headerRect.y + 10, 68, 22);
-            GUI.enabled = !_isBusy;
-            if (GUI.Button(refreshRect, "Refresh"))
-                RefreshProjects();
-            GUI.enabled = true;
-
             if (_profile != null)
             {
-                var profileAnchor = new Rect(headerRect.x, headerRect.y + 10, refreshRect.x - 4 - headerRect.x, 22);
+                var profileAnchor = new Rect(headerRect.x, headerRect.y + 10, headerRect.xMax - 10 - headerRect.x, 22);
                 _profile.DrawProfileBar(profileAnchor, _smallLabelStyle);
             }
         }
@@ -181,25 +129,21 @@ namespace PurrNet.Services.Editor.Telemetry
             DrawLinkedProjectSummary();
 
             EditorGUILayout.Space(8);
+            DrawPurrServicesPrompt();
 
-            if (PurrPackageManagerAuth.IsLoggedIn)
-                DrawProjectPicker();
-            else
-                DrawLoginPrompt();
+            if (!PurrTelemetrySettings.isLinked)
+                return;
 
-            if (PurrTelemetrySettings.isLinked)
+            EditorGUILayout.Space(8);
+            using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.Space(8);
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    GUI.color = ACCENT_COLOR;
-                    if (GUILayout.Button("Send Test Event", GUILayout.Height(24)))
-                        SendTestEvent();
-                    GUI.color = Color.white;
+                GUI.color = ACCENT_COLOR;
+                if (GUILayout.Button("Send Test Event", GUILayout.Height(24)))
+                    SendTestEvent();
+                GUI.color = Color.white;
 
-                    if (GUILayout.Button("Open Dashboard", GUILayout.Height(24)))
-                        Application.OpenURL($"{DASHBOARD_URL}/{PurrTelemetrySettings.projectId}/telemetry");
-                }
+                if (GUILayout.Button("Open Dashboard", GUILayout.Height(24)))
+                    Application.OpenURL($"{DASHBOARD_URL}/{PurrTelemetrySettings.projectId}/telemetry");
             }
         }
 
@@ -215,91 +159,31 @@ namespace PurrNet.Services.Editor.Telemetry
             {
                 using (new EditorGUILayout.VerticalScope())
                 {
+                    var projectName = string.IsNullOrEmpty(PurrTelemetrySettings.projectName)
+                        ? "Linked project"
+                        : PurrTelemetrySettings.projectName;
+
                     GUI.color = LINKED_COLOR;
-                    EditorGUILayout.LabelField(PurrTelemetrySettings.projectName, EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(projectName, EditorStyles.boldLabel);
                     GUI.color = Color.white;
                     EditorGUILayout.LabelField($"id: {PurrTelemetrySettings.projectId}", _smallLabelStyle);
                 }
             }
         }
 
-        void DrawLoginPrompt()
+        void DrawPurrServicesPrompt()
         {
-            EditorGUILayout.HelpBox(
-                "Login with Discord to change which project this Unity project sends telemetry to. " +
-                "Runtime sends and Send Test Event work for everyone using the committed link.",
-                MessageType.Info);
+            var message = PurrTelemetrySettings.isLinked
+                ? "Project linking is handled by PurrServices."
+                : "Link a project from PurrServices to enable telemetry.";
+
+            EditorGUILayout.HelpBox(message, MessageType.Info);
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Login with Discord", GUILayout.Height(22), GUILayout.Width(180)))
-                    PurrPackageManagerAuth.Login();
-            }
-        }
-
-        void DrawProjectPicker()
-        {
-            if (_error != null)
-            {
-                EditorGUILayout.HelpBox(_error, MessageType.Error);
-                if (GUILayout.Button("Retry", GUILayout.Height(22)))
-                    RefreshProjects();
-                return;
-            }
-
-            if (_isBusy && _projects == null)
-            {
-                EditorGUILayout.LabelField("Loading projects...", _bodyStyle);
-                return;
-            }
-
-            if (_projects == null || _projects.Length == 0)
-            {
-                EditorGUILayout.LabelField("No projects yet. Create one from the PurrServices window.", _bodyStyle);
                 if (GUILayout.Button("Open PurrServices", GUILayout.Height(22), GUILayout.Width(160)))
                     PurrServicesSetupWindow.ShowWindow();
-                return;
             }
-
-            int currentIndex = 0;
-            string[] names = new[] { "—" }.Concat(_projects.Select(p => p.name)).ToArray();
-            var linkedId = PurrTelemetrySettings.projectId;
-            if (!string.IsNullOrEmpty(linkedId))
-            {
-                for (int i = 0; i < _projects.Length; i++)
-                {
-                    if (_projects[i].id == linkedId)
-                    {
-                        currentIndex = i + 1;
-                        break;
-                    }
-                }
-            }
-
-            int picked = EditorGUILayout.Popup("Change Linked Project", currentIndex, names);
-            if (picked != currentIndex)
-            {
-                if (picked == 0)
-                    UnlinkProject();
-                else
-                    LinkProject(_projects[picked - 1]);
-            }
-        }
-
-        void LinkProject(ProjectInfo project)
-        {
-            ApplicationConstants.Set(PurrTelemetrySettings.KeyProjectId, project.id);
-            ApplicationConstants.Set(PurrTelemetrySettings.KeyPublicKey, project.publicKey);
-            ApplicationConstants.Set(PurrTelemetrySettings.KeyProjectName, project.name);
-            Repaint();
-        }
-
-        void UnlinkProject()
-        {
-            ApplicationConstants.Delete(PurrTelemetrySettings.KeyProjectId);
-            ApplicationConstants.Delete(PurrTelemetrySettings.KeyPublicKey);
-            ApplicationConstants.Delete(PurrTelemetrySettings.KeyProjectName);
-            Repaint();
         }
 
         async void SendTestEvent()

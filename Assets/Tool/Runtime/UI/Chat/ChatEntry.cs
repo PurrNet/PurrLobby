@@ -23,7 +23,7 @@ namespace PurrNet.Lobby
                 _message.text = message;
 
             if (_avatarGraphic && _avatarLetter && player != null)
-                IPlayer.SetupAvatar(player, _avatarGraphic, _avatarLetter);
+                PlayerAvatarUI.SetupAvatar(player, _avatarGraphic, _avatarLetter);
         }
 
         public void AppendNewMessage(string message)

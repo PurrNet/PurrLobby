@@ -1,5 +1,5 @@
 {
-    "name": "PurrLobby.PurrNet",
+    "name": "PurrNet.Lobby.PurrNet",
     "rootNamespace": "PurrNet.Lobby.PurrNet",
     "references": [
         "GUID:fb5aa70e09e0db742957de215ef97d5b",

@@ -1,39 +1,54 @@
 using PurrNet.UI;
 using UnityEngine;
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
+using UnityEngine.Events;
 
 namespace PurrNet.Lobby
 {
+    /// <summary>
+    /// Sole Escape owner in the game scene: opens the pause menu when nothing is
+    /// on the stack, closes it when it is topmost, and defers to whatever other
+    /// view is topmost (its own back handler owns the press).
+    /// </summary>
     public class PushPauseMenu : MonoBehaviour
     {
         [SerializeField] private ViewStack _stack;
 
-        static bool WasEscapePressed()
+        [SerializeField] private UnityEvent _onPauseOpened;
+        [SerializeField] private UnityEvent _onPauseClosed;
+
+        private void OnEnable()
         {
-#if ENABLE_INPUT_SYSTEM
-            var kb = Keyboard.current;
-            return kb != null && kb.escapeKey.wasPressedThisFrame;
-#else
-            return Input.GetKeyDown(KeyCode.Escape);
-#endif
+            PauseMenuView.onOpened += OnPauseOpened;
+            PauseMenuView.onClosed += OnPauseClosed;
         }
+
+        private void OnDisable()
+        {
+            PauseMenuView.onOpened -= OnPauseOpened;
+            PauseMenuView.onClosed -= OnPauseClosed;
+        }
+
+        private void OnPauseOpened() => _onPauseOpened?.Invoke();
+
+        private void OnPauseClosed() => _onPauseClosed?.Invoke();
 
         private void Update()
         {
-            if (WasEscapePressed())
+            var top = _stack.top;
+
+            if (top is PauseMenuView pause)
             {
-                var existing = _stack.GetFirstView<PauseMenuView>();
-                if (existing)
-                {
-                    _stack.Pop(existing);
-                }
-                else
-                {
-                    _stack.Push<PauseMenuView>();
-                }
+                if ((BackInput.WasPausePressed() || BackInput.WasBackPressed()) && BackInput.TryConsume())
+                    _stack.Pop(pause);
             }
+            else if (top == null)
+            {
+                if (BackInput.WasPausePressed() && BackInput.TryConsume())
+                    _stack.Push<PauseMenuView>();
+            }
+            // else: another view (context menu, dialog, consumer view) is topmost.
+            // Its own back handler owns this press; the BackInput latch guarantees
+            // no double-consume regardless of Update order.
         }
     }
 }

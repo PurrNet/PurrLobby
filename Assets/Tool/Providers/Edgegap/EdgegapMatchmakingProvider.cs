@@ -4,11 +4,10 @@ using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using PurrNet.UI;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace PurrNet.Lobby.PurrNet
+namespace PurrNet.Lobby.Edgegap
 {
     /// <summary>
     /// Matchmaking backed by Edgegap's managed matchmaker.
@@ -43,119 +42,76 @@ namespace PurrNet.Lobby.PurrNet
         [Tooltip("Give up if no host is assigned within this many milliseconds.")]
         [SerializeField] private int _timeoutMs = 120_000;
 
-        private MatchmakingTicket? _activeTicket;
-        private string _activeTicketId;
         private bool _cancelled;
 
-        public override Task Login(ViewStack stack) => Task.CompletedTask;
-
-        public override void Logout()
+        public override async Task Logout()
         {
             _cancelled = true;
-            var ticketId = _activeTicketId;
-            _activeTicket = null;
-            _activeTicketId = null;
-            _ = DeleteTicket(ticketId);
+            var ticketId = activeTicket?.ticketId;
+
+            if (activeTicket is { } ticket)
+                TryConsumeActiveTicket(ticket);
+
+            await DeleteTicket(ticketId);
         }
 
-        public override async void StartMatchmaking(MatchmakingRequest request, Action<MatchmakingTicketResponse> onComplete)
+        public override async Task<MatchmakingTicketResponse> StartMatchmaking(MatchmakingRequest request)
         {
+            if (string.IsNullOrEmpty(_matchmakerUrl))
+                return MatchmakingTicketResponse.Failure($"[{name}] Matchmaker URL is not set.");
+
+            if (_gameAllocator == null)
+                return MatchmakingTicketResponse.Failure(
+                    $"[{name}] No Edgegap Game Allocator assigned. Pair one so the matchmaker knows which transport and port to connect through.");
+
+            _cancelled = false;
+
+            var profile = string.IsNullOrEmpty(request.gameMode) ? _defaultProfile : request.gameMode;
+
             try
             {
-                if (string.IsNullOrEmpty(_matchmakerUrl))
+                var body = JsonConvert.SerializeObject(new TicketRequest
                 {
-                    onComplete?.Invoke(MatchmakingTicketResponse.Failure($"[{name}] Matchmaker URL is not set."));
-                    return;
-                }
+                    profile = profile,
+                    attributes = request.attributes ?? new Dictionary<string, string>(),
+                    player_ip = null
+                });
 
-                if (_gameAllocator == null)
-                {
-                    onComplete?.Invoke(MatchmakingTicketResponse.Failure(
-                        $"[{name}] No Edgegap Game Allocator assigned. Pair one so the matchmaker knows which transport and port to connect through."));
-                    return;
-                }
+                var post = await SendAsync(UnityWebRequest.kHttpVerbPOST, TicketsUrl(), body);
+                if (!post.ok)
+                    return MatchmakingTicketResponse.Failure($"Failed to create ticket: {post.error}");
 
-                _cancelled = false;
-                _activeTicket = null;
-                _activeTicketId = null;
+                var created = JsonConvert.DeserializeObject<TicketResponse>(post.body);
+                if (created == null || string.IsNullOrEmpty(created.id))
+                    return MatchmakingTicketResponse.Failure("Matchmaker returned a ticket without an id.");
 
-                var profile = string.IsNullOrEmpty(request.gameMode) ? _defaultProfile : request.gameMode;
+                var ticket = BeginTicket(created.id);
 
-                MatchmakingTicket ticket;
+                // Results flow through onMatchFound/onMatchmakingError as the poll progresses.
+                PollUntilAssigned(ticket).Forget($"[{name}] Ticket polling failed");
 
-                try
-                {
-                    var body = JsonConvert.SerializeObject(new TicketRequest
-                    {
-                        profile = profile,
-                        attributes = request.attributes ?? new Dictionary<string, string>(),
-                        player_ip = null
-                    });
-
-                    var post = await SendAsync(UnityWebRequest.kHttpVerbPOST, TicketsUrl(), body);
-                    if (!post.ok)
-                    {
-                        onComplete?.Invoke(MatchmakingTicketResponse.Failure($"Failed to create ticket: {post.error}"));
-                        return;
-                    }
-
-                    var created = JsonConvert.DeserializeObject<TicketResponse>(post.body);
-                    if (created == null || string.IsNullOrEmpty(created.id))
-                    {
-                        onComplete?.Invoke(MatchmakingTicketResponse.Failure("Matchmaker returned a ticket without an id."));
-                        return;
-                    }
-
-                    ticket = new MatchmakingTicket { ticketId = created.id };
-                    _activeTicket = ticket;
-                    _activeTicketId = created.id;
-
-                    onComplete?.Invoke(MatchmakingTicketResponse.Success(ticket));
-                    RaiseStatusChanged(ticket, MatchmakingStatus.Searching);
-                }
-                catch (Exception e)
-                {
-                    onComplete?.Invoke(MatchmakingTicketResponse.Failure(e.Message));
-                    return;
-                }
-
-                await PollUntilAssigned(ticket);
+                return MatchmakingTicketResponse.Success(ticket);
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
-                onComplete?.Invoke(MatchmakingTicketResponse.Failure($"Unexpected error: {e.Message}"));
+                return MatchmakingTicketResponse.Failure(e.Message);
             }
         }
 
-        public override async void CancelMatchmaking(MatchmakingTicket ticket, Action<APIResponse> onComplete)
+        public override async Task<APIResponse> CancelMatchmaking(MatchmakingTicket ticket)
         {
-            try
-            {
-                if (_activeTicket == null || _activeTicket.Value.ticketId != ticket.ticketId)
-                {
-                    onComplete?.Invoke(APIResponse.Failure("No active matchmaking with that ticket."));
-                    return;
-                }
+            if (!TryConsumeActiveTicket(ticket))
+                return APIResponse.Failure("No active matchmaking with that ticket.");
 
-                var ticketId = _activeTicketId;
-                _activeTicket = null;
-                _activeTicketId = null;
-                _cancelled = true;
+            _cancelled = true;
 
-                var delete = await DeleteTicket(ticketId);
+            var delete = await DeleteTicket(ticket.ticketId);
 
-                RaiseStatusChanged(ticket, MatchmakingStatus.Cancelled);
+            CancelLocally(ticket);
 
-                onComplete?.Invoke(delete.ok
-                    ? APIResponse.Success()
-                    : APIResponse.Failure(delete.error));
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                onComplete?.Invoke(APIResponse.Failure($"Unexpected error: {e.Message}"));
-            }
+            return delete.ok
+                ? APIResponse.Success()
+                : APIResponse.Failure(delete.error);
         }
 
         /// <summary>Polls the ticket until a host is assigned, the ticket is cancelled, or it times out.</summary>
@@ -168,7 +124,7 @@ namespace PurrNet.Lobby.PurrNet
                 await Task.Delay(_pollIntervalMs);
                 elapsed += _pollIntervalMs;
 
-                if (IsStale(ticket))
+                if (IsTicketStale(ticket))
                     return;
 
                 (bool ok, string body, string error) poll;
@@ -178,17 +134,17 @@ namespace PurrNet.Lobby.PurrNet
                 }
                 catch (Exception e)
                 {
-                    if (!IsStale(ticket))
-                        FailTicket(ticket, e.Message);
+                    if (!IsTicketStale(ticket))
+                        FailMatch(ticket, e.Message);
                     return;
                 }
 
-                if (IsStale(ticket))
+                if (IsTicketStale(ticket))
                     return;
 
                 if (!poll.ok)
                 {
-                    FailTicket(ticket, $"Failed to poll ticket: {poll.error}");
+                    FailMatch(ticket, $"Failed to poll ticket: {poll.error}");
                     return;
                 }
 
@@ -199,7 +155,7 @@ namespace PurrNet.Lobby.PurrNet
                 }
                 catch (Exception e)
                 {
-                    FailTicket(ticket, $"Could not read ticket response: {e.Message}");
+                    FailMatch(ticket, $"Could not read ticket response: {e.Message}");
                     return;
                 }
 
@@ -210,9 +166,8 @@ namespace PurrNet.Lobby.PurrNet
                         return;
 
                     case "CANCELLED":
-                        _activeTicket = null;
-                        _activeTicketId = null;
-                        RaiseStatusChanged(ticket, MatchmakingStatus.Cancelled);
+                        TryConsumeActiveTicket(ticket);
+                        CancelLocally(ticket);
                         return;
 
                     default:
@@ -221,45 +176,32 @@ namespace PurrNet.Lobby.PurrNet
                 }
             }
 
-            if (!IsStale(ticket))
-                FailTicket(ticket, $"Matchmaking timed out after {_timeoutMs / 1000}s.");
+            if (!IsTicketStale(ticket))
+                FailMatch(ticket, $"Matchmaking timed out after {_timeoutMs / 1000}s.");
         }
 
-        private bool IsStale(MatchmakingTicket ticket) =>
-            _cancelled || _activeTicket?.ticketId != ticket.ticketId;
+        private bool IsTicketStale(in MatchmakingTicket ticket) => _cancelled || IsStale(ticket);
 
         private void CompleteTicket(MatchmakingTicket ticket, TicketResponse status)
         {
-            _activeTicket = null;
-            _activeTicketId = null;
-
             if (status.assignment == null)
             {
-                FailTicket(ticket, "Host was assigned but the matchmaker returned no assignment.");
+                FailMatch(ticket, "Host was assigned but the matchmaker returned no assignment.");
                 return;
             }
 
             if (!TryBuildConnection(status.assignment, ticket.ticketId, out var connection, out var error))
             {
-                FailTicket(ticket, error);
+                FailMatch(ticket, error);
                 return;
             }
 
-            RaiseStatusChanged(ticket, MatchmakingStatus.Found);
-            RaiseMatchFound(ticket, new MatchResult
+            CompleteMatch(ticket, new MatchResult
             {
                 lobby = null,
                 connection = connection,
                 isHost = false
             });
-        }
-
-        private void FailTicket(MatchmakingTicket ticket, string error)
-        {
-            _activeTicket = null;
-            _activeTicketId = null;
-            RaiseMatchmakingError(ticket, error);
-            RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
         }
 
         private bool TryBuildConnection(Assignment assignment, string ticketId, out ConnectionInfo connection, out string error)

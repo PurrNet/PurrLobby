@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nakama;
-using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrNet.Lobby.Nakama
@@ -11,49 +10,39 @@ namespace PurrNet.Lobby.Nakama
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Matchmaker", order = -202)]
     public class NakamaMatchmakingProvider : MatchmakingProvider
     {
-        [SerializeField] private NakamaSessionProvider _sessionProvider;
-
         [Tooltip("Minimum number of users that must match before Nakama forms a match.")]
         [SerializeField] private int _minCount = 2;
 
         [Tooltip("Maximum number of users in a single match.")]
         [SerializeField] private int _maxCount = 4;
 
-        private MatchmakingTicket? _activeTicket;
         private string _activeNakamaTicketId;
         private bool _matchmakerSubscribed;
 
-        public override async Task Login(ViewStack stack)
+        public override Task Initialize()
         {
-            if (_sessionProvider == null)
-            {
-                Debug.LogError($"[{name}] NakamaSessionProvider is not assigned.");
-                return;
-            }
-
-            ResetState();
-            await _sessionProvider.Login(stack);
+            // Detach any handler left over from a previous menu boot before
+            // resubscribing — Initialize runs on every return to the menu.
+            UnsubscribeMatchmaker();
+            _activeNakamaTicketId = null;
             EnsureMatchmakerSubscribed();
+            return Task.CompletedTask;
         }
 
-        public override void Logout()
+        public override async Task Logout()
         {
-            CancelActiveTicketAsync().Forget($"[{name}] Failed to cancel matchmaker ticket on logout");
+            await CancelActiveTicketAsync();
             UnsubscribeMatchmaker();
         }
 
-        private void ResetState()
-        {
-            _matchmakerSubscribed = false;
-            _activeTicket = null;
-            _activeNakamaTicketId = null;
-        }
-
+        /// <summary>Silently drops the active ticket (no status events), cancelling it server-side.</summary>
         private async Task CancelActiveTicketAsync()
         {
             var nakamaTicket = _activeNakamaTicketId;
-            _activeTicket = null;
             _activeNakamaTicketId = null;
+
+            if (activeTicket is { } ticket)
+                TryConsumeActiveTicket(ticket);
 
             if (string.IsNullOrEmpty(nakamaTicket))
                 return;
@@ -70,16 +59,13 @@ namespace PurrNet.Lobby.Nakama
             }
         }
 
-        public override async void StartMatchmaking(MatchmakingRequest request, Action<MatchmakingTicketResponse> onComplete)
+        public override async Task<MatchmakingTicketResponse> StartMatchmaking(MatchmakingRequest request)
         {
             try
             {
                 var conn = NakamaConnection.instance;
                 if (!conn.isSocketConnected)
-                {
-                    onComplete?.Invoke(MatchmakingTicketResponse.Failure("Nakama socket is not connected."));
-                    return;
-                }
+                    return MatchmakingTicketResponse.Failure("Nakama socket is not connected.");
 
                 // A previous ticket would keep matching server-side; drop it first.
                 if (!string.IsNullOrEmpty(_activeNakamaTicketId))
@@ -90,50 +76,36 @@ namespace PurrNet.Lobby.Nakama
                 var (query, stringProps, numericProps) = BuildMatchmakerQuery(request);
                 var ticket = await conn.socket.AddMatchmakerAsync(query, _minCount, _maxCount, stringProps, numericProps);
 
-                var publicTicket = new MatchmakingTicket { ticketId = Guid.NewGuid().ToString() };
-                _activeTicket = publicTicket;
+                var publicTicket = BeginTicket();
                 _activeNakamaTicketId = ticket.Ticket;
 
-                onComplete?.Invoke(MatchmakingTicketResponse.Success(publicTicket));
-                RaiseStatusChanged(publicTicket, MatchmakingStatus.Searching);
+                return MatchmakingTicketResponse.Success(publicTicket);
             }
             catch (Exception ex)
             {
-                onComplete?.Invoke(MatchmakingTicketResponse.Failure(ex.Message));
+                return MatchmakingTicketResponse.Failure(ex.Message);
             }
         }
 
-        public override async void CancelMatchmaking(MatchmakingTicket ticket, Action<APIResponse> onComplete)
+        public override async Task<APIResponse> CancelMatchmaking(MatchmakingTicket ticket)
         {
+            if (!TryConsumeActiveTicket(ticket))
+                return APIResponse.Failure("No active matchmaking with that ticket.");
+
+            var nakamaTicket = _activeNakamaTicketId;
+            _activeNakamaTicketId = null;
+
             try
             {
-                if (_activeTicket == null || _activeTicket.Value.ticketId != ticket.ticketId)
-                {
-                    onComplete?.Invoke(APIResponse.Failure("No active matchmaking with that ticket."));
-                    return;
-                }
+                if (!string.IsNullOrEmpty(nakamaTicket))
+                    await NakamaConnection.instance.socket.RemoveMatchmakerAsync(nakamaTicket);
 
-                var nakamaTicket = _activeNakamaTicketId;
-                var publicTicket = _activeTicket.Value;
-                _activeTicket = null;
-                _activeNakamaTicketId = null;
-
-                try
-                {
-                    if (!string.IsNullOrEmpty(nakamaTicket))
-                        await NakamaConnection.instance.socket.RemoveMatchmakerAsync(nakamaTicket);
-
-                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Cancelled);
-                    onComplete?.Invoke(APIResponse.Success());
-                }
-                catch (Exception ex)
-                {
-                    onComplete?.Invoke(APIResponse.Failure(ex.Message));
-                }
+                CancelLocally(ticket);
+                return APIResponse.Success();
             }
             catch (Exception ex)
             {
-                onComplete?.Invoke(APIResponse.Failure(ex.Message));
+                return APIResponse.Failure(ex.Message);
             }
         }
 
@@ -158,49 +130,47 @@ namespace PurrNet.Lobby.Nakama
             _matchmakerSubscribed = false;
         }
 
-        private async void OnMatchmakerMatched(IMatchmakerMatched matched)
+        private void OnMatchmakerMatched(IMatchmakerMatched matched)
+        {
+            if (matched == null || activeTicket is not { } publicTicket)
+                return;
+
+            if (!string.IsNullOrEmpty(_activeNakamaTicketId) && matched.Ticket != _activeNakamaTicketId)
+                return;
+
+            _activeNakamaTicketId = null;
+
+            // Consume the ticket synchronously so a cancel landing during the async
+            // join fails cleanly instead of abandoning a silently-joined match.
+            TryConsumeActiveTicket(publicTicket);
+
+            HandleMatchedAsync(publicTicket, matched).Forget($"[{name}] Matchmaker join failed");
+        }
+
+        private async Task HandleMatchedAsync(MatchmakingTicket publicTicket, IMatchmakerMatched matched)
         {
             try
             {
-                if (matched == null || _activeTicket == null)
-                    return;
+                var conn = NakamaConnection.instance;
 
-                if (!string.IsNullOrEmpty(_activeNakamaTicketId) && matched.Ticket != _activeNakamaTicketId)
-                    return;
+                var match = await conn.socket.JoinMatchAsync(matched);
 
-                var publicTicket = _activeTicket.Value;
-                _activeTicket = null;
-                _activeNakamaTicketId = null;
+                var hostUserId = ResolveLowestUserId(matched);
+                var isHost = hostUserId == conn.session.UserId;
 
-                try
+                CompleteMatch(publicTicket, new MatchResult
                 {
-                    var conn = NakamaConnection.instance;
-
-                    var match = await conn.socket.JoinMatchAsync(matched);
-
-                    var hostUserId = ResolveLowestUserId(matched);
-                    var isHost = hostUserId == conn.session.UserId;
-
-                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Found);
-                    RaiseMatchFound(publicTicket, new MatchResult
+                    isHost = isHost,
+                    connection = new ConnectionInfo
                     {
-                        isHost = isHost,
-                        connection = new ConnectionInfo
-                        {
-                            serverAddress = match.Id,
-                            hostId = hostUserId,
-                        },
-                    });
-                }
-                catch (Exception ex)
-                {
-                    RaiseMatchmakingError(publicTicket, ex.Message);
-                    RaiseStatusChanged(publicTicket, MatchmakingStatus.Failed);
-                }
+                        serverAddress = match.Id,
+                        hostId = hostUserId,
+                    },
+                });
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.LogException(e);
+                FailMatch(publicTicket, ex.Message);
             }
         }
 

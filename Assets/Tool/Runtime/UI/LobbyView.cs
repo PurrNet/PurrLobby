@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace PurrNet.Lobby
     {
         public const string LOBBY_STATUS_STRING = "LOBBY_STATUS_STRING";
         public const string LOBBY_STATUS_DETAILS_STRING = "LOBBY_STATUS_DETAILS_STRING";
-        public const string LOBBY_CONN_INFO = "LOBBY_CONN_INFO";
+        public const string LOBBY_CONN_INFO = GameStartKeys.ConnInfo;
 
         [SerializeField] private RectTransform _content;
         [SerializeField] private PlayerEntry _playerPrefab;
@@ -121,7 +122,7 @@ namespace PurrNet.Lobby
                 }
                 case LOBBY_CONN_INFO:
                 {
-                    JoinGameAsync(value);
+                    JoinGame(value);
                     break;
                 }
             }
@@ -178,7 +179,7 @@ namespace PurrNet.Lobby
                     _lobbyStatusDetails.text = $"LOADING ...";
                     _lobby.lobbyData.SetData(LOBBY_STATUS_DETAILS_STRING, _lobbyStatusDetails.text);
 
-                    StartGameAsync();
+                    StartGame();
                     return;
                 }
 
@@ -201,7 +202,46 @@ namespace PurrNet.Lobby
             }
         }
 
-        private async void StartGameAsync()
+        private void StartGame()
+        {
+            LaunchGame(async loadingView =>
+            {
+                var joinInfo = await _orchestrator.gameAllocator.AllocateGame(lobby);
+                if (!this || _lobby == null)
+                    return;
+
+                if (!joinInfo.success)
+                    throw new Exception(joinInfo.error);
+
+                GameStartKeys.PublishConnectionInfo(_lobby, joinInfo.connection);
+
+                loadingView.Setup("Loading game ...");
+                await _orchestrator.gameAllocator.LoadGame(lobby);
+                if (!this || _lobby == null)
+                    return;
+
+                _orchestrator.gameAllocator.Connect(joinInfo.connection, true);
+            }).Forget("[LobbyView] StartGame failed");
+        }
+
+        private void JoinGame(string rawConnectionInfo)
+        {
+            LaunchGame(async loadingView =>
+            {
+                if (!GameStartKeys.TryReadConnectionInfo(rawConnectionInfo, out var info))
+                    throw new Exception("Received malformed connection info from the lobby.");
+
+                loadingView.Setup("Loading game ...");
+                await _orchestrator.gameAllocator.LoadGame(lobby);
+                if (!this || _lobby == null)
+                    return;
+
+                _orchestrator.gameAllocator.Connect(info, false);
+            }).Forget("[LobbyView] JoinGame failed");
+        }
+
+        /// <summary>Runs a launch flow behind a LoadingView; on failure resets the ready/countdown state.</summary>
+        private async Task LaunchGame(Func<LoadingView, Task> flow)
         {
             LoadingView loadingView = null;
 
@@ -210,32 +250,13 @@ namespace PurrNet.Lobby
                 loadingView = parentStack.Push<LoadingView>();
                 loadingView.Setup("Allocating game ...");
 
-                var joinInfo = await _orchestrator.gameAllocator.AllocateGame(lobby);
-                if (!this || _lobby == null)
-                    return;
-
-                if (!joinInfo.success)
-                    throw new Exception(joinInfo.error);
-
-                var connectionInfo = JsonUtility.ToJson(joinInfo.connection);
-                _lobby.lobbyData.SetData(LOBBY_CONN_INFO, connectionInfo);
-
-                loadingView.Setup("Loading game ...");
-                await _orchestrator.gameAllocator.LoadGame(lobby);
-                if (!this || _lobby == null)
-                    return;
-
-                _orchestrator.gameAllocator.Connect(joinInfo.connection, true);
+                await flow(loadingView);
             }
             catch (Exception e)
             {
                 Toaster.PushError("Failed to start game", e);
                 Debug.LogException(e, _orchestrator.gameAllocator);
-                ResetStatusLabels();
-                _wasAllReady = false;
-                _gameStarted = false;
-                _allReadyTimer = _timeToStartGame;
-                _lobby?.localPlayer?.SetReady(false);
+                ResetStartState();
             }
             finally
             {
@@ -244,39 +265,13 @@ namespace PurrNet.Lobby
             }
         }
 
-        private async void JoinGameAsync(string connectionInfo)
+        private void ResetStartState()
         {
-            LoadingView loadingView = null;
-
-            try
-            {
-                loadingView = parentStack.Push<LoadingView>();
-                loadingView.Setup("Allocating game ...");
-
-                var info = JsonUtility.FromJson<ConnectionInfo>(connectionInfo);
-
-                loadingView.Setup("Loading game ...");
-                await _orchestrator.gameAllocator.LoadGame(lobby);
-                if (!this || _lobby == null)
-                    return;
-
-                _orchestrator.gameAllocator.Connect(info, false);
-            }
-            catch (Exception e)
-            {
-                Toaster.PushError("Failed to start game", e);
-                Debug.LogException(e, _orchestrator.gameAllocator);
-                ResetStatusLabels();
-                _wasAllReady = false;
-                _gameStarted = false;
-                _allReadyTimer = _timeToStartGame;
-                _lobby?.localPlayer?.SetReady(false);
-            }
-            finally
-            {
-                if (loadingView)
-                    loadingView.PopMe();
-            }
+            ResetStatusLabels();
+            _wasAllReady = false;
+            _gameStarted = false;
+            _allReadyTimer = _timeToStartGame;
+            _lobby?.localPlayer?.SetReady(false);
         }
 
         public void ToggleMicrophone()

@@ -210,7 +210,7 @@ namespace PurrNet.Services.Telemetry
                 {
                     if (Application.isEditor && !_unauthorizedLogged)
                     {
-                        Debug.LogWarning("[PurrTelemetry] 401 Unauthorized. Re-link the project from Tools/PurrNet/PurrTelemetry.");
+                        Debug.LogWarning("[PurrTelemetry] 401 Unauthorized. Re-link the project from Tools/PurrNet/PurrServices.");
                         _unauthorizedLogged = true;
                     }
                     return;

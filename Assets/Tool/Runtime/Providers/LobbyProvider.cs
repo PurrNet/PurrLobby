@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrNet.Lobby
@@ -38,9 +37,14 @@ namespace PurrNet.Lobby
         /// </summary>
         public virtual LobbyCapabilities capabilities => LobbyCapabilities.All;
 
-        public abstract Task Login(ViewStack stack);
+        /// <summary>
+        /// Called once after the session provider has logged in. Providers needing
+        /// post-login setup override this; session login itself lives on <see cref="SessionProvider"/>.
+        /// </summary>
+        public virtual Task Initialize() => Task.CompletedTask;
 
-        public abstract void Logout();
+        /// <summary>Provider-local cleanup. Session logout lives on <see cref="SessionProvider"/>.</summary>
+        public virtual Task Logout() => Task.CompletedTask;
 
         public abstract Task<LobbyResponse> CreateLobby(LobbySettings settings);
 

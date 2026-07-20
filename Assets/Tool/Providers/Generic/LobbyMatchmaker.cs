@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrNet.Lobby.GenericProviders
@@ -12,89 +11,64 @@ namespace PurrNet.Lobby.GenericProviders
         [SerializeField] private LobbyProvider _lobbyProvider;
         [SerializeField] private string _lobbyNamePrefix = "Matchmaking";
 
-        private MatchmakingTicket? _activeTicket;
         private bool _cancelled;
 
-        public override async Task Login(ViewStack stack)
+        public override Task Logout()
         {
-            await _lobbyProvider.Login(stack);
+            return _lobbyProvider ? _lobbyProvider.Logout() : Task.CompletedTask;
         }
 
-        public override void Logout()
+        public override Task<MatchmakingTicketResponse> StartMatchmaking(MatchmakingRequest request)
         {
-            _lobbyProvider.Logout();
+            _cancelled = false;
+            var ticket = BeginTicket();
+
+            MatchIntoLobbyAsync(ticket, request).Forget($"[{name}] Matchmaking failed");
+
+            return Task.FromResult(MatchmakingTicketResponse.Success(ticket));
         }
 
-        public override async void StartMatchmaking(MatchmakingRequest request, Action<MatchmakingTicketResponse> onComplete)
+        public override Task<APIResponse> CancelMatchmaking(MatchmakingTicket ticket)
+        {
+            if (!TryConsumeActiveTicket(ticket))
+                return Task.FromResult(APIResponse.Failure("No active matchmaking with that ticket."));
+
+            _cancelled = true;
+            CancelLocally(ticket);
+            return Task.FromResult(APIResponse.Success());
+        }
+
+        private async Task MatchIntoLobbyAsync(MatchmakingTicket ticket, MatchmakingRequest request)
         {
             try
             {
-                var ticket = new MatchmakingTicket
+                var lobby = await FindOrCreateLobby(request);
+
+                if (_cancelled || IsStale(ticket))
                 {
-                    ticketId = Guid.NewGuid().ToString()
-                };
-
-                _activeTicket = ticket;
-                _cancelled = false;
-
-                onComplete?.Invoke(MatchmakingTicketResponse.Success(ticket));
-                RaiseStatusChanged(ticket, MatchmakingStatus.Searching);
-
-                try
-                {
-                    var lobby = await FindOrCreateLobby(request);
-
-                    if (_cancelled)
-                    {
-                        // The cancel landed while we were joining; don't squat in the lobby.
-                        lobby?.LeaveLobby();
-                        return;
-                    }
-
-                    if (lobby == null)
-                    {
-                        _activeTicket = null;
-                        RaiseMatchmakingError(ticket, "Failed to find or create a lobby.");
-                        RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
-                        return;
-                    }
-
-                    _activeTicket = null;
-                    RaiseStatusChanged(ticket, MatchmakingStatus.Found);
-                    RaiseMatchFound(ticket, new MatchResult
-                    {
-                        lobby = lobby
-                    });
+                    // The cancel (or a restart) landed while we were joining; don't squat in the lobby.
+                    lobby?.LeaveLobby();
+                    return;
                 }
-                catch (Exception e)
-                {
-                    if (_cancelled)
-                        return;
 
-                    _activeTicket = null;
-                    RaiseMatchmakingError(ticket, e.Message);
-                    RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
+                if (lobby == null)
+                {
+                    FailMatch(ticket, "Failed to find or create a lobby.");
+                    return;
                 }
+
+                CompleteMatch(ticket, new MatchResult
+                {
+                    lobby = lobby
+                });
             }
             catch (Exception e)
             {
-                RaiseMatchmakingError(new MatchmakingTicket { ticketId = "N/A" }, $"Unexpected error starting matchmaking: {e.Message}");
-                Debug.LogException(e);
-            }
-        }
+                if (_cancelled || IsStale(ticket))
+                    return;
 
-        public override void CancelMatchmaking(MatchmakingTicket ticket, Action<APIResponse> onComplete)
-        {
-            if (_activeTicket == null || _activeTicket.Value.ticketId != ticket.ticketId)
-            {
-                onComplete?.Invoke(APIResponse.Failure("No active matchmaking with that ticket."));
-                return;
+                FailMatch(ticket, e.Message);
             }
-
-            _cancelled = true;
-            _activeTicket = null;
-            RaiseStatusChanged(ticket, MatchmakingStatus.Cancelled);
-            onComplete?.Invoke(APIResponse.Success());
         }
 
         private async Task<ILobby> FindOrCreateLobby(MatchmakingRequest request)

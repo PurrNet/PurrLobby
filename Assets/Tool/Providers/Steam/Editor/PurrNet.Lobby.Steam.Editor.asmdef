@@ -1,0 +1,24 @@
+{
+    "name": "PurrNet.Lobby.Steam.Editor",
+    "rootNamespace": "PurrNet.Lobby.Steam.Editor",
+    "references": [
+        "GUID:fa956321508a2aa4da8596c3e41eb158"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.rlabrecque.steamworks.net",
+            "expression": "",
+            "define": "STEAMWORKS"
+        }
+    ],
+    "noEngineReferences": false
+}

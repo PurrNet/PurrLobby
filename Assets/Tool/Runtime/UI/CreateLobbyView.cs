@@ -1,5 +1,4 @@
-using System;
-using System.Collections;
+using System.Threading.Tasks;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
@@ -8,10 +7,8 @@ using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby
 {
-    public class CreateLobbyView : MonoView
+    public class CreateLobbyView : SlidePageView
     {
-        [SerializeField] private RectTransform _content;
-        [Space]
         [SerializeField] TMP_InputField _lobbyName;
         [SerializeField] ToggleElement _publicToggle;
         [SerializeField] Slider _playerCountSlider;
@@ -30,7 +27,7 @@ namespace PurrNet.Lobby
         public void Setup(GameOrchestrator provider)
         {
             _orchestrator = provider;
-            _successfulExit = false;
+            successfulExit = false;
             _playerCountSlider.minValue = 1;
             _playerCountSlider.maxValue = _orchestrator.lobbyProvider.maxPlayer;
             _playerCountSlider.value = _orchestrator.lobbyProvider.maxPlayer;
@@ -45,66 +42,34 @@ namespace PurrNet.Lobby
             _playerCountText.text = val.ToString();
         }
 
-        private bool _successfulExit = false;
-
-        public async void CreateLobby()
+        public void CreateLobby()
         {
-            try
-            {
-                _closeParentView.canClose = false;
-                _loadingOverlay.Toggle(true);
-
-                var lobbySettings = new LobbySettings
-                {
-                    maxPlayers = Mathf.RoundToInt(_playerCountSlider.value),
-                    visibility = _publicToggle.value ? LobbyVisibility.Public : LobbyVisibility.Private,
-                    name = _lobbyName.text
-                };
-
-                var response = await _orchestrator.lobbyProvider.CreateLobby(lobbySettings);
-
-                if (!response.success)
-                {
-                    Toaster.Push("Lobby Creation Failed", response.error, true);
-                    return;
-                }
-
-                _successfulExit = true;
-                var lobbyView = parentStack.ReplaceOrPush<LobbyView>(this);
-                lobbyView.Setup(response.lobby, _orchestrator);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-            finally
-            {
-                _closeParentView.canClose = true;
-                _loadingOverlay.Toggle(false);
-            }
+            UiTask.Run(CreateLobbyAsync, "Lobby Creation Failed", _loadingOverlay, closeGuard: _closeParentView);
         }
 
-        protected override IEnumerator OnEnterTransition()
+        private async Task CreateLobbyAsync()
         {
-            var fade = ViewTransitions.FadeIn(this);
-            var slide = ViewTransitions.SlideFromRight(_content);
-            return ViewTransitions.Parallel(fade, slide);
-        }
+            var lobbySettings = new LobbySettings
+            {
+                maxPlayers = Mathf.RoundToInt(_playerCountSlider.value),
+                visibility = _publicToggle.value ? LobbyVisibility.Public : LobbyVisibility.Private,
+                name = _lobbyName.text
+            };
 
-        protected override IEnumerator OnExitTransition()
-        {
-            if (_successfulExit)
+            var response = await _orchestrator.lobbyProvider.CreateLobby(lobbySettings);
+
+            if (!this)
+                return;
+
+            if (!response.success)
             {
-                var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToLeft(_content);
-                return ViewTransitions.Parallel(fade, slide);
+                Toaster.Push("Lobby Creation Failed", response.error, true);
+                return;
             }
-            else
-            {
-                var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToRight(_content);
-                return ViewTransitions.Parallel(fade, slide);
-            }
+
+            successfulExit = true;
+            var lobbyView = parentStack.ReplaceOrPush<LobbyView>(this);
+            lobbyView.Setup(response.lobby, _orchestrator);
         }
     }
 }

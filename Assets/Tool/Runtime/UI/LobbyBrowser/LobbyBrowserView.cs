@@ -1,14 +1,12 @@
-using System;
-using System.Collections;
+using System.Threading.Tasks;
 using PurrNet.UI;
 using PurrNet.UI.HeroUI;
 using UnityEngine;
 
 namespace PurrNet.Lobby
 {
-    public class LobbyBrowserView : MonoView
+    public class LobbyBrowserView : SlidePageView
     {
-        [SerializeField] private RectTransform _window;
         [SerializeField] private LobbyInfoEntry _lobbyInfoEntry;
         [SerializeField] private RectTransform _lobbyContent;
         [Space]
@@ -16,7 +14,6 @@ namespace PurrNet.Lobby
 
         private GameOrchestrator _orchestrator;
         private UIPool<LobbyInfoEntry> _lobbyEntries;
-        private bool _successfulExit;
 
         private readonly LobbyQuery _query = new LobbyQuery()
             .AddStringFilter("matchmaking", FilterComparison.NotEqual, "y");
@@ -25,30 +22,22 @@ namespace PurrNet.Lobby
         {
             _orchestrator = orchestrator;
             _lobbyEntries ??= new UIPool<LobbyInfoEntry>(_lobbyInfoEntry, _lobbyContent);
-            Refresh();
+            TriggerRefresh();
         }
 
-        public void TriggerRefresh() => Refresh();
-
-        private async void Refresh()
+        public void TriggerRefresh()
         {
-            try
-            {
-                _loadingOverlay.Toggle(true);
-                var res = await _orchestrator.lobbyProvider.QueryLobbies(_query);
-                if (!this)
-                    return;
-                SetupView(res);
-            }
-            catch (Exception e)
-            {
-                Toaster.PushError("Failed to fetch lobbies", e);
-                Debug.LogException(e);
-            }
-            finally
-            {
-                _loadingOverlay.Toggle(false);
-            }
+            UiTask.Run(RefreshAsync, "Failed to fetch lobbies", _loadingOverlay);
+        }
+
+        private async Task RefreshAsync()
+        {
+            var res = await _orchestrator.lobbyProvider.QueryLobbies(_query);
+
+            if (!this)
+                return;
+
+            SetupView(res);
         }
 
         private void SetupView(LobbyCollectionResponse query)
@@ -67,53 +56,26 @@ namespace PurrNet.Lobby
             _lobbyEntries.DiscardRest();
         }
 
-        private async void OnClickedLobby(LobbyInfo info)
+        private void OnClickedLobby(LobbyInfo info)
         {
-            try
-            {
-                _loadingOverlay.Toggle(true);
-                var res = await _orchestrator.lobbyProvider.JoinLobby(info.id);
-                if (!res.success)
-                {
-                    Toaster.PushError("Failed to join lobby", res.error);
-                    return;
-                }
-
-                _successfulExit = true;
-                parentStack.ReplaceOrPush<LobbyView>(this).Setup(res.lobby, _orchestrator);
-            }
-            catch (Exception e)
-            {
-                Toaster.PushError("Failed to join lobby", e);
-                Debug.LogException(e);
-            }
-            finally
-            {
-                _loadingOverlay.Toggle(false);
-            }
+            UiTask.Run(() => JoinAsync(info), "Failed to join lobby", _loadingOverlay);
         }
 
-        protected override IEnumerator OnEnterTransition()
+        private async Task JoinAsync(LobbyInfo info)
         {
-            var fade = ViewTransitions.FadeIn(this);
-            var slide = ViewTransitions.SlideFromRight(_window);
-            return ViewTransitions.Parallel(fade, slide);
-        }
+            var res = await _orchestrator.lobbyProvider.JoinLobby(info.id);
 
-        protected override IEnumerator OnExitTransition()
-        {
-            if (_successfulExit)
+            if (!this)
+                return;
+
+            if (!res.success)
             {
-                var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToLeft(_window);
-                return ViewTransitions.Parallel(fade, slide);
+                Toaster.PushError("Failed to join lobby", res.error);
+                return;
             }
-            else
-            {
-                var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToRight(_window);
-                return ViewTransitions.Parallel(fade, slide);
-            }
+
+            successfulExit = true;
+            parentStack.ReplaceOrPush<LobbyView>(this).Setup(res.lobby, _orchestrator);
         }
     }
 }

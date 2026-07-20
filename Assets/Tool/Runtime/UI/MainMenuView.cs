@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -88,7 +89,12 @@ namespace PurrNet.Lobby
             parentStack.Push<LobbyBrowserView>().Setup(_orchestrator);
         }
 
-        public async void Logout()
+        public void Logout()
+        {
+            LogoutAsync().Forget("[MainMenuView] Logout failed");
+        }
+
+        private async Task LogoutAsync()
         {
             if (_loggingOut)
                 return;
@@ -98,13 +104,13 @@ namespace PurrNet.Lobby
             try
             {
                 if (_orchestrator.matchmakingProvider)
-                    _orchestrator.matchmakingProvider.Logout();
+                    await _orchestrator.matchmakingProvider.Logout();
 
                 if (_orchestrator.gameAllocator)
-                    _orchestrator.gameAllocator.Logout();
+                    await _orchestrator.gameAllocator.Logout();
 
                 if (_orchestrator.lobbyProvider)
-                    _orchestrator.lobbyProvider.Logout();
+                    await _orchestrator.lobbyProvider.Logout();
 
                 if (_orchestrator.sessionProvider)
                     await _orchestrator.sessionProvider.Logout();

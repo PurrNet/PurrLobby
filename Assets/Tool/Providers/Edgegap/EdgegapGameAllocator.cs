@@ -3,10 +3,9 @@ using System.Threading.Tasks;
 using PurrNet.Logging;
 using PurrNet.Services;
 using PurrNet.Transports;
-using PurrNet.UI;
 using UnityEngine;
 
-namespace PurrNet.Lobby.PurrNet
+namespace PurrNet.Lobby.Edgegap
 {
     public enum EdgegapAllocatorTransport
     {
@@ -38,10 +37,6 @@ namespace PurrNet.Lobby.PurrNet
 
         /// <summary>Optional named port to connect through; empty means pick by protocol.</summary>
         public string PortName => _portName;
-
-        public override Task Login(ViewStack stack) => Task.CompletedTask;
-
-        public override void Logout() { }
 
         public override async Task<GameStartResponse> AllocateGame(ILobby lobby)
         {
@@ -130,56 +125,32 @@ namespace PurrNet.Lobby.PurrNet
             return LoadGameScene(_gameScene);
         }
 
-        public override void Connect(ConnectionInfo connection, bool shouldBeHost)
+        /// <summary>Edgegap deploys dedicated servers; clients never host.</summary>
+        protected override bool supportsHosting => false;
+
+        protected override bool ConfigureTransport(NetworkManager manager, ConnectionInfo connection, bool asHost)
         {
-            var manager = NetworkManager.main;
-
-            if (!manager)
-            {
-                PurrLogger.LogError("No `NetworkManager` found in the scene.");
-                return;
-            }
-
-            if (manager.shouldAutoStartServer || manager.shouldAutoStartClient)
-            {
-                PurrLogger.LogError("`NetworkManager` is set to auto start (has auto start flags). Please disable auto start and try again.");
-                return;
-            }
-
             switch (_transport)
             {
                 case EdgegapAllocatorTransport.UDP:
-                    ConfigureUdp(manager, connection);
-                    break;
+                {
+                    var udp = manager.transport as UDPTransport ?? GetOrAddComponent<UDPTransport>(manager.gameObject);
+                    udp.address = connection.serverAddress;
+                    udp.serverPort = (ushort)connection.serverPort;
+                    manager.transport = udp;
+                    return true;
+                }
                 case EdgegapAllocatorTransport.Web:
-                    ConfigureWeb(manager, connection);
-                    break;
+                {
+                    var web = manager.transport as WebTransport ?? GetOrAddComponent<WebTransport>(manager.gameObject);
+                    web.address = connection.serverAddress;
+                    web.serverPort = (ushort)connection.serverPort;
+                    manager.transport = web;
+                    return true;
+                }
+                default:
+                    return false;
             }
-
-            manager.StartClient();
-        }
-
-        private static void ConfigureUdp(NetworkManager manager, ConnectionInfo connection)
-        {
-            var udp = manager.transport as UDPTransport ?? GetOrAddComponent<UDPTransport>(manager.gameObject);
-            udp.address = connection.serverAddress;
-            udp.serverPort = (ushort)connection.serverPort;
-            manager.transport = udp;
-        }
-
-        private static void ConfigureWeb(NetworkManager manager, ConnectionInfo connection)
-        {
-            var web = manager.transport as WebTransport ?? GetOrAddComponent<WebTransport>(manager.gameObject);
-            web.address = connection.serverAddress;
-            web.serverPort = (ushort)connection.serverPort;
-            manager.transport = web;
-        }
-
-        private static T GetOrAddComponent<T>(GameObject gameObject) where T : Component
-        {
-            if (gameObject.TryGetComponent(out T component))
-                return component;
-            return gameObject.AddComponent<T>();
         }
     }
 }

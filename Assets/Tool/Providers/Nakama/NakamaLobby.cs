@@ -9,48 +9,13 @@ using UnityEngine;
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>Wraps a Nakama relayed match as an <see cref="ILobby"/>.</summary>
-    public class NakamaLobby : ILobby, IDisposable
+    public class NakamaLobby : LobbyBase<NakamaPlayer>, IDisposable
     {
-        public string id => _matchId;
-        public string joinCode => _matchId;
-        public IPlayer localPlayer => _localPlayer;
-        public IPlayer owner => _host;
-        public int maxPlayers => _maxPlayers;
-        public IReadOnlyList<IPlayer> players => _players;
-        public IMetadata lobbyData => _lobbyMetadata;
-        public bool isLobbyJoinable => _joinable;
-        public ILobbyChat chat => _chat;
-        public bool isOwner => _localPlayer != null && _localPlayer.isOwner;
-
-        private Action<IPlayer> _onPlayerJoined;
-        public event Action<IPlayer> onPlayerJoined
-        {
-            add
-            {
-                _onPlayerJoined += value;
-                if (value == null)
-                    return;
-                for (int i = 0; i < _players.Count; i++)
-                    value.Invoke(_players[i]);
-            }
-            remove => _onPlayerJoined -= value;
-        }
-
-        private Action<IPlayer> _onHostChanged;
-        public event Action<IPlayer> onOwnerChanged
-        {
-            add
-            {
-                _onHostChanged += value;
-                if (value != null && _host != null)
-                    value.Invoke(_host);
-            }
-            remove => _onHostChanged -= value;
-        }
-
-        public event Action<IPlayer> onPlayerLeft;
-        public event Action<IPlayer> onPlayerUpdated;
-        public event Action onLobbyDestroyed;
+        public override string id => _matchId;
+        public override int maxPlayers => _maxPlayers;
+        public override IMetadata lobbyData => _lobbyMetadata;
+        public override bool isLobbyJoinable => _joinable;
+        public override ILobbyChat chat => _chat;
 
         private readonly ISocket _socket;
         private readonly ISession _session;
@@ -60,9 +25,6 @@ namespace PurrNet.Lobby.Nakama
         private bool _joinable;
         private string _hostUserId;
 
-        private NakamaPlayer _localPlayer;
-        private NakamaPlayer _host;
-        private readonly List<NakamaPlayer> _players = new();
         private readonly NakamaMetadata _lobbyMetadata;
         private readonly NakamaChat _chat;
 
@@ -103,10 +65,9 @@ namespace PurrNet.Lobby.Nakama
             var selfDisplay = !string.IsNullOrEmpty(match.Self?.Username) ? match.Self.Username : _session.Username;
             var selfId = match.Self?.UserId ?? _session.UserId;
             var selfPlayer = new NakamaPlayer(this, selfId, selfDisplay, isHost: selfId == _hostUserId, isLocal: true);
-            _players.Add(selfPlayer);
-            _localPlayer = selfPlayer;
+            AddPlayer(selfPlayer, isLocal: true);
             if (selfPlayer.isOwner)
-                _host = selfPlayer;
+                SetOwner(selfPlayer);
 
             if (match.Presences != null)
             {
@@ -114,18 +75,18 @@ namespace PurrNet.Lobby.Nakama
                 {
                     if (p == null || p.UserId == selfId)
                         continue;
-                    if (TryFindPlayer(p.UserId, out _))
+                    if (TryGetPlayerInternal(p.UserId, out _))
                         continue;
                     var isPlayerHost = p.UserId == _hostUserId;
                     var player = new NakamaPlayer(this, p.UserId, p.Username, isPlayerHost, isLocal: false);
-                    _players.Add(player);
+                    AddPlayer(player, isLocal: false);
                     if (isPlayerHost)
-                        _host = player;
+                        SetOwner(player);
                 }
             }
         }
 
-        public void KickPlayer(IPlayer player)
+        public override void KickPlayer(IPlayer player)
         {
             if (player == null)
                 return;
@@ -138,7 +99,7 @@ namespace PurrNet.Lobby.Nakama
                 .Forget("[NakamaLobby] Kick failed");
         }
 
-        public void SetIsLobbyJoinable(bool isJoinable)
+        public override void SetIsLobbyJoinable(bool isJoinable)
         {
             if (!isOwner)
             {
@@ -162,7 +123,7 @@ namespace PurrNet.Lobby.Nakama
                     return Task.CompletedTask;
                 if (_disposed)
                     return Task.FromException(new ObjectDisposedException(nameof(NakamaLobby)));
-                if (_players.Count <= 1)
+                if (playerList.Count <= 1)
                     return Task.FromException(new InvalidOperationException(
                         "Joined Nakama lobby has no other presences; the owner is gone."));
                 tcs = _firstSnapshotTcs ??= new TaskCompletionSource<bool>();
@@ -211,7 +172,12 @@ namespace PurrNet.Lobby.Nakama
             tcs?.TrySetException(ex);
         }
 
-        public async void LeaveLobby()
+        public override void LeaveLobby()
+        {
+            LeaveAsync().Forget("[NakamaLobby] Leave failed");
+        }
+
+        private async Task LeaveAsync()
         {
             try
             {
@@ -253,7 +219,7 @@ namespace PurrNet.Lobby.Nakama
         {
             SendMatchStateAsync(NakamaOpCodes.PlayerMetadataPatch, new PlayerMetadataMessage
             {
-                userId = _localPlayer?.id ?? _session.UserId,
+                userId = localPlayerInternal?.id ?? _session.UserId,
                 metadata = snapshot
             }).Forget("[NakamaLobby] Player metadata patch failed");
         }
@@ -287,20 +253,15 @@ namespace PurrNet.Lobby.Nakama
                 {
                     if (presence == null || presence.UserId == _session.UserId)
                         continue;
-                    if (TryFindPlayer(presence.UserId, out _))
+                    if (TryGetPlayerInternal(presence.UserId, out _))
                         continue;
 
                     var isPlayerHost = presence.UserId == _hostUserId;
                     var player = new NakamaPlayer(this, presence.UserId, presence.Username, isPlayerHost, isLocal: false);
-                    _players.Add(player);
-
-                    _onPlayerJoined?.Invoke(player);
+                    AddPlayer(player, isLocal: false);
 
                     if (isPlayerHost)
-                    {
-                        _host = player;
-                        _onHostChanged?.Invoke(player);
-                    }
+                        SetOwner(player);
 
                     if (this.isOwner)
                         SendSnapshotAsync().Forget("[NakamaLobby] Snapshot broadcast failed");
@@ -314,11 +275,10 @@ namespace PurrNet.Lobby.Nakama
                 {
                     if (presence == null)
                         continue;
-                    if (!TryRemovePlayer(presence.UserId, out var removed))
+                    if (!RemovePlayer(presence.UserId, out var removed))
                         continue;
 
                     anyLeaves = true;
-                    onPlayerLeft?.Invoke(removed);
 
                     if (removed.isOwner)
                         HandleHostDisappeared();
@@ -326,7 +286,7 @@ namespace PurrNet.Lobby.Nakama
 
                 lock (_snapshotGate)
                 {
-                    if (anyLeaves && !_firstSnapshotReceived && _players.Count <= 1)
+                    if (anyLeaves && !_firstSnapshotReceived && playerList.Count <= 1)
                         SetSnapshotFailed(new InvalidOperationException(
                             "Nakama lobby drained while waiting for the first snapshot."));
                 }
@@ -352,7 +312,7 @@ namespace PurrNet.Lobby.Nakama
                         ApplyPlayerMetadataPatch(Decode<PlayerMetadataMessage>(state.State));
                         break;
                     case NakamaOpCodes.Chat:
-                        if (TryFindPlayer(state.UserPresence?.UserId, out var sender))
+                        if (TryGetPlayerInternal(state.UserPresence?.UserId, out var sender))
                             _chat.DispatchIncoming(sender, state.State);
                         break;
                     case NakamaOpCodes.Kick:
@@ -381,7 +341,7 @@ namespace PurrNet.Lobby.Nakama
             if (_disposed)
                 return;
             SetSnapshotFailed(new Exception($"Nakama socket closed: {reason}"));
-            onLobbyDestroyed?.Invoke();
+            RaiseLobbyDestroyed();
             Dispose();
         }
 
@@ -402,11 +362,10 @@ namespace PurrNet.Lobby.Nakama
             {
                 foreach (var kvp in msg.playerMetadata)
                 {
-                    if (!TryFindPlayer(kvp.Key, out var player))
+                    if (!TryGetPlayerInternal(kvp.Key, out var player))
                         continue;
                     player.GetMetadata().ReplaceFrom(kvp.Value);
-                    player.TriggerOnPlayerMetadataUpdated();
-                    onPlayerUpdated?.Invoke(player);
+                    RaisePlayerMetadataUpdated(player);
                 }
             }
         }
@@ -422,11 +381,10 @@ namespace PurrNet.Lobby.Nakama
         {
             if (string.IsNullOrEmpty(msg.userId))
                 return;
-            if (!TryFindPlayer(msg.userId, out var player))
+            if (!TryGetPlayerInternal(msg.userId, out var player))
                 return;
             player.GetMetadata().ReplaceFrom(msg.metadata);
-            player.TriggerOnPlayerMetadataUpdated();
-            onPlayerUpdated?.Invoke(player);
+            RaisePlayerMetadataUpdated(player);
         }
 
         private void ApplyKick(KickMessage msg)
@@ -435,7 +393,7 @@ namespace PurrNet.Lobby.Nakama
                 return;
             if (msg.userId == _session.UserId)
             {
-                onLobbyDestroyed?.Invoke();
+                RaiseLobbyDestroyed();
                 _ = LeaveQuietlyAsync();
             }
         }
@@ -450,7 +408,7 @@ namespace PurrNet.Lobby.Nakama
             if (string.IsNullOrEmpty(msg.hostUserId))
                 return;
 
-            if (!TryFindPlayer(msg.hostUserId, out _))
+            if (!TryGetPlayerInternal(msg.hostUserId, out _))
                 return;
 
             ChangeHost(msg.hostUserId);
@@ -467,16 +425,16 @@ namespace PurrNet.Lobby.Nakama
 
         private void HandleHostDisappeared()
         {
-            if (_players.Count == 0)
+            if (playerList.Count == 0)
             {
-                onLobbyDestroyed?.Invoke();
+                RaiseLobbyDestroyed();
                 return;
             }
 
             string newHostId = null;
-            for (int i = 0; i < _players.Count; i++)
+            for (int i = 0; i < playerList.Count; i++)
             {
-                var pid = _players[i].id;
+                var pid = playerList[i].id;
                 if (string.IsNullOrEmpty(pid))
                     continue;
                 if (newHostId == null || string.CompareOrdinal(pid, newHostId) < 0)
@@ -505,24 +463,9 @@ namespace PurrNet.Lobby.Nakama
 
             NakamaPlayer resolved = null;
             if (!string.IsNullOrEmpty(newHostUserId))
-                TryFindPlayer(newHostUserId, out resolved);
+                TryGetPlayerInternal(newHostUserId, out resolved);
 
-            _host = resolved;
-
-            for (int i = 0; i < _players.Count; i++)
-            {
-                var p = _players[i];
-                var shouldBeHost = resolved != null && p == resolved;
-                if (p.isOwner != shouldBeHost)
-                {
-                    p.SetIsHost(shouldBeHost);
-                    p.TriggerOnPlayerUpdated();
-                    onPlayerUpdated?.Invoke(p);
-                }
-            }
-
-            if (resolved != null)
-                _onHostChanged?.Invoke(resolved);
+            SetOwner(resolved);
         }
 
         private async Task LeaveQuietlyAsync()
@@ -546,42 +489,13 @@ namespace PurrNet.Lobby.Nakama
                 playerMetadata = new Dictionary<string, Dictionary<string, string>>(),
             };
 
-            for (int i = 0; i < _players.Count; i++)
+            for (int i = 0; i < playerList.Count; i++)
             {
-                var p = _players[i];
+                var p = playerList[i];
                 snapshot.playerMetadata[p.id] = new Dictionary<string, string>(p.GetMetadata().Snapshot());
             }
 
             return SendMatchStateAsync(NakamaOpCodes.Snapshot, snapshot);
-        }
-
-        private bool TryFindPlayer(string userId, out NakamaPlayer player)
-        {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                if (_players[i].id == userId)
-                {
-                    player = _players[i];
-                    return true;
-                }
-            }
-            player = null;
-            return false;
-        }
-
-        private bool TryRemovePlayer(string userId, out NakamaPlayer removed)
-        {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                if (_players[i].id == userId)
-                {
-                    removed = _players[i];
-                    _players.RemoveAt(i);
-                    return true;
-                }
-            }
-            removed = null;
-            return false;
         }
 
         private static T Decode<T>(byte[] state) where T : struct, IPackedAuto

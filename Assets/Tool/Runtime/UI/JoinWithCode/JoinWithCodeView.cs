@@ -1,21 +1,17 @@
-using System;
-using System.Collections;
-using PurrNet.UI;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby
 {
-    public class JoinWithCodeView : MonoView
+    public class JoinWithCodeView : SlidePageView
     {
-        [SerializeField] private RectTransform _content;
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private LoadingOverlay _loadingOverlay;
         [SerializeField] private TMP_InputField _codeField;
 
         private GameOrchestrator _orchestrator;
-        private bool _successfulExit;
 
         public void Setup(GameOrchestrator orchestrator)
         {
@@ -31,55 +27,26 @@ namespace PurrNet.Lobby
             Submit();
         }
 
-        public async void Submit()
+        public void Submit()
         {
-            try
-            {
-                _loadingOverlay.Toggle(true);
-                _canvasGroup.interactable = false;
-
-                var response = await _orchestrator.lobbyProvider.JoinLobbyByCode(_codeField.text);
-                if (!response.success)
-                {
-                    Toaster.Push("Join Failed", response.error, true);
-                    return;
-                }
-
-                _successfulExit = true;
-                parentStack.ReplaceOrPush<LobbyView>(this).Setup(response.lobby, _orchestrator);
-            }
-            catch (Exception e)
-            {
-                Toaster.Push("Join Failed", e.Message, true);
-            }
-            finally
-            {
-                _loadingOverlay.Toggle(false);
-                _canvasGroup.interactable = true;
-            }
+            UiTask.Run(SubmitAsync, "Join Failed", _loadingOverlay, disableGroup: _canvasGroup);
         }
 
-        protected override IEnumerator OnEnterTransition()
+        private async Task SubmitAsync()
         {
-            var fade = ViewTransitions.FadeIn(this);
-            var slide = ViewTransitions.SlideFromRight(_content);
-            return ViewTransitions.Parallel(fade, slide);
-        }
+            var response = await _orchestrator.lobbyProvider.JoinLobbyByCode(_codeField.text);
 
-        protected override IEnumerator OnExitTransition()
-        {
-            if (_successfulExit)
+            if (!this)
+                return;
+
+            if (!response.success)
             {
-                var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToLeft(_content);
-                return ViewTransitions.Parallel(fade, slide);
+                Toaster.Push("Join Failed", response.error, true);
+                return;
             }
-            else
-            {
-                var fade = ViewTransitions.FadeOut(this);
-                var slide = ViewTransitions.SlideToRight(_content);
-                return ViewTransitions.Parallel(fade, slide);
-            }
+
+            successfulExit = true;
+            parentStack.ReplaceOrPush<LobbyView>(this).Setup(response.lobby, _orchestrator);
         }
     }
 }

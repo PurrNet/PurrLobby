@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
 
@@ -24,12 +25,30 @@ namespace PurrNet.Lobby
                 _provider.onStatusChanged += OnStatusChanged;
                 _provider.onMatchFound += OnMatchFound;
                 _provider.onMatchmakingError += OnMatchmakingError;
-                _provider.StartMatchmaking(request, OnComplete);
+                StartMatchmakingAsync(request).Forget("[MatchmakingView] StartMatchmaking failed");
             }
             else
             {
                 Toaster.Push($"No matchmaking provider", "This feature is not available", true);
                 PopMe();
+            }
+        }
+
+        private async Task StartMatchmakingAsync(MatchmakingRequest request)
+        {
+            var response = await _provider.StartMatchmaking(request);
+
+            if (!this)
+                return;
+
+            if (!response.success)
+            {
+                Toaster.Push($"Matchmaking failed", response.error, true);
+                PopMe();
+            }
+            else
+            {
+                _currentTicket = response.ticket;
             }
         }
 
@@ -64,45 +83,38 @@ namespace PurrNet.Lobby
                 return;
             }
 
-            StartGameFromMatch(result);
+            StartGameFromMatch(result).Forget("[MatchmakingView] StartGameFromMatch failed");
         }
 
-        private async void StartGameFromMatch(MatchResult result)
+        private async Task StartGameFromMatch(MatchResult result)
         {
+            _orchestrator.activeLobby = null;
+            var loadingView = parentStack.ReplaceOrPush<LoadingView>(this);
+
             try
             {
-                _orchestrator.activeLobby = null;
-                var loadingView = parentStack.ReplaceOrPush<LoadingView>(this);
+                loadingView.Setup("Allocating game...");
 
-                try
-                {
-                    loadingView.Setup("Allocating game...");
+                var response = await _orchestrator.gameAllocator.AllocateGame(result);
 
-                    var response = await _orchestrator.gameAllocator.AllocateGame(result);
+                if (!response.success)
+                    throw new Exception(response.error);
 
-                    if (!response.success)
-                        throw new Exception(response.error);
+                loadingView.Setup("Loading game...");
+                await _orchestrator.gameAllocator.LoadGame(result);
 
-                    loadingView.Setup("Loading game...");
-                    await _orchestrator.gameAllocator.LoadGame(result);
-
-                    _orchestrator.gameAllocator.Connect(response.connection, result.isHost);
-                }
-                catch (Exception e)
-                {
-                    Toaster.PushError("Failed to start game", e);
-                    if (_orchestrator.gameAllocator)
-                        Debug.LogException(e, _orchestrator.gameAllocator);
-                }
-                finally
-                {
-                    if (loadingView)
-                        loadingView.PopMe();
-                }
+                _orchestrator.gameAllocator.Connect(response.connection, result.isHost);
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Toaster.PushError("Failed to start game", e);
+                if (_orchestrator.gameAllocator)
+                    Debug.LogException(e, _orchestrator.gameAllocator);
+            }
+            finally
+            {
+                if (loadingView)
+                    loadingView.PopMe();
             }
         }
 
@@ -118,14 +130,19 @@ namespace PurrNet.Lobby
             }
 
             _cancelling = true;
-            _provider.CancelMatchmaking(_currentTicket.Value, OnCanceled);
+            CancelAsync(_currentTicket.Value).Forget("[MatchmakingView] CancelMatchmaking failed");
         }
 
-        private void OnCanceled(APIResponse resp)
+        private async Task CancelAsync(MatchmakingTicket ticket)
         {
+            var response = await _provider.CancelMatchmaking(ticket);
+
+            if (!this)
+                return;
+
             _cancelling = false;
-            if (!resp.success)
-                 Toaster.Push($"Failed to cancel", resp.error, true);
+            if (!response.success)
+                 Toaster.Push($"Failed to cancel", response.error, true);
             else PopMe();
         }
 
@@ -152,18 +169,5 @@ namespace PurrNet.Lobby
         }
 
         private MatchmakingTicket? _currentTicket;
-
-        private void OnComplete(MatchmakingTicketResponse response)
-        {
-            if (!response.success)
-            {
-                Toaster.Push($"Matchmaking failed", response.error, true);
-                PopMe();
-            }
-            else
-            {
-                _currentTicket = response.ticket;
-            }
-        }
     }
 }

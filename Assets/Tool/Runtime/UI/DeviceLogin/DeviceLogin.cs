@@ -72,36 +72,24 @@ namespace PurrNet.Lobby
                 PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_rememberMe));
             }
 
-            HandleLoginAsync();
+            UiTask.Run(HandleLoginAsync, "Login Failed", _loadingOverlay, closeGuard: _closeParentView);
         }
 
-        private async void HandleLoginAsync()
+        private async Task HandleLoginAsync()
         {
-            try
-            {
-                _closeParentView.canClose = false;
-                _loadingOverlay.Toggle(true);
+            var response = await _onLogin(_deviceId, _displayName.text, _rememberMe.value);
 
-                var response = await _onLogin(_deviceId, _displayName.text, _rememberMe.value);
+            if (!this)
+                return;
 
-                if (!response.success)
-                {
-                    Toaster.Push("Login Failed", response.error, true);
-                    return;
-                }
+            if (!response.success)
+            {
+                Toaster.Push("Login Failed", response.error, true);
+                return;
+            }
 
-                _onDone?.Invoke();
-                CloseMe();
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-            finally
-            {
-                _closeParentView.canClose = true;
-                _loadingOverlay.Toggle(false);
-            }
+            _onDone?.Invoke();
+            CloseMe();
         }
     }
 }

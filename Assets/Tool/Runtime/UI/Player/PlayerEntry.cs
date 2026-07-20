@@ -117,7 +117,7 @@ namespace PurrNet.Lobby
             _status.text = _player.isReady ? "Ready" : "Not Ready";
             _status.color = _player.isReady ? _statusReady : _statusUnready;
 
-            IPlayer.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
+            PlayerAvatarUI.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
         }
 
         private void Update()

@@ -2,7 +2,6 @@
 using System;
 using System.Threading.Tasks;
 using Nakama;
-using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrNet.Lobby.Nakama
@@ -28,22 +27,6 @@ namespace PurrNet.Lobby.Nakama
 
         public override LobbyCapabilities capabilities =>
             LobbyCapabilities.CreateLobby | LobbyCapabilities.JoinLobbyById | LobbyCapabilities.JoinLobbyByCode;
-
-        public override async Task Login(ViewStack stack)
-        {
-            if (_sessionProvider == null)
-            {
-                Debug.LogError($"[{name}] NakamaSessionProvider is not assigned.");
-                return;
-            }
-            await _sessionProvider.Login(stack);
-        }
-
-        public override void Logout()
-        {
-            if (_sessionProvider != null)
-                _ = _sessionProvider.Logout();
-        }
 
         public override async Task<LobbyResponse> CreateLobby(LobbySettings settings)
         {

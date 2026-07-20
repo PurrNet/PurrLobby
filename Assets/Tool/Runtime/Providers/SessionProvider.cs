@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
@@ -12,9 +11,6 @@ namespace PurrNet.Lobby
         public abstract string playerId { get; }
 
         public abstract string playerName { get; }
-
-        [NonSerialized]
-        public readonly SessionCookies cookies = new SessionCookies();
 
         public abstract Task Login(ViewStack stack);
 

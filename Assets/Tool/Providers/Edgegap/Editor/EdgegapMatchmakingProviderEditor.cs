@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace PurrNet.Lobby.PurrNet
+namespace PurrNet.Lobby.Edgegap
 {
     /// <summary>
     /// Inspector for <see cref="EdgegapMatchmakingProvider"/>. Adds field grouping,

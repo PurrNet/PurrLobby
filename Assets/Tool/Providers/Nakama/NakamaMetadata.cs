@@ -1,5 +1,4 @@
 #if NAKAMA
-using System;
 using System.Collections.Generic;
 
 namespace PurrNet.Lobby.Nakama
@@ -8,14 +7,11 @@ namespace PurrNet.Lobby.Nakama
     /// Metadata backed by Nakama match-state messages.
     /// Lobby metadata is host-authoritative; player metadata is owner-authoritative.
     /// </summary>
-    public class NakamaMetadata : IMetadata
+    public class NakamaMetadata : LobbyMetadataBase
     {
         private readonly NakamaLobby _lobby;
         private readonly string _ownerId;
         private readonly bool _isLocalOwner;
-        private readonly Dictionary<string, string> _data = new();
-
-        public event Action<string, string> onDataChanged;
 
         internal NakamaMetadata(NakamaLobby lobby, string ownerId, bool isLocalOwner)
         {
@@ -24,116 +20,16 @@ namespace PurrNet.Lobby.Nakama
             _isLocalOwner = isLocalOwner;
         }
 
-        public void SetData(string key, string value)
+        protected override bool CanWrite =>
+            _ownerId == null ? _lobby.isOwner : _isLocalOwner;
+
+        protected override void PushChange(string key, string value)
         {
-            if (string.IsNullOrEmpty(key))
-                return;
-
-            if (_data.TryGetValue(key, out var existing) && existing == value)
-                return;
-
-            if (_ownerId == null && !_lobby.isOwner)
-            {
-                UnityEngine.Debug.LogWarning("[NakamaMetadata] Lobby metadata can only be written by the host.");
-                return;
-            }
-            if (_ownerId != null && !_isLocalOwner)
-            {
-                UnityEngine.Debug.LogWarning("[NakamaMetadata] Other players' metadata is read-only.");
-                return;
-            }
-
-            _data[key] = value;
-            onDataChanged?.Invoke(key, value);
-
             if (_ownerId == null)
                 _lobby.SubmitLobbyMetadataPatch(new Dictionary<string, string> { { key, value } });
             else
-                _lobby.BroadcastLocalPlayerMetadata(new Dictionary<string, string>(_data));
+                _lobby.BroadcastLocalPlayerMetadata(new Dictionary<string, string>(Snapshot()));
         }
-
-        public string GetData(string key) => _data[key];
-
-        public bool TryGetData(string key, out string value) => _data.TryGetValue(key, out value);
-
-        public void RemoveData(string key)
-        {
-            if (_ownerId == null && !_lobby.isOwner)
-            {
-                UnityEngine.Debug.LogWarning("[NakamaMetadata] Lobby metadata can only be written by the host.");
-                return;
-            }
-            if (_ownerId != null && !_isLocalOwner)
-            {
-                UnityEngine.Debug.LogWarning("[NakamaMetadata] Other players' metadata is read-only.");
-                return;
-            }
-            if (!_data.Remove(key))
-                return;
-
-            onDataChanged?.Invoke(key, null);
-
-            if (_ownerId == null)
-                _lobby.SubmitLobbyMetadataPatch(new Dictionary<string, string> { { key, null } });
-            else
-                _lobby.BroadcastLocalPlayerMetadata(new Dictionary<string, string>(_data));
-        }
-
-        public bool ContainsData(string key) => _data.ContainsKey(key);
-
-        internal IReadOnlyDictionary<string, string> Snapshot() => _data;
-
-        /// <summary>Replaces all data and fires <see cref="onDataChanged"/> for any differences.</summary>
-        internal void ReplaceFrom(Dictionary<string, string> replacement)
-        {
-            replacement ??= new Dictionary<string, string>();
-
-            _scratchKeys.Clear();
-            foreach (var key in _data.Keys)
-            {
-                if (!replacement.ContainsKey(key))
-                    _scratchKeys.Add(key);
-            }
-            for (int i = 0; i < _scratchKeys.Count; i++)
-            {
-                _data.Remove(_scratchKeys[i]);
-                onDataChanged?.Invoke(_scratchKeys[i], null);
-            }
-            _scratchKeys.Clear();
-
-            foreach (var kvp in replacement)
-            {
-                if (_data.TryGetValue(kvp.Key, out var existing) && existing == kvp.Value)
-                    continue;
-                _data[kvp.Key] = kvp.Value;
-                onDataChanged?.Invoke(kvp.Key, kvp.Value);
-            }
-        }
-
-        /// <summary>Applies a partial patch. Null values delete the key.</summary>
-        internal void ApplyPatch(Dictionary<string, string> patch)
-        {
-            if (patch == null)
-                return;
-
-            foreach (var kvp in patch)
-            {
-                if (kvp.Value == null)
-                {
-                    if (_data.Remove(kvp.Key))
-                        onDataChanged?.Invoke(kvp.Key, null);
-                }
-                else
-                {
-                    if (_data.TryGetValue(kvp.Key, out var existing) && existing == kvp.Value)
-                        continue;
-                    _data[kvp.Key] = kvp.Value;
-                    onDataChanged?.Invoke(kvp.Key, kvp.Value);
-                }
-            }
-        }
-
-        private readonly List<string> _scratchKeys = new();
     }
 }
 #endif
