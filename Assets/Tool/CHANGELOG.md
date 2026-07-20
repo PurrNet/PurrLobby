@@ -1,3 +1,10 @@
+# [1.0.0-beta.4](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2026-06-11)
+
+
+### Bug Fixes
+
+* patching bugs and completing some features ([72ff705](https://github.com/PurrNet/PurrLobby/commit/72ff705eccd71d3ecc1610c32495711a869c7406))
+
 # [1.0.0-beta.3](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2026-05-29)
 
 
