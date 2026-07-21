@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using PurrNet.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PurrNet.Lobby
@@ -14,8 +16,18 @@ namespace PurrNet.Lobby
     }
 #endif
 
-    public class PlayerEntry : MonoBehaviour
+    public class PlayerEntry : MonoBehaviour, IPointerClickHandler
     {
+        /// <summary>
+        /// Raised while building a player's context menu (right-click or
+        /// <see cref="OpenContextMenu()"/>). Games append their own actions —
+        /// mute, view profile, etc. — without touching the entry prefab.
+        /// </summary>
+        public static event Action<ILobby, IPlayer, List<PlayerContextAction>> onBuildContextActions;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => onBuildContextActions = null;
+
         [SerializeField] private RectangleGraphic _graphic;
         [SerializeField] private RectangleGraphic _hostIndicator;
         [SerializeField] private RectangleGraphic _avatarGraphic;
@@ -79,6 +91,63 @@ namespace PurrNet.Lobby
         {
             if (_player != null)
                 _onKickPlayer?.Invoke(_player);
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button == PointerEventData.InputButton.Right)
+                OpenContextMenu(eventData.position);
+        }
+
+        /// <summary>Opens the player context menu at this entry. UnityEvent-friendly (e.g. a "…" button).</summary>
+        public void OpenContextMenu()
+        {
+            OpenContextMenu(RectTransformUtility.WorldToScreenPoint(null, transform.position));
+        }
+
+        private void OpenContextMenu(Vector2 screenPos)
+        {
+            if (_player == null || _lobby == null)
+                return;
+
+            var actions = new List<PlayerContextAction>();
+
+            bool iAmHost = _localPlayer?.isOwner == true;
+            bool isMe = _localPlayer?.id == _player.id;
+
+            if (iAmHost && !isMe && !_player.isOwner)
+            {
+                actions.Add(new PlayerContextAction
+                {
+                    option = new ContextOption
+                    {
+                        name = "Kick",
+                        description = $"Remove {_player.displayName} from the lobby",
+                        isDangerous = true
+                    },
+                    action = (_, player) => _onKickPlayer?.Invoke(player)
+                });
+            }
+
+            onBuildContextActions?.Invoke(_lobby, _player, actions);
+
+            if (actions.Count == 0)
+                return;
+
+            var parentView = GetComponentInParent<MonoView>();
+            if (!parentView || !parentView.parentStack)
+                return;
+
+            var stack = parentView.parentStack;
+
+            var options = new ContextOption[actions.Count];
+            for (int i = 0; i < actions.Count; i++)
+                options[i] = actions[i].option;
+
+            var lobby = _lobby;
+            var player = _player;
+            stack.Push<ContextMenuView>().Setup(screenPos, _player.displayName, options,
+                index => actions[index].action?.Invoke(lobby, player));
         }
 
         private void OnDestroy()
