@@ -1,3 +1,10 @@
+# [1.0.0-beta.5](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2026-07-20)
+
+
+### Features
+
+* steam provider + BIG rework ([a5a6aed](https://github.com/PurrNet/PurrLobby/commit/a5a6aed62b814d776506ca4e542d68aab2340f6c))
+
 # [1.0.0-beta.4](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2026-06-11)
 
 
