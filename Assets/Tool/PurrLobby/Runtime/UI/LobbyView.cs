@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PurrNet.Logging;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
