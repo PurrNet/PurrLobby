@@ -1,11 +1,12 @@
 #if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX)
 #define DISABLESTEAMWORKS
 #endif
-#if STEAMWORKS && !DISABLESTEAMWORKS
 using System.Threading.Tasks;
+using UnityEngine;
+#if STEAMWORKS && !DISABLESTEAMWORKS
 using PurrNet.Logging;
 using PurrNet.Steam;
-using UnityEngine;
+#endif
 
 namespace PurrNet.Lobby.Steam
 {
@@ -18,6 +19,12 @@ namespace PurrNet.Lobby.Steam
     {
         [SerializeField, PurrScene] private string _gameScene;
 
+        public override Task LoadGame(ILobby lobby)
+        {
+            return LoadGameScene(_gameScene);
+        }
+
+#if STEAMWORKS && !DISABLESTEAMWORKS
         public override Task<GameStartResponse> AllocateGame(ILobby lobby)
         {
             if (!SteamRuntime.isInitialized)
@@ -32,11 +39,6 @@ namespace PurrNet.Lobby.Steam
                 serverAddress = hostId,
                 hostId = hostId,
             }));
-        }
-
-        public override Task LoadGame(ILobby lobby)
-        {
-            return LoadGameScene(_gameScene);
         }
 
         protected override bool ConfigureTransport(NetworkManager manager, ConnectionInfo connection, bool asHost)
@@ -55,6 +57,19 @@ namespace PurrNet.Lobby.Steam
             transport.address = connection.serverAddress;
             return true;
         }
+#else
+        public override Task<GameStartResponse> AllocateGame(ILobby lobby)
+        {
+            return Task.FromResult(GameStartResponse.Failure(
+                "Steamworks.NET is not installed or Steam is unsupported on this platform."));
+        }
+
+        protected override bool ConfigureTransport(NetworkManager manager, ConnectionInfo connection, bool asHost)
+        {
+            Debug.LogError(
+                $"[{name}] Steamworks.NET is not installed or Steam is unsupported on this platform.");
+            return false;
+        }
+#endif
     }
 }
-#endif

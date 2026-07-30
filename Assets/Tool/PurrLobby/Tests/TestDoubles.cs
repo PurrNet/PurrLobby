@@ -30,6 +30,29 @@ namespace PurrNet.Lobby.Tests
         }
     }
 
+    public class TestChat : LobbyChatBase
+    {
+        public IPlayer localPlayerValue;
+        public readonly List<byte[]> sentMessages = new();
+        public Action<byte[]> onSend;
+
+        protected override IPlayer localPlayer => localPlayerValue;
+
+        public TestChat(IPlayer localPlayer = null)
+        {
+            localPlayerValue = localPlayer;
+        }
+
+        protected override void SendToProvider(byte[] data)
+        {
+            sentMessages.Add(data);
+            onSend?.Invoke(data);
+        }
+
+        public void ReceiveFromProviderPublic(IPlayer sender, byte[] data) =>
+            ReceiveFromProvider(sender, data);
+    }
+
     /// <summary>Lobby double exposing the protected roster/owner API for tests.</summary>
     public class TestLobby : LobbyBase<TestPlayer>
     {

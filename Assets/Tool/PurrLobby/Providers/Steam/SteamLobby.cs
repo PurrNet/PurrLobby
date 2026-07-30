@@ -226,7 +226,6 @@ namespace PurrNet.Lobby.Steam
 
                 var blob = SteamMatchmaking.GetLobbyMemberData(_lobbyId, memberId, MemberDataKey);
                 player.GetMetadata().ReplaceFrom(SteamMetadata.DeserializeBlob(blob));
-                RaisePlayerMetadataUpdated(player);
             }
         }
 

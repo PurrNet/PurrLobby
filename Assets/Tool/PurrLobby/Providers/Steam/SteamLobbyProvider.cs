@@ -1,12 +1,13 @@
 #if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX)
 #define DISABLESTEAMWORKS
 #endif
+using System.Threading.Tasks;
+using UnityEngine;
 #if STEAMWORKS && !DISABLESTEAMWORKS
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Steamworks;
-using UnityEngine;
+#endif
 
 namespace PurrNet.Lobby.Steam
 {
@@ -23,6 +24,7 @@ namespace PurrNet.Lobby.Steam
 
         public override int maxPlayer => _maxPlayers;
 
+#if STEAMWORKS && !DISABLESTEAMWORKS
         public override LobbyCapabilities capabilities => LobbyCapabilities.All;
 
         private Callback<GameLobbyJoinRequested_t> _overlayJoinCallback;
@@ -256,6 +258,30 @@ namespace PurrNet.Lobby.Steam
 
         private const string SteamUnavailable =
             "Steam is not running or SteamAPI failed to initialize.";
+#else
+        private const string SteamUnavailable =
+            "Steamworks.NET is not installed or Steam is unsupported on this platform.";
+
+        public override LobbyCapabilities capabilities => LobbyCapabilities.None;
+
+        public override Task Initialize() => Task.CompletedTask;
+
+        public override Task Logout() => Task.CompletedTask;
+
+        public override Task<LobbyResponse> CreateLobby(LobbySettings settings) =>
+            Task.FromResult(LobbyResponse.Failure(SteamUnavailable));
+
+        public override Task<LobbyResponse> JoinLobby(string lobbyId) =>
+            Task.FromResult(LobbyResponse.Failure(SteamUnavailable));
+
+        public override Task<LobbyResponse> JoinLobbyByCode(string code) =>
+            Task.FromResult(LobbyResponse.Failure(SteamUnavailable));
+
+        public override Task<LobbyResponse> JoinRandom(LobbyQuery query = null) =>
+            Task.FromResult(LobbyResponse.Failure(SteamUnavailable));
+
+        public override Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null) =>
+            Task.FromResult(LobbyCollectionResponse.Failure(SteamUnavailable));
+#endif
     }
 }
-#endif

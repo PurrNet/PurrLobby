@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using NUnit.Framework;
 
 namespace PurrNet.Lobby.Tests
@@ -166,6 +167,108 @@ namespace PurrNet.Lobby.Tests
             }, _events);
             Assert.IsFalse(_metadata.ContainsData("delete"));
             Assert.AreEqual("z", _metadata.GetData("added"));
+        }
+    }
+
+    public class LobbyChatBaseTests
+    {
+        private TestPlayer _localPlayer;
+        private TestPlayer _remotePlayer;
+        private TestChat _chat;
+        private List<(IPlayer sender, string message)> _received;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _localPlayer = new TestPlayer("local");
+            _remotePlayer = new TestPlayer("remote");
+            _chat = new TestChat(_localPlayer);
+            _received = new List<(IPlayer, string)>();
+            _chat.onMessageReceived += (sender, data) =>
+                _received.Add((sender, Encoding.UTF8.GetString(data)));
+        }
+
+        [Test]
+        public void SendMessage_LoopsBackBeforeSendingToProvider()
+        {
+            var order = new List<string>();
+            _chat.onMessageReceived += (_, _) => order.Add("loopback");
+            _chat.onSend += _ => order.Add("provider");
+
+            _chat.SendMessage(Encoding.UTF8.GetBytes("hello"));
+
+            Assert.AreEqual(new[] { "loopback", "provider" }, order);
+            Assert.AreEqual(1, _chat.sentMessages.Count);
+            Assert.AreEqual(new[] { (_localPlayer as IPlayer, "hello") }, _received);
+        }
+
+        [Test]
+        public void ReceiveFromProvider_MatchingLocalEcho_IsConsumed()
+        {
+            var data = Encoding.UTF8.GetBytes("hello");
+            _chat.SendMessage(data);
+
+            _chat.ReceiveFromProviderPublic(_localPlayer, data);
+
+            Assert.AreEqual(new[] { (_localPlayer as IPlayer, "hello") }, _received);
+        }
+
+        [Test]
+        public void ReceiveFromProvider_RemoteMessageWithSamePayload_IsDelivered()
+        {
+            var data = Encoding.UTF8.GetBytes("hello");
+            _chat.SendMessage(data);
+
+            _chat.ReceiveFromProviderPublic(_remotePlayer, data);
+
+            Assert.AreEqual(new[]
+            {
+                (_localPlayer as IPlayer, "hello"),
+                (_remotePlayer as IPlayer, "hello"),
+            }, _received);
+        }
+
+        [Test]
+        public void ReceiveFromProvider_UnmatchedLocalMessage_IsDelivered()
+        {
+            _chat.ReceiveFromProviderPublic(_localPlayer, Encoding.UTF8.GetBytes("server event"));
+
+            Assert.AreEqual(new[] { (_localPlayer as IPlayer, "server event") }, _received);
+        }
+
+        [Test]
+        public void RepeatedMessages_ConsumeOneProviderEchoEach()
+        {
+            var data = Encoding.UTF8.GetBytes("same");
+            _chat.SendMessage(data);
+            _chat.SendMessage(data);
+
+            _chat.ReceiveFromProviderPublic(_localPlayer, data);
+            _chat.ReceiveFromProviderPublic(_localPlayer, data);
+
+            Assert.AreEqual(2, _received.Count);
+            Assert.AreEqual(2, _chat.sentMessages.Count);
+        }
+
+        [Test]
+        public void SendMessage_WithoutLocalPlayer_StillSends()
+        {
+            _chat.localPlayerValue = null;
+
+            _chat.SendMessage(Encoding.UTF8.GetBytes("hello"));
+
+            Assert.IsEmpty(_received);
+            Assert.AreEqual(1, _chat.sentMessages.Count);
+        }
+
+        [Test]
+        public void SendMessage_NullOrEmpty_IsIgnored()
+        {
+            _chat.SendMessage(null);
+            _chat.SendMessage(System.Array.Empty<byte>());
+
+            Assert.IsEmpty(_received);
+            Assert.IsEmpty(_chat.sentMessages);
         }
     }
 }

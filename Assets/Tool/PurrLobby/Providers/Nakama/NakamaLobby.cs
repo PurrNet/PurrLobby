@@ -365,7 +365,6 @@ namespace PurrNet.Lobby.Nakama
                     if (!TryGetPlayerInternal(kvp.Key, out var player))
                         continue;
                     player.GetMetadata().ReplaceFrom(kvp.Value);
-                    RaisePlayerMetadataUpdated(player);
                 }
             }
         }
@@ -384,7 +383,6 @@ namespace PurrNet.Lobby.Nakama
             if (!TryGetPlayerInternal(msg.userId, out var player))
                 return;
             player.GetMetadata().ReplaceFrom(msg.metadata);
-            RaisePlayerMetadataUpdated(player);
         }
 
         private void ApplyKick(KickMessage msg)

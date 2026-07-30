@@ -135,6 +135,62 @@ namespace PurrNet.Lobby.Tests
         }
 
         [Test]
+        public void PlayerOriginatedUpdate_IsForwardedByLobbyImmediately()
+        {
+            var alice = new TestPlayer("alice");
+            _lobby.AddPlayerPublic(alice, isLocal: true);
+
+            var updates = new List<IPlayer>();
+            _lobby.onPlayerUpdated += updates.Add;
+
+            alice.SetReady(true);
+
+            Assert.AreEqual(new IPlayer[] { alice }, updates);
+            Assert.IsTrue(alice.isReady);
+        }
+
+        [Test]
+        public void PlayerMetadataWrite_IsForwardedImmediately_AndEchoIsDeduplicated()
+        {
+            var alice = new TestPlayer("alice");
+            _lobby.AddPlayerPublic(alice, isLocal: true);
+
+            int playerMetadataUpdates = 0;
+            var lobbyUpdates = new List<IPlayer>();
+            alice.onPlayerMetadataUpdated += () => playerMetadataUpdates++;
+            _lobby.onPlayerUpdated += lobbyUpdates.Add;
+
+            alice.userData.SetData("setting", "enabled");
+
+            Assert.AreEqual(1, playerMetadataUpdates);
+            Assert.AreEqual(new IPlayer[] { alice }, lobbyUpdates);
+
+            ((TestMetadata)alice.userData).ReplaceFrom(new Dictionary<string, string>
+            {
+                { "setting", "enabled" },
+            });
+
+            Assert.AreEqual(1, playerMetadataUpdates);
+            Assert.AreEqual(new IPlayer[] { alice }, lobbyUpdates);
+        }
+
+        [Test]
+        public void RemovedPlayerUpdate_IsNoLongerForwardedByLobby()
+        {
+            var alice = new TestPlayer("alice");
+            _lobby.AddPlayerPublic(alice);
+            _lobby.RemovePlayerPublic(alice.id, out _);
+
+            var updates = new List<IPlayer>();
+            _lobby.onPlayerUpdated += updates.Add;
+
+            alice.NotifyUpdated();
+            alice.NotifyMetadataUpdated();
+
+            Assert.IsEmpty(updates);
+        }
+
+        [Test]
         public void RaisePlayerMetadataUpdated_RaisesPlayerAndLobbyEvents()
         {
             var alice = new TestPlayer("alice");

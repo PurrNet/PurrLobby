@@ -1,34 +1,27 @@
 #if NAKAMA
-using System;
 using UnityEngine;
 
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>Chat implementation using Nakama match-state messages.</summary>
-    public class NakamaChat : ILobbyChat
+    public class NakamaChat : LobbyChatBase
     {
         private readonly NakamaLobby _lobby;
 
-        public event Action<IPlayer, byte[]> onMessageReceived;
+        protected override IPlayer localPlayer => _lobby.localPlayer;
 
         internal NakamaChat(NakamaLobby lobby)
         {
             _lobby = lobby;
         }
 
-        public void SendMessage(byte[] data)
+        protected override void SendToProvider(byte[] data)
         {
-            if (data == null || data.Length == 0)
-                return;
-
             try
             {
                 _ = _lobby.SendMatchStateBytesAsync(NakamaOpCodes.Chat, data);
-
-                if (_lobby.localPlayer != null)
-                    onMessageReceived?.Invoke(_lobby.localPlayer, data);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 Debug.LogException(ex);
             }
@@ -38,7 +31,7 @@ namespace PurrNet.Lobby.Nakama
         {
             if (sender == null || state == null)
                 return;
-            onMessageReceived?.Invoke(sender, state);
+            ReceiveFromProvider(sender, state);
         }
     }
 }

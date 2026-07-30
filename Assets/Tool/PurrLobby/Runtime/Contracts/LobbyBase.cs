@@ -93,6 +93,9 @@ namespace PurrNet.Lobby
         protected void AddPlayer(TPlayer player, bool isLocal)
         {
             playerList.Add(player);
+            player.updatedInternal += OnPlayerUpdatedInternal;
+            player.metadataUpdatedInternal += OnPlayerMetadataUpdatedInternal;
+            player.ObserveUserDataChanges();
             if (isLocal)
                 localPlayerInternal = player;
             _onPlayerJoined?.Invoke(player);
@@ -107,6 +110,9 @@ namespace PurrNet.Lobby
                 {
                     removed = playerList[i];
                     playerList.RemoveAt(i);
+                    removed.StopObservingUserDataChanges();
+                    removed.updatedInternal -= OnPlayerUpdatedInternal;
+                    removed.metadataUpdatedInternal -= OnPlayerMetadataUpdatedInternal;
                     _onPlayerLeft?.Invoke(removed);
                     return true;
                 }
@@ -155,15 +161,19 @@ namespace PurrNet.Lobby
         protected void RaisePlayerUpdated(TPlayer player)
         {
             player.NotifyUpdated();
-            _onPlayerUpdated?.Invoke(player);
         }
 
         /// <summary>Raises the player's metadata event and the lobby-level <see cref="onPlayerUpdated"/>.</summary>
         protected void RaisePlayerMetadataUpdated(TPlayer player)
         {
             player.NotifyMetadataUpdated();
-            _onPlayerUpdated?.Invoke(player);
         }
+
+        private void OnPlayerUpdatedInternal(LobbyPlayerBase player) =>
+            _onPlayerUpdated?.Invoke((TPlayer)player);
+
+        private void OnPlayerMetadataUpdatedInternal(LobbyPlayerBase player) =>
+            _onPlayerUpdated?.Invoke((TPlayer)player);
 
         protected void RaiseLobbyDestroyed() => _onLobbyDestroyed?.Invoke();
     }

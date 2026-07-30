@@ -59,7 +59,6 @@ namespace PurrNet.Lobby.PurrNet
                 return;
 
             player.GetMetadata().ReplaceFrom(metadata);
-            RaisePlayerMetadataUpdated(player);
         }
 
         private void OnLobbySnapshot(LobbySnapshot snapshot)

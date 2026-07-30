@@ -1,36 +1,36 @@
 using System.IO;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace PurrNet.Lobby.Steam.Editor
 {
     /// <summary>
-    /// Setup helpers for the Steam lobby provider: installing Steamworks.NET and
-    /// creating the steam_appid.txt Steam requires when launching from the editor.
+    /// Setup helper for the steam_appid.txt Steam requires when launching from the editor.
     /// </summary>
     public static class SteamSetupUtility
     {
-        private const string SteamworksPackageUrl =
-            "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#2024.8.0";
-
         private const string TestAppId = "480"; // Spacewar, Valve's public test AppID.
 
-        [MenuItem("Tools/PurrLobby/Steam/Install Steamworks.NET")]
-        public static void InstallSteamworks()
+        private static string appIdPath =>
+            Path.Combine(Directory.GetParent(Application.dataPath)!.FullName, "steam_appid.txt");
+
+        internal static void DrawAppIdSetup()
         {
-#if STEAMWORKS
-            EditorUtility.DisplayDialog("Steamworks.NET", "Steamworks.NET is already installed.", "OK");
-#else
-            Client.Add(SteamworksPackageUrl);
-            Debug.Log("[PurrLobby] Installing Steamworks.NET via the Package Manager...");
-#endif
+            if (File.Exists(appIdPath))
+                return;
+
+            GUILayout.Space(10);
+            EditorGUILayout.HelpBox(
+                "steam_appid.txt is missing. Create a test file to run Steam from the editor.",
+                MessageType.Warning);
+
+            if (GUILayout.Button("Create steam_appid.txt (480 - Spacewar)"))
+                CreateTestAppId();
         }
 
-        [MenuItem("Tools/PurrLobby/Steam/Create steam_appid.txt (480)")]
-        public static void CreateTestAppId()
+        private static void CreateTestAppId()
         {
-            var path = Path.Combine(Directory.GetParent(Application.dataPath)!.FullName, "steam_appid.txt");
+            var path = appIdPath;
 
             if (File.Exists(path))
             {

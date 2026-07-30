@@ -5,11 +5,13 @@ using UnityEngine;
 
 namespace PurrNet.Lobby.PurrNet
 {
-    public class PurrNetChat : ILobbyChat, IDisposable
+    public class PurrNetChat : LobbyChatBase, IDisposable
     {
         private readonly LobbyConnection _connection;
 
         private readonly PurrNetLobby _lobby;
+
+        protected override IPlayer localPlayer => _lobby.localPlayer;
 
         public PurrNetChat(LobbyConnection connection, PurrNetLobby lobby)
         {
@@ -21,10 +23,10 @@ namespace PurrNet.Lobby.PurrNet
         private void OnChatMessage(ChatMessage obj)
         {
             if (_lobby.TryGetPlayer(obj.playerId, out var player))
-                onMessageReceived?.Invoke(player, Convert.FromBase64String(obj.data));
+                ReceiveFromProvider(player, Convert.FromBase64String(obj.data));
         }
 
-        public void SendMessage(byte[] data)
+        protected override void SendToProvider(byte[] data)
         {
             try
             {
@@ -41,8 +43,6 @@ namespace PurrNet.Lobby.PurrNet
         {
             _connection.onChat -= OnChatMessage;
         }
-
-        public event Action<IPlayer, byte[]> onMessageReceived;
     }
 }
 #endif

@@ -116,7 +116,7 @@ namespace PurrNet.Lobby
                     await _orchestrator.sessionProvider.Logout();
 
                 CloseMe();
-                _manager.Initialize();
+                await _manager.InitializeAsync();
             }
             catch (Exception e)
             {

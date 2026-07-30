@@ -2,32 +2,25 @@
 #define DISABLESTEAMWORKS
 #endif
 #if STEAMWORKS && !DISABLESTEAMWORKS
-using System;
 using Steamworks;
 using UnityEngine;
 
 namespace PurrNet.Lobby.Steam
 {
-    /// <summary>
-    /// Chat over Steam lobby messages. Steam echoes the sender's own message back
-    /// through LobbyChatMsg_t, so no manual local echo is needed.
-    /// </summary>
-    public class SteamChat : ILobbyChat
+    /// <summary>Chat over Steam lobby messages.</summary>
+    public class SteamChat : LobbyChatBase
     {
-        public event Action<IPlayer, byte[]> onMessageReceived;
-
         private readonly SteamLobby _lobby;
+
+        protected override IPlayer localPlayer => _lobby.localPlayer;
 
         internal SteamChat(SteamLobby lobby)
         {
             _lobby = lobby;
         }
 
-        public void SendMessage(byte[] data)
+        protected override void SendToProvider(byte[] data)
         {
-            if (data == null || data.Length == 0)
-                return;
-
             if (!SteamMatchmaking.SendLobbyChatMsg(_lobby.steamLobbyId, data, data.Length))
                 Debug.LogWarning("[SteamChat] Failed to send lobby chat message.");
         }
@@ -35,7 +28,7 @@ namespace PurrNet.Lobby.Steam
         /// <summary>Called by SteamLobby when a LobbyChatMsg_t arrives.</summary>
         internal void DispatchIncoming(IPlayer sender, byte[] data)
         {
-            onMessageReceived?.Invoke(sender, data);
+            ReceiveFromProvider(sender, data);
         }
     }
 }
