@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PurrNet.Logging;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
@@ -216,11 +217,9 @@ namespace PurrNet.Lobby
                 GameStartKeys.PublishConnectionInfo(_lobby, joinInfo.connection);
 
                 loadingView.Setup("Loading game ...");
-                await _orchestrator.gameAllocator.LoadGame(lobby);
-                if (!this || _lobby == null)
-                    return;
-
-                _orchestrator.gameAllocator.Connect(joinInfo.connection, true);
+                var orchestrator = _orchestrator;
+                await orchestrator.gameAllocator.LoadGame(lobby);
+                orchestrator.gameAllocator.Connect(joinInfo.connection, true);
             }).Forget("[LobbyView] StartGame failed");
         }
 
@@ -232,11 +231,9 @@ namespace PurrNet.Lobby
                     throw new Exception("Received malformed connection info from the lobby.");
 
                 loadingView.Setup("Loading game ...");
-                await _orchestrator.gameAllocator.LoadGame(lobby);
-                if (!this || _lobby == null)
-                    return;
-
-                _orchestrator.gameAllocator.Connect(info, false);
+                var orchestrator = _orchestrator;
+                await orchestrator.gameAllocator.LoadGame(lobby);
+                orchestrator.gameAllocator.Connect(info, false);
             }).Forget("[LobbyView] JoinGame failed");
         }
 
@@ -335,12 +332,11 @@ namespace PurrNet.Lobby
             UpdateLocalPlayerData(lobby);
         }
 
-        private PlayerEntry CreatePlayerEntry(IPlayer player)
+        private void CreatePlayerEntry(IPlayer player)
         {
             var entry = Instantiate(_playerPrefab, _playerContent);
             entry.Setup(_lobby, player, OnKickPlayer);
             _uiPlayerEntry.Add(player, entry);
-            return entry;
         }
 
         private void UpdateLocalPlayerData(ILobby lobby)

@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.LobbyBrowserView
   _cullWindowsBehind: 0
-  _window: {fileID: 4340601998198881851}
+  _slideContent: {fileID: 4340601998198881851}
   _lobbyInfoEntry: {fileID: 9162618694489962696, guid: 8208a9755a412e746a4b47a2ec4cf2cc, type: 3}
   _lobbyContent: {fileID: 3681367271549679813}
   _loadingOverlay: {fileID: 4796412847088559957}
@@ -587,6 +587,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7493001921848074238, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 8977300806387756823, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -595,13 +599,25 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8977300806387756823, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
+      propertyPath: m_Size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9183684759662979713, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
+      propertyPath: m_Value
+      value: 0.88235295
+      objectReference: {fileID: 0}
     - target: {fileID: 9188611237920211996, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Size
-      value: 0.9999999
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9188611237920211996, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
