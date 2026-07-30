@@ -1,3 +1,4 @@
+#if PURR_SERVICES
 using System;
 using PurrNet.Services;
 using UnityEngine;
@@ -44,3 +45,4 @@ namespace PurrNet.Lobby.PurrNet
         public event Action<IPlayer, byte[]> onMessageReceived;
     }
 }
+#endif

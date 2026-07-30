@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 752e7907a8424e7199261a652466a3af, type: 3}
   m_Name: Edgegap Matchmaker
   m_EditorClassIdentifier: PurrNet.Lobby.Edgegap::PurrNet.Lobby.PurrNet.EdgegapMatchmakingProvider
-  _matchmakerUrl: https://om-1z5snq9f8w.edgegap.net
-  _authToken: e39f478d-ac3d-4671-9360-f34937daf8ed
+  _matchmakerUrl: 
+  _authToken: 
   _defaultProfile: default
   _gameAllocator: {fileID: 11400000, guid: 2ac55af591b3f3348919639961036fdd, type: 2}
   _pollIntervalMs: 3000

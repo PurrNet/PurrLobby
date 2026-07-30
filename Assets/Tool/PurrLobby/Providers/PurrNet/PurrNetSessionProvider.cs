@@ -1,13 +1,16 @@
 using System.Threading.Tasks;
-using PurrNet.Services;
 using PurrNet.UI;
 using UnityEngine;
+#if PURR_SERVICES
+using PurrNet.Services;
+#endif
 
 namespace PurrNet.Lobby.PurrNet
 {
     [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Session Provider", order = -201)]
     public class PurrNetSessionProvider : SessionProvider
     {
+#if PURR_SERVICES
         public override bool isLoggedIn => PurrServices.instance.auth.isAuthenticated;
 
         public override string playerId => PurrServices.instance.auth.playerId;
@@ -82,5 +85,20 @@ namespace PurrNet.Lobby.PurrNet
             services.auth.Logout();
             return Task.CompletedTask;
         }
+#else
+        public override bool isLoggedIn => false;
+
+        public override string playerId => null;
+
+        public override string playerName => null;
+
+        public override Task Login(ViewStack stack)
+        {
+            Debug.LogError($"[{name}] PurrServices is not installed. Install it from this provider's inspector.");
+            return Task.CompletedTask;
+        }
+
+        public override Task Logout() => Task.CompletedTask;
+#endif
     }
 }

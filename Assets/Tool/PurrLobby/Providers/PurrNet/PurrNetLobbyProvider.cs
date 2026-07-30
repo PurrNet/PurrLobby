@@ -1,7 +1,9 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using PurrNet.Services;
 using UnityEngine;
+#if PURR_SERVICES
+using System.Collections.Generic;
+using PurrNet.Services;
+#endif
 
 namespace PurrNet.Lobby.PurrNet
 {
@@ -12,6 +14,7 @@ namespace PurrNet.Lobby.PurrNet
 
         public override int maxPlayer => _maxPlayers;
 
+#if PURR_SERVICES
         public override async Task<LobbyResponse> CreateLobby(LobbySettings settings)
         {
             var services = PurrServices.instance;
@@ -144,5 +147,24 @@ namespace PurrNet.Lobby.PurrNet
                 default: return global::PurrNet.Services.LobbyComparison.Equal;
             }
         }
+#else
+        private const string MissingServicesError =
+            "PurrServices is not installed. Install it from this provider's inspector.";
+
+        public override Task<LobbyResponse> CreateLobby(LobbySettings settings) =>
+            Task.FromResult(LobbyResponse.Failure(MissingServicesError));
+
+        public override Task<LobbyResponse> JoinLobby(string lobbyId) =>
+            Task.FromResult(LobbyResponse.Failure(MissingServicesError));
+
+        public override Task<LobbyResponse> JoinLobbyByCode(string code) =>
+            Task.FromResult(LobbyResponse.Failure(MissingServicesError));
+
+        public override Task<LobbyResponse> JoinRandom(LobbyQuery query = null) =>
+            Task.FromResult(LobbyResponse.Failure(MissingServicesError));
+
+        public override Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null) =>
+            Task.FromResult(LobbyCollectionResponse.Failure(MissingServicesError));
+#endif
     }
 }

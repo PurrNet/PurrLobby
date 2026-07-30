@@ -16,7 +16,7 @@ namespace PurrNet.Lobby.Edgegap
     /// Deliberately depends only on Unity - not on the Edgegap Unity plugin.
     /// </summary>
     [CustomEditor(typeof(EdgegapMatchmakingProvider))]
-    public class EdgegapMatchmakingProviderEditor : Editor
+    public class EdgegapMatchmakingProviderEditor : UnityEditor.Editor
     {
         private static readonly HttpClient client = new()
         {

@@ -1,3 +1,4 @@
+#if PURR_SERVICES
 using System;
 using System.Collections;
 using System.Threading.Tasks;
@@ -115,3 +116,4 @@ namespace PurrNet.Lobby.PurrNet
         }
     }
 }
+#endif

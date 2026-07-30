@@ -18,6 +18,12 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "dev.purrnet.services",
+            "expression": "",
+            "define": "PURR_SERVICES"
+        }
+    ],
     "noEngineReferences": false
 }

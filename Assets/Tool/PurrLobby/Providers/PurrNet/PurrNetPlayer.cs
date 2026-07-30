@@ -1,3 +1,4 @@
+#if PURR_SERVICES
 using PurrNet.Services;
 
 namespace PurrNet.Lobby.PurrNet
@@ -37,3 +38,4 @@ namespace PurrNet.Lobby.PurrNet
         }
     }
 }
+#endif

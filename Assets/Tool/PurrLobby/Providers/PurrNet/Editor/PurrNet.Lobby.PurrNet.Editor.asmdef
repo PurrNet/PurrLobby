@@ -1,9 +1,8 @@
 {
-    "name": "PurrNet.Lobby.Edgegap.Editor",
-    "rootNamespace": "PurrNet.Lobby.PurrNet",
+    "name": "PurrNet.Lobby.PurrNet.Editor",
+    "rootNamespace": "PurrNet.Lobby.PurrNet.Editor",
     "references": [
-        "GUID:2adece59b0dab0c48a908fc445e93fc0",
-        "GUID:fb5aa70e09e0db742957de215ef97d5b",
+        "GUID:1f6f4d2bec3b4dd47a2c4cf26aa8d7e4",
         "GUID:629ad64ea20117f43b28b33033f75b88"
     ],
     "includePlatforms": [

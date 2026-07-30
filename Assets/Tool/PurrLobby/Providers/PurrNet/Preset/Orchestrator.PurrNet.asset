@@ -15,4 +15,4 @@ MonoBehaviour:
   sessionProvider: {fileID: 11400000, guid: f3595a4b475d69c40920509baf248ca3, type: 2}
   lobbyProvider: {fileID: 11400000, guid: e65904cd2015fd34d84e7467efb6eb95, type: 2}
   matchmakingProvider: {fileID: 11400000, guid: 8d5dd6a728f583a43b9dd65a47a4ac8e, type: 2}
-  gameAllocator: {fileID: 11400000, guid: 2ac55af591b3f3348919639961036fdd, type: 2}
+  gameAllocator: {fileID: 11400000, guid: f6f42b61eda35004d851f4e8d45d928e, type: 2}

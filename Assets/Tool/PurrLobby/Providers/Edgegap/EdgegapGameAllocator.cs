@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using PurrNet.Logging;
+#if PURR_SERVICES
 using PurrNet.Services;
+#endif
 using PurrNet.Transports;
 using UnityEngine;
 
@@ -22,11 +24,17 @@ namespace PurrNet.Lobby.Edgegap
         [Tooltip("Optional Edgegap port name. If empty, the first port whose protocol matches the chosen transport is used.")]
         [SerializeField] private string _portName = "";
 
+#if !PURR_SERVICES
+#pragma warning disable CS0414 // Preserve serialized allocation settings while their service is unavailable.
+#endif
         [Tooltip("Total deployment timeout in milliseconds.")]
         [SerializeField] private int _deploymentTimeoutMs = 300_000;
 
         [Tooltip("Polling interval in milliseconds while waiting for the deployment to become ready.")]
         [SerializeField] private int _pollIntervalMs = 2_000;
+#if !PURR_SERVICES
+#pragma warning restore CS0414
+#endif
 
         /// <summary>
         /// Transport this allocator connects with. The single source of truth for
@@ -38,6 +46,7 @@ namespace PurrNet.Lobby.Edgegap
         /// <summary>Optional named port to connect through; empty means pick by protocol.</summary>
         public string PortName => _portName;
 
+#if PURR_SERVICES
         public override async Task<GameStartResponse> AllocateGame(ILobby lobby)
         {
             await PurrServices.instance.edgegap.StopAllAsync();
@@ -98,6 +107,13 @@ namespace PurrNet.Lobby.Edgegap
             error = $"No Edgegap port found matching transport `{_transport}`. Set the port name explicitly on `{name}`.";
             return false;
         }
+#else
+        public override Task<GameStartResponse> AllocateGame(ILobby lobby)
+        {
+            return Task.FromResult(GameStartResponse.Failure(
+                "PurrServices is not installed. Install it before using direct Edgegap allocation."));
+        }
+#endif
 
         private bool MatchesTransport(string protocol)
         {
