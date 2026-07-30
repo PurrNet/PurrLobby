@@ -134,17 +134,17 @@ namespace PurrNet.Lobby.PurrNet
             return sq;
         }
 
-        private static global::PurrNet.Services.LobbyComparison ToServicesOp(FilterComparison op)
+        private static LobbyComparison ToServicesOp(FilterComparison op)
         {
             switch (op)
             {
-                case FilterComparison.Equal: return global::PurrNet.Services.LobbyComparison.Equal;
-                case FilterComparison.NotEqual: return global::PurrNet.Services.LobbyComparison.NotEqual;
-                case FilterComparison.LessThan: return global::PurrNet.Services.LobbyComparison.LessThan;
-                case FilterComparison.GreaterThan: return global::PurrNet.Services.LobbyComparison.GreaterThan;
-                case FilterComparison.LessThanOrEqual: return global::PurrNet.Services.LobbyComparison.LessThanOrEqual;
-                case FilterComparison.GreaterThanOrEqual: return global::PurrNet.Services.LobbyComparison.GreaterThanOrEqual;
-                default: return global::PurrNet.Services.LobbyComparison.Equal;
+                case FilterComparison.Equal: return LobbyComparison.Equal;
+                case FilterComparison.NotEqual: return LobbyComparison.NotEqual;
+                case FilterComparison.LessThan: return LobbyComparison.LessThan;
+                case FilterComparison.GreaterThan: return LobbyComparison.GreaterThan;
+                case FilterComparison.LessThanOrEqual: return LobbyComparison.LessThanOrEqual;
+                case FilterComparison.GreaterThanOrEqual: return LobbyComparison.GreaterThanOrEqual;
+                default: return LobbyComparison.Equal;
             }
         }
 #else

@@ -50,6 +50,7 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
-    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.22.0-beta.6"
+    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.22.0-beta.7",
+    "dev.purrnet.services": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#v1.0.0"
   }
 }
