@@ -18,7 +18,6 @@ namespace PurrNet.Lobby
         [SerializeField] private CloseParentView _closeParentView;
 
         private GameOrchestrator _orchestrator;
-
         public override void OnPopped()
         {
             _playerCountSlider.onValueChanged.RemoveAllListeners();

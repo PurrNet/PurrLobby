@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.CreateLobbyView
   _cullWindowsBehind: 0
-  _content: {fileID: 2745614998433910954}
+  _slideContent: {fileID: 2745614998433910954}
   _lobbyName: {fileID: 6041622171317757104}
   _publicToggle: {fileID: 5780933904004143131}
   _playerCountSlider: {fileID: 1851851891228131154}
@@ -700,15 +700,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4913896743773401763, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
       propertyPath: m_Color.b
-      value: 0.15686275
+      value: 0.96470594
       objectReference: {fileID: 0}
     - target: {fileID: 4913896743773401763, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
       propertyPath: m_Color.g
-      value: 0.15294118
+      value: 0.5176471
       objectReference: {fileID: 0}
     - target: {fileID: 4913896743773401763, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
       propertyPath: m_Color.r
-      value: 0.15294118
+      value: 0.015686275
       objectReference: {fileID: 0}
     - target: {fileID: 5174428824100797442, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
       propertyPath: m_text
@@ -724,7 +724,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8994020968389987630, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -7
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 9012655581116271127, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
       propertyPath: m_AnchorMax.y
@@ -832,7 +832,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9082719154817434415, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
       propertyPath: _value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1779,7 +1779,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9188611237920211996, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
