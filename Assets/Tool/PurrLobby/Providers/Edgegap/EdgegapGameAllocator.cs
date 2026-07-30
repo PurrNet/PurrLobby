@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using PurrNet.Logging;
 #if PURR_SERVICES
 using PurrNet.Services;
 #endif
