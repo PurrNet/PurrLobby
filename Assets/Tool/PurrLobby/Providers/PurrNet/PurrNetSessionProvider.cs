@@ -1,0 +1,86 @@
+using System.Threading.Tasks;
+using PurrNet.Services;
+using PurrNet.UI;
+using UnityEngine;
+
+namespace PurrNet.Lobby.PurrNet
+{
+    [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Session Provider", order = -201)]
+    public class PurrNetSessionProvider : SessionProvider
+    {
+        public override bool isLoggedIn => PurrServices.instance.auth.isAuthenticated;
+
+        public override string playerId => PurrServices.instance.auth.playerId;
+
+        public override string playerName => PurrServices.instance.auth.displayName;
+
+        private TaskCompletionSource<bool> _loggingIn;
+
+        public override async Task Login(ViewStack stack)
+        {
+            var services = PurrServices.instance;
+
+            if (services.auth.isAuthenticated)
+            {
+                var result = await services.auth.ValidateSessionAsync();
+
+                if (result.success)
+                    return;
+
+                Debug.LogWarning(result.error);
+            }
+
+            // The session expired but the user asked to be remembered: the device id
+            // is the credential, so log back in silently instead of prompting again.
+            if (DeviceLogin.TryGetRememberedLogin(out var deviceId, out var rememberedName))
+            {
+                var result = await services.auth.LoginAsync(deviceId, rememberedName);
+
+                if (result.success)
+                    return;
+
+                Debug.LogWarning($"[{name}] Silent device login failed: {result.error}");
+            }
+
+            _loggingIn = new TaskCompletionSource<bool>();
+
+            var deviceLogin = stack.Push<DeviceLogin>();
+            deviceLogin.Setup(SetFlag, Login);
+
+            await _loggingIn.Task;
+        }
+
+        void SetFlag()
+        {
+            _loggingIn.TrySetResult(true);
+        }
+
+        static async Task<APIResponse> Login(string deviceId, string displayName, bool rememberMe)
+        {
+            var services = PurrServices.instance;
+            var result = await services.auth.LoginAsync(deviceId, displayName);
+
+            if (!result.success)
+                return APIResponse.Failure(result.error);
+
+            // The device already had an account: the server keeps its original display
+            // name and ignores the typed one. Say so instead of silently swapping.
+            var actualName = services.auth.displayName;
+            if (!string.IsNullOrEmpty(displayName) && !string.IsNullOrEmpty(actualName) && actualName != displayName)
+                Toaster.Push("Welcome back", $"This device already has an account — logged in as {actualName}.");
+
+            return APIResponse.Success();
+        }
+
+        public override Task Logout()
+        {
+            // Forget the remembered device login too, otherwise the next Login()
+            // silently signs straight back in and logout appears to do nothing.
+            DeviceLogin.ClearRememberedLogin();
+
+            var services = PurrServices.instance;
+            services.auth.Logout();
+            return Task.CompletedTask;
+        }
+    }
+}

@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "com.edgegap.unity-servers-plugin": "https://github.com/edgegap/edgegap-unity-plugin.git#partner/purrnet-source",
+    "com.heroiclabs.nakama-unity": "https://github.com/heroiclabs/nakama-unity.git?path=/Packages/Nakama",
+    "com.rlabrecque.steamworks.net": "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#2024.8.0",
     "com.unity.ai.navigation": "2.0.10",
     "com.unity.collab-proxy": "2.11.3",
     "com.unity.ide.rider": "3.0.39",
@@ -12,6 +15,7 @@
     "com.unity.timeline": "1.8.10",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.9",
+    "dev.purrnet.ui": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.5.0-beta.9",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
@@ -46,9 +50,6 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
-    "com.heroiclabs.nakama-unity": "https://github.com/heroiclabs/nakama-unity.git?path=/Packages/Nakama",
-    "dev.purrnet.ui": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.5.0-beta.9",
-    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.20.1-beta.1",
-    "com.edgegap.unity-servers-plugin": "https://github.com/edgegap/edgegap-unity-plugin.git#partner/purrnet-source"
+    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.22.0-beta.4"
   }
 }
