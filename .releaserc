@@ -22,14 +22,6 @@
             "files": ["Assets/Tool/PurrLobby/package.json"],
             "from": "\"version\": \".*?\"",
             "to": "\"version\": \"${nextRelease.version}\"",
-            "results": [
-              {
-                "file": "Assets/Tool/PurrLobby/package.json",
-                "hasChanged": true,
-                "numMatches": 1,
-                "numReplacements": 1
-              }
-            ],
             "countMatches": true
           }
         ]
