@@ -6,6 +6,12 @@ using PurrNet.Transports;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+#if UNITY_6000_3_OR_NEWER
+using SceneKey = UnityEngine.SceneManagement.SceneHandle;
+#else
+using SceneKey = System.Int32;
+#endif
+
 namespace PurrNet.Lobby
 {
     /// <summary>
@@ -32,12 +38,12 @@ namespace PurrNet.Lobby
         /// <summary>The most recently registered <see cref="GameSession"/>. For the common single-session case; prefer <see cref="TryGet"/> when the scene is known.</summary>
         public static GameSession instance { get; private set; }
 
-        private static readonly Dictionary<int, GameSession> _byScene = new();
+        private static readonly Dictionary<SceneKey, GameSession> _byScene = new();
 
         /// <summary>Gets the <see cref="GameSession"/> living in the given scene, if any.</summary>
         public static bool TryGet(Scene scene, out GameSession session)
         {
-            if (_byScene.TryGetValue(scene.handle, out session) && session)
+            if (_byScene.TryGetValue(GetSceneKey(scene), out session) && session)
                 return true;
             session = null;
             return false;
@@ -85,7 +91,7 @@ namespace PurrNet.Lobby
                 return;
             }
 
-            _byScene[scene.handle] = this;
+            _byScene[GetSceneKey(scene)] = this;
             instance = this;
         }
 
@@ -123,12 +129,15 @@ namespace PurrNet.Lobby
                 _manager.onServerConnectionState -= OnServerConnectionState;
             }
 
-            if (_byScene.TryGetValue(gameObject.scene.handle, out var s) && s == this)
-                _byScene.Remove(gameObject.scene.handle);
+            var sceneHandle = GetSceneKey(gameObject.scene);
+            if (_byScene.TryGetValue(sceneHandle, out var s) && s == this)
+                _byScene.Remove(sceneHandle);
 
             if (instance == this)
                 instance = null;
         }
+
+        private static SceneKey GetSceneKey(Scene scene) => scene.handle;
 
         /// <summary>The player chose to leave. Returns to the menu immediately, with no reconnect.</summary>
         public void LeaveToMenu() => ExitToMenu(GameExitReason.LeftByChoice);
