@@ -1,3 +1,17 @@
+# [1.0.0-beta.6](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2026-07-31)
+
+
+### Bug Fixes
+
+* auto start was broken ([27385b6](https://github.com/PurrNet/PurrLobby/commit/27385b6f5a590aec8b3df2e8778f829eb9b7548d))
+* include purrservices warning ([77cc9a0](https://github.com/PurrNet/PurrLobby/commit/77cc9a0d18261ed72be7e550af378047e694aa4c))
+* make purrservices optional ([8eb9190](https://github.com/PurrNet/PurrLobby/commit/8eb91904c22a96039a330a88c2a589578bc00e29))
+* no more "global" free tier thing ([aa2e7a3](https://github.com/PurrNet/PurrLobby/commit/aa2e7a30d1038298fab06351afcb62043bb1cf67))
+* not needed global namespaces ([0bfec23](https://github.com/PurrNet/PurrLobby/commit/0bfec2378780d2140b9e4ee527d4be6d0757fe9d))
+* refactor folder structure and steam provider ([53b9b07](https://github.com/PurrNet/PurrLobby/commit/53b9b0716b4688f299bfcdac045e54ef00ecb468))
+* releaserc ([2bdf7b8](https://github.com/PurrNet/PurrLobby/commit/2bdf7b8a25da2d8dce719495a85d4df3dffe8976))
+* remove meta files ([c8891d2](https://github.com/PurrNet/PurrLobby/commit/c8891d224c137f411aa6cdfb65c677bdf4913ffc))
+
 # [1.0.0-beta.5](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2026-07-20)
 
 
