@@ -1,3 +1,10 @@
+# [1.0.0-beta.8](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2026-07-31)
+
+
+### Bug Fixes
+
+* releaserc ([05e09bc](https://github.com/PurrNet/PurrLobby/commit/05e09bcf6486bb65f6408ad6e772bab73c419089))
+
 # [1.0.0-beta.7](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2026-07-31)
 
 
