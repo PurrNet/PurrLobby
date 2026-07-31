@@ -14,12 +14,12 @@
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     ["@semantic-release/changelog", {
-      "changelogFile": "Assets/Tool/PurrLobby/CHANGELOG.md"
+      "changelogFile": "PurrLobby/CHANGELOG.md"
     }],
     ["semantic-release-replace-plugin", {
         "replacements": [
           {
-            "files": ["Assets/Tool/PurrLobby/package.json"],
+            "files": ["PurrLobby/package.json"],
             "from": "\"version\": \".*?\"",
             "to": "\"version\": \"${nextRelease.version}\"",
             "countMatches": true
@@ -27,12 +27,12 @@
         ]
     }],
     ["@iam1337/create-unitypackage", {
-      "packageRoot": "Assets/Tool/PurrLobby",
+      "packageRoot": "PurrLobby",
       "projectRoot": "./",
       "output": "PurrLobby_${nextRelease.version}.unitypackage"
     }],
     ["@semantic-release/git", {
-        "assets": ["Assets/Tool/PurrLobby/package.json", "Assets/Tool/PurrLobby/CHANGELOG.md"],
+        "assets": ["PurrLobby/package.json", "PurrLobby/CHANGELOG.md"],
         "message": "ci(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
     }],
     ["@semantic-release/github", {

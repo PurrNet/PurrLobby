@@ -34,8 +34,10 @@ jobs:
       # Step 4: Run Semantic Release and capture output
       - name: Run Semantic Release
         id: release
+        working-directory: Assets/Tool
         run: |
-          npx semantic-release > output.log || true
+          cp ../../.releaserc .releaserc
+          ../../node_modules/.bin/semantic-release > output.log || true
           if grep -q "Publishing version" output.log; then
             echo "new-release=true" >> $GITHUB_ENV
             VERSION=$(grep "Publishing version" output.log | sed -n 's/.*Publishing version \(.*\)$/\1/p')
