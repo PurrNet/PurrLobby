@@ -1,3 +1,10 @@
+# [1.0.0-beta.10](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2026-07-31)
+
+
+### Bug Fixes
+
+* support Unity 6.3 scene handles ([f640496](https://github.com/PurrNet/PurrLobby/commit/f6404961fc949a53aafb9d44c83ac6dd25f3ae29))
+
 # [1.0.0-beta.9](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2026-07-31)
 
 
