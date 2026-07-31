@@ -1,3 +1,8 @@
 {
-  "version": "v1.20.0-beta.108"
+  "version": "v1.20.0-beta.108",
+  "PurrServices.editor.override": "True",
+  "PurrServices.build.mode": "project",
+  "PurrServices.build.apiKey": "pk_pub_1f1501ee74cc86321512e96bf9a0d8f49f279d8206b35e206dde429056dd7e59",
+  "PurrServices.build.projectId": "aa2335db-2c7e-4707-9101-32816c23e99f",
+  "PurrServices.build.projectName": "Testing Game"
 }
