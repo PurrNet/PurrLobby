@@ -1,3 +1,10 @@
+# [1.0.0-beta.9](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2026-07-31)
+
+
+### Bug Fixes
+
+* wtf ([6bf797e](https://github.com/PurrNet/PurrLobby/commit/6bf797e75ac150e8fb05a071f87468fa4e5f4ce8))
+
 # [1.0.0-beta.8](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2026-07-31)
 
 
