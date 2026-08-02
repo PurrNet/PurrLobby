@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Tool/PurrLobby/Scenes/MenuScene.unity
+    path: Assets/PurrLobby/Scenes/MenuScene.unity
     guid: 77c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Tool/PurrLobby/Scenes/GameScene.unity
+    path: Assets/PurrLobby/Scenes/GameScene.unity
     guid: 2600a2f6fc219ab41b443997382a526f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

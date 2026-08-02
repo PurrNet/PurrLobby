@@ -331,7 +331,7 @@ namespace PurrNet.Lobby.Edgegap
             return (true, request.downloadHandler.text, null);
         }
 
-        [Serializable, UsedImplicitly]
+        [UsedImplicitly]
         private class TicketRequest
         {
             public string profile;
@@ -339,7 +339,6 @@ namespace PurrNet.Lobby.Edgegap
             public string player_ip;
         }
 
-        [Serializable]
         private class TicketResponse
         {
             public string id;
@@ -347,7 +346,6 @@ namespace PurrNet.Lobby.Edgegap
             public Assignment assignment;
         }
 
-        [Serializable]
         private class Assignment
         {
             public string fqdn;
@@ -355,7 +353,6 @@ namespace PurrNet.Lobby.Edgegap
             public Dictionary<string, AssignedPort> ports;
         }
 
-        [Serializable]
         private class AssignedPort
         {
             public int external;
