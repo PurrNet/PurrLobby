@@ -1,3 +1,10 @@
+# [1.0.0-beta.13](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2026-08-02)
+
+
+### Bug Fixes
+
+* developer errors ([0609ee1](https://github.com/PurrNet/PurrLobby/commit/0609ee1ba1b2b3427ad64e8c4971460c968a2cd6))
+
 # [1.0.0-beta.12](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2026-08-02)
 
 
