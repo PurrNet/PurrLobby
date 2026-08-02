@@ -1,3 +1,11 @@
+# [1.0.0-beta.14](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.13...v1.0.0-beta.14) (2026-08-02)
+
+
+### Bug Fixes
+
+* Create & Link ([c64b827](https://github.com/PurrNet/PurrLobby/commit/c64b8278cbaa1d86b61c2eefa65dcc173bb07c9a))
+* issues ([ba4d997](https://github.com/PurrNet/PurrLobby/commit/ba4d9971bc302a27382005268970053960c679d1))
+
 # [1.0.0-beta.13](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2026-08-02)
 
 
