@@ -7,6 +7,7 @@ using PurrNet.Services;
 
 namespace PurrNet.Lobby.PurrNet
 {
+    [ProviderDependency("dev.purrnet.services", "PurrServices")]
     [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Lobby Provider", order = -201)]
     public class PurrNetLobbyProvider : LobbyProvider
     {

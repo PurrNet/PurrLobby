@@ -16,6 +16,7 @@ namespace PurrNet.Lobby.Steam
     /// its id and join code. Supports the full capability set: create, join by
     /// id/code, browse, and quick join.
     /// </summary>
+    [ProviderDependency("com.rlabrecque.steamworks.net", "Steamworks.NET")]
     [CreateAssetMenu(menuName = "PurrLobby/Steam/Lobby Provider", fileName = "Steam Lobby Provider", order = -203)]
     public class SteamLobbyProvider : LobbyProvider
     {

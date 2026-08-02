@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
@@ -7,6 +8,7 @@ using PurrNet.Services;
 
 namespace PurrNet.Lobby.PurrNet
 {
+    [ProviderDependency("dev.purrnet.services", "PurrServices")]
     [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Session Provider", order = -201)]
     public class PurrNetSessionProvider : SessionProvider
     {
@@ -22,6 +24,11 @@ namespace PurrNet.Lobby.PurrNet
         public override async Task Login(ViewStack stack)
         {
             var services = PurrServices.instance;
+            if (!PurrServicesConfiguration.IsConfigured(services))
+            {
+                Toaster.PushError("Online Services Unavailable", PurrServicesConfiguration.UserError);
+                throw new InvalidOperationException(PurrServicesConfiguration.DeveloperError);
+            }
 
             if (services.auth.isAuthenticated)
             {
@@ -58,9 +65,15 @@ namespace PurrNet.Lobby.PurrNet
             _loggingIn.TrySetResult(true);
         }
 
-        static async Task<APIResponse> Login(string deviceId, string displayName, bool rememberMe)
+        async Task<APIResponse> Login(string deviceId, string displayName, bool rememberMe)
         {
             var services = PurrServices.instance;
+            if (!PurrServicesConfiguration.IsConfigured(services))
+            {
+                PurrServicesConfiguration.LogDeveloperError(this);
+                return APIResponse.Failure(PurrServicesConfiguration.UserError);
+            }
+
             var result = await services.auth.LoginAsync(deviceId, displayName);
 
             if (!result.success)

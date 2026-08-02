@@ -14,6 +14,7 @@ namespace PurrNet.Lobby.Edgegap
         Web,
     }
 
+    [ProviderDependency("dev.purrnet.services", "PurrServices")]
     [CreateAssetMenu(menuName = "PurrLobby/Edgegap/Game Allocator", fileName = "Edgegap Game Allocator", order = -199)]
     public class EdgegapGameAllocator : GameAllocatorProvider
     {

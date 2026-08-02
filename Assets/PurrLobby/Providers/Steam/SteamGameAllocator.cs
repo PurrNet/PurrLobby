@@ -14,6 +14,7 @@ namespace PurrNet.Lobby.Steam
     /// Game allocator for Steam peer-to-peer sessions: the lobby owner hosts, and
     /// clients connect to the owner's SteamID over Steam relay sockets.
     /// </summary>
+    [ProviderDependency("com.rlabrecque.steamworks.net", "Steamworks.NET")]
     [CreateAssetMenu(menuName = "PurrLobby/Steam/Game Allocator", fileName = "Steam Game Allocator", order = -203)]
     public class SteamGameAllocator : GameAllocatorProvider
     {

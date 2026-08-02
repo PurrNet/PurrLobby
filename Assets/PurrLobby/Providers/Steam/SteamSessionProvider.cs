@@ -14,6 +14,7 @@ namespace PurrNet.Lobby.Steam
     /// Steam authentication is ambient — the running Steam client is the session.
     /// Login just initializes the SteamAPI; there is nothing to log out of.
     /// </summary>
+    [ProviderDependency("com.rlabrecque.steamworks.net", "Steamworks.NET")]
     [CreateAssetMenu(menuName = "PurrLobby/Steam/Session Provider", fileName = "Steam Session Provider", order = -203)]
     public class SteamSessionProvider : SessionProvider
     {

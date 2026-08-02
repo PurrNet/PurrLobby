@@ -83,6 +83,13 @@ namespace PurrNet.Lobby.PurrNet
             if (_busy || !ValidateInputs())
                 return;
 
+            if (!PurrServicesConfiguration.IsConfigured(PurrServices.instance))
+            {
+                PurrServicesConfiguration.LogDeveloperError(this);
+                Toaster.Push("Online Services Unavailable", PurrServicesConfiguration.UserError, true);
+                return;
+            }
+
             SaveRememberMe();
 
             try
