@@ -50,6 +50,8 @@ namespace PurrNet.Lobby
         private float _allReadyTimer;
         private bool _wasAllReady;
         private bool _gameStarted;
+        private bool _closingLobby;
+        private string _localPlayerId;
 
         private UIPool<Transform> _playerPlaceholderPool;
 
@@ -64,6 +66,7 @@ namespace PurrNet.Lobby
         public void Setup(ILobby lobby, GameOrchestrator orchestrator)
         {
             UnsubscribeLobbyEvents();
+            DisconnectFromLobby();
             ClearPlayerEntries();
 
             _orchestrator = orchestrator;
@@ -71,6 +74,8 @@ namespace PurrNet.Lobby
             _lobbyEventsUnsubscribed = false;
             _gameStarted = false;
             _wasAllReady = false;
+            _closingLobby = false;
+            _localPlayerId = lobby?.localPlayer?.id;
             ResetStatusLabels();
 
             _playerPlaceholderPool ??= new UIPool<Transform>(_playerPlaceholderPrefab.transform, _playerContent);
@@ -80,10 +85,16 @@ namespace PurrNet.Lobby
 
             RenderPlayerList(lobby);
 
+            // Destruction is terminal and replays on subscription. Observe it before
+            // replaying player joins, which can otherwise start a transient connection
+            // to a lobby that was already destroyed while this view was loading.
+            _lobby.onLobbyDestroyed += OnLobbyDestroyed;
+            if (_closingLobby)
+                return;
+
             _lobby.onPlayerJoined += OnPlayerJoined;
             _lobby.onPlayerLeft += OnPlayerLeft;
             _lobby.onPlayerUpdated += OnPlayerUpdated;
-            _lobby.onLobbyDestroyed += OnLobbyDestroyed;
             _lobby.onOwnerChanged += OnOwnerChanged;
 
             if (_lobby.lobbyData.TryGetData(LOBBY_STATUS_STRING, out var lobbyStatus))
@@ -292,10 +303,21 @@ namespace PurrNet.Lobby
 
         private void ConnectToLobby(ILobby lobby)
         {
-            if (_connectToPurrnetInLobby && _lobby.localPlayer != null && !_lobbyConnected && _lobbyConnection)
+            if (!_closingLobby && _connectToPurrnetInLobby && _lobby.localPlayer != null &&
+                !_lobbyConnected && _lobbyConnection)
             {
-                _lobbyConnection.JoinedLobby(lobby);
+                // Mark connected first because provider setup can synchronously replay
+                // a terminal event and ask this view to disconnect again.
                 _lobbyConnected = true;
+                try
+                {
+                    _lobbyConnection.JoinedLobby(lobby);
+                }
+                catch
+                {
+                    _lobbyConnected = false;
+                    throw;
+                }
             }
         }
 
@@ -390,16 +412,25 @@ namespace PurrNet.Lobby
             if (_orchestrator != null && _orchestrator.activeLobby == _lobby)
                 _orchestrator.activeLobby = null;
 
-            if (_lobby != null && _lobbyConnected && _lobbyConnection)
-            {
+            DisconnectFromLobby();
+        }
+
+        private void DisconnectFromLobby()
+        {
+            if (!_lobbyConnected)
+                return;
+
+            // Clear this first because stopping the transport can synchronously
+            // invoke lobby/provider callbacks.
+            _lobbyConnected = false;
+            if (_lobby != null && _lobbyConnection)
                 _lobbyConnection.LeftLobby(_lobby);
-                _lobbyConnected = false;
-            }
         }
 
         private void OnDestroy()
         {
             UnsubscribeLobbyEvents();
+            DisconnectFromLobby();
         }
 
         private void OnOwnerChanged(IPlayer host)
@@ -410,12 +441,28 @@ namespace PurrNet.Lobby
 
         private void OnLobbyDestroyed()
         {
-            PopMe();
+            CloseLobbyView();
         }
 
         public void LeaveLobby()
         {
-            _lobby.LeaveLobby();
+            if (_closingLobby)
+                return;
+
+            _closingLobby = true;
+            var lobby = _lobby;
+            DisconnectFromLobby();
+            lobby?.LeaveLobby();
+            PopMe();
+        }
+
+        private void CloseLobbyView()
+        {
+            if (_closingLobby)
+                return;
+
+            _closingLobby = true;
+            DisconnectFromLobby();
             PopMe();
         }
 
@@ -433,6 +480,10 @@ namespace PurrNet.Lobby
 
         private void OnPlayerJoined(IPlayer player)
         {
+            var localPlayer = _lobby?.localPlayer;
+            if (localPlayer != null)
+                _localPlayerId = localPlayer.id;
+
             RenderPlayerList(_lobby);
             ConnectToLobby(_lobby);
 
@@ -442,6 +493,12 @@ namespace PurrNet.Lobby
 
         private void OnPlayerLeft(IPlayer player)
         {
+            if (player != null && !string.IsNullOrEmpty(_localPlayerId) && player.id == _localPlayerId)
+            {
+                CloseLobbyView();
+                return;
+            }
+
             if (_uiPlayerEntry.Remove(player, out var entry) && entry)
                 Destroy(entry.gameObject);
 

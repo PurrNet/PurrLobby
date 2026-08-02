@@ -228,6 +228,18 @@ namespace PurrNet.Lobby.Tests
 
             Assert.AreEqual(1, destroyed);
         }
+
+        [Test]
+        public void OnLobbyDestroyed_ReplaysTerminalEvent_AndRaisesOnlyOnce()
+        {
+            _lobby.RaiseLobbyDestroyedPublic();
+            _lobby.RaiseLobbyDestroyedPublic();
+
+            int destroyed = 0;
+            _lobby.onLobbyDestroyed += () => destroyed++;
+
+            Assert.AreEqual(1, destroyed);
+        }
     }
 
     public class LobbyPlayerBaseTests

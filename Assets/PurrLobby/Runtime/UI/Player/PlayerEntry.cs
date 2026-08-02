@@ -58,6 +58,12 @@ namespace PurrNet.Lobby
 
         private void Awake()
         {
+            // Kicking is exposed through the player context menu. Keep the old
+            // prefab reference disabled so existing prefab variants cannot bring
+            // the direct kick button back.
+            if (_options)
+                _options.SetActive(false);
+
 #if PURR_VOICE
             _phonemeSprite.color = new Color(1, 1, 1, 0);
 #else
@@ -177,11 +183,9 @@ namespace PurrNet.Lobby
             _hostIndicator.enabled = _player.isOwner;
             _username.text = _player.displayName;
 
-            bool iAmHost = _localPlayer?.isOwner == true;
             bool isMe = _localPlayer?.id == _player.id;
 
             _outline.outlineWidthNotSelected = isMe ? 1f : 0f;
-            _options.SetActive(iAmHost && !_player.isOwner);
 
             _status.text = _player.isReady ? "Ready" : "Not Ready";
             _status.color = _player.isReady ? _statusReady : _statusUnready;

@@ -248,7 +248,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5512809213008706615, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
       propertyPath: m_text
-      value: <icon=discord> Login
+      value: <icon=account_outline> Login
       objectReference: {fileID: 0}
     - target: {fileID: 5512809213008706615, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
       propertyPath: m_fontStyle

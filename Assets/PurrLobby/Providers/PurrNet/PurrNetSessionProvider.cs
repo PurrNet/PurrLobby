@@ -13,6 +13,9 @@ namespace PurrNet.Lobby.PurrNet
     public class PurrNetSessionProvider : SessionProvider
     {
 #if PURR_SERVICES
+        private const string WEBGL_DEVICE_ID_MIGRATION_KEY =
+            nameof(PurrNetSessionProvider) + "_WebGLDeviceIdV1";
+
         public override bool isLoggedIn => PurrServices.instance.auth.isAuthenticated;
 
         public override string playerId => PurrServices.instance.auth.playerId;
@@ -28,6 +31,14 @@ namespace PurrNet.Lobby.PurrNet
             {
                 Toaster.PushError("Online Services Unavailable", PurrServicesConfiguration.UserError);
                 throw new InvalidOperationException(PurrServicesConfiguration.DeveloperError);
+            }
+
+            if (MigrateWebGlDeviceIdentity() && services.auth.isAuthenticated)
+            {
+                // Sessions created from Unity's shared WebGL fingerprint still
+                // point at the shared account. Drop them once so the persisted
+                // per-browser id is actually used for the next device login.
+                services.auth.Logout();
             }
 
             if (services.auth.isAuthenticated)
@@ -58,6 +69,24 @@ namespace PurrNet.Lobby.PurrNet
             deviceLogin.Setup(SetFlag, Login);
 
             await _loggingIn.Task;
+        }
+
+        private static bool MigrateWebGlDeviceIdentity()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // Ensure the replacement id exists even when a saved auth session
+            // would otherwise let startup skip the DeviceLogin view entirely.
+            _ = DeviceLogin.GetDeviceId();
+
+            if (PlayerPrefs.HasKey(WEBGL_DEVICE_ID_MIGRATION_KEY))
+                return false;
+
+            PlayerPrefs.SetInt(WEBGL_DEVICE_ID_MIGRATION_KEY, 1);
+            PlayerPrefs.Save();
+            return true;
+#else
+            return false;
+#endif
         }
 
         void SetFlag()

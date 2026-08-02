@@ -61,6 +61,12 @@ namespace PurrNet.Lobby
         /// </summary>
         public void Connect(ConnectionInfo connection, bool shouldBeHost)
         {
+            if (GameSession.TryGet(SceneManager.GetActiveScene(), out var session) && session.isExiting)
+            {
+                PurrLogger.LogWarning("Skipping the game connection because its `GameSession` is already exiting.");
+                return;
+            }
+
             var networkManager = NetworkManager.main;
             if (!networkManager)
             {

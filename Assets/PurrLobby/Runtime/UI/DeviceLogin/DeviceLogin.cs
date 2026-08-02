@@ -9,9 +9,11 @@ using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby
 {
+    [DefaultExecutionOrder(-1000)]
     public class DeviceLogin : MonoView
     {
         const string KEY_PREFIX = nameof(DeviceLogin) + "_";
+        const string WEBGL_DEVICE_ID_KEY = KEY_PREFIX + "WebGLDeviceId";
 
         [SerializeField] private RectTransform _content;
         [SerializeField] private TMPro.TMP_InputField _displayName;
@@ -35,9 +37,11 @@ namespace PurrNet.Lobby
         }
 
         /// <summary>
-        /// The stable device id used as the login credential. In the editor it is
-        /// salted with the project path (and the ParrelSync clone name) so clones
-        /// get distinct accounts.
+        /// The stable device id used as the login credential. WebGL cannot use
+        /// SystemInfo.deviceUniqueIdentifier because it is derived from browser and
+        /// hardware data rather than a particular user. Store a random id in that
+        /// browser profile instead. In the editor the id is salted with the project
+        /// path (and the ParrelSync clone name) so clones get distinct accounts.
         /// </summary>
         public static string GetDeviceId()
         {
@@ -55,6 +59,15 @@ namespace PurrNet.Lobby
             using var sha = SHA256.Create();
             var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(salt));
             return BitConverter.ToString(bytes).Replace("-", "")[..32].ToLowerInvariant();
+#elif UNITY_WEBGL
+            var persistedId = PlayerPrefs.GetString(WEBGL_DEVICE_ID_KEY, null);
+            if (!string.IsNullOrEmpty(persistedId))
+                return persistedId;
+
+            var generatedId = Guid.NewGuid().ToString("N");
+            PlayerPrefs.SetString(WEBGL_DEVICE_ID_KEY, generatedId);
+            PlayerPrefs.Save();
+            return generatedId;
 #else
             return SystemInfo.deviceUniqueIdentifier;
 #endif
@@ -89,9 +102,22 @@ namespace PurrNet.Lobby
         {
             _onDone = onDone;
             _onLogin = loginCallback;
+            // This is a required startup step. Dismissing it leaves the session
+            // provider awaiting a login that can no longer be completed.
+            if (_closeParentView)
+                _closeParentView.canClose = false;
+
             _rememberMe.value = PlayerPrefs.HasKey(KEY_PREFIX + nameof(_rememberMe));
             if (_rememberMe.value)
                 _displayName.text = PlayerPrefs.GetString(KEY_PREFIX + nameof(_displayName), "");
+        }
+
+        private void Update()
+        {
+            // Consume back before generic window handlers can dismiss this
+            // mandatory view. Successful login still closes it explicitly.
+            if (isTopMost && BackInput.WasBackPressed())
+                BackInput.TryConsume();
         }
 
         public void Login()
@@ -107,7 +133,7 @@ namespace PurrNet.Lobby
                 PlayerPrefs.DeleteKey(KEY_PREFIX + nameof(_rememberMe));
             }
 
-            UiTask.Run(HandleLoginAsync, "Login Failed", _loadingOverlay, closeGuard: _closeParentView);
+            UiTask.Run(HandleLoginAsync, "Login Failed", _loadingOverlay);
         }
 
         private async Task HandleLoginAsync()

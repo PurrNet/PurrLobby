@@ -6,8 +6,9 @@ namespace PurrNet.Lobby
     /// <summary>
     /// Shared <see cref="ILobby"/> implementation: player roster, ownership tracking
     /// and the standardized replay-on-subscribe event semantics — subscribing to
-    /// <see cref="onPlayerJoined"/> immediately replays all current players and
-    /// subscribing to <see cref="onOwnerChanged"/> replays the current owner.
+    /// <see cref="onPlayerJoined"/> immediately replays all current players,
+    /// subscribing to <see cref="onOwnerChanged"/> replays the current owner, and
+    /// subscribing to <see cref="onLobbyDestroyed"/> replays a terminal destruction.
     /// </summary>
     public abstract class LobbyBase<TPlayer> : ILobby where TPlayer : LobbyPlayerBase
     {
@@ -83,9 +84,15 @@ namespace PurrNet.Lobby
         }
 
         private Action _onLobbyDestroyed;
+        private bool _lobbyDestroyed;
         public event Action onLobbyDestroyed
         {
-            add => _onLobbyDestroyed += value;
+            add
+            {
+                _onLobbyDestroyed += value;
+                if (_lobbyDestroyed)
+                    value?.Invoke();
+            }
             remove => _onLobbyDestroyed -= value;
         }
 
@@ -175,6 +182,13 @@ namespace PurrNet.Lobby
         private void OnPlayerMetadataUpdatedInternal(LobbyPlayerBase player) =>
             _onPlayerUpdated?.Invoke((TPlayer)player);
 
-        protected void RaiseLobbyDestroyed() => _onLobbyDestroyed?.Invoke();
+        protected void RaiseLobbyDestroyed()
+        {
+            if (_lobbyDestroyed)
+                return;
+
+            _lobbyDestroyed = true;
+            _onLobbyDestroyed?.Invoke();
+        }
     }
 }

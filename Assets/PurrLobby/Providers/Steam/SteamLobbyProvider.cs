@@ -77,6 +77,10 @@ namespace PurrNet.Lobby.Steam
                     SteamMatchmaking.SetLobbyData(lobbyId, SteamLobby.NameKey, settings.name);
 
                 SteamMatchmaking.SetLobbyData(lobbyId, SteamLobby.JoinableKey, "1");
+                // The public browser excludes matchmaking-created lobbies with a
+                // `matchmaking != y` filter. Steam excludes missing keys from that
+                // comparison, so normal lobbies must carry an explicit default.
+                SteamMatchmaking.SetLobbyData(lobbyId, SteamLobby.MatchmakingKey, "n");
 
                 var lobby = new SteamLobby(lobbyId);
 
@@ -187,6 +191,12 @@ namespace PurrNet.Lobby.Steam
 
         private static void ApplyQueryFilters(LobbyQuery query)
         {
+            // Steam defaults lobby searches to the local/nearby regions. The lobby
+            // browser is a public browser, so include public lobbies worldwide;
+            // callers can still narrow the result with the filters below.
+            SteamMatchmaking.AddRequestLobbyListDistanceFilter(
+                ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide);
+
             if (query == null)
                 return;
 

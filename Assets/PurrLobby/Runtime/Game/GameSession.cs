@@ -71,6 +71,9 @@ namespace PurrNet.Lobby
         /// <summary>True while reconnect attempts are in progress after an unexpected disconnect.</summary>
         public bool isReconnecting { get; private set; }
 
+        /// <summary>True once this session has begun its terminal return-to-menu flow.</summary>
+        public bool isExiting => _exiting;
+
         /// <summary>Raised when <see cref="isReconnecting"/> changes.</summary>
         public event Action<bool> onReconnectingChanged;
 
@@ -78,6 +81,8 @@ namespace PurrNet.Lobby
         public event Action<GameExitReason> onExiting;
 
         private NetworkManager _manager;
+        private ILobby _observedLobby;
+        private string _gameHostId;
         private bool _exiting;
         private Coroutine _reconnectRoutine;
 
@@ -93,18 +98,12 @@ namespace PurrNet.Lobby
 
             _byScene[GetSceneKey(scene)] = this;
             instance = this;
-        }
 
-        private void Start()
-        {
             if (!_orchestrator)
                 _orchestrator = GameOrchestrator.active;
 
             if (string.IsNullOrEmpty(_menuScene) && _orchestrator)
                 _menuScene = _orchestrator.menuScene;
-
-            if (!_orchestrator)
-                PurrLogger.LogError("`GameSession` has no `GameOrchestrator` assigned - it cannot leave the lobby.", this);
 
             if (string.IsNullOrEmpty(_menuScene))
                 PurrLogger.LogError("`GameSession` has no menu scene assigned - it cannot return to the menu.", this);
@@ -112,17 +111,31 @@ namespace PurrNet.Lobby
             _manager = NetworkManager.main;
 
             if (!_manager)
-            {
                 PurrLogger.LogError("`GameSession` found no `NetworkManager` in the scene.", this);
+            else
+            {
+                _manager.onClientConnectionState += OnClientConnectionState;
+                _manager.onServerConnectionState += OnServerConnectionState;
+            }
+
+            if (!_orchestrator)
+            {
+                PurrLogger.LogError("`GameSession` has no `GameOrchestrator` assigned - it cannot leave the lobby.", this);
                 return;
             }
 
-            _manager.onClientConnectionState += OnClientConnectionState;
-            _manager.onServerConnectionState += OnServerConnectionState;
+            ObserveLobby(_orchestrator.activeLobby);
         }
 
         private void OnDestroy()
         {
+            if (_observedLobby != null)
+            {
+                _observedLobby.onLobbyDestroyed -= OnLobbyDestroyed;
+                _observedLobby.onPlayerLeft -= OnLobbyPlayerLeft;
+                _observedLobby = null;
+            }
+
             if (_manager)
             {
                 _manager.onClientConnectionState -= OnClientConnectionState;
@@ -139,11 +152,89 @@ namespace PurrNet.Lobby
 
         private static SceneKey GetSceneKey(Scene scene) => scene.handle;
 
+        private void ObserveLobby(ILobby lobby)
+        {
+            _observedLobby = lobby;
+            if (_observedLobby == null)
+                return;
+
+            if (_observedLobby.lobbyData.TryGetData(GameStartKeys.ConnInfo, out var rawConnection) &&
+                GameStartKeys.TryReadConnectionInfo(rawConnection, out var connection))
+            {
+                _gameHostId = connection.hostId;
+            }
+
+            _observedLobby.onPlayerLeft += OnLobbyPlayerLeft;
+            // Lobby destruction is sticky in LobbyBase, so this also catches a kick
+            // that completed between scene activation and this component's Awake.
+            _observedLobby.onLobbyDestroyed += OnLobbyDestroyed;
+
+            if (_exiting)
+                return;
+
+            // Player-left is not replayed. Reconcile the current roster after the
+            // subscriptions so a kick or host departure in the scene-loading window
+            // cannot fall between the snapshot check and registering the callbacks.
+            var localPlayerId = _observedLobby.localPlayer?.id;
+            bool hasLocalPlayer = string.IsNullOrEmpty(localPlayerId);
+            bool hasGameHost = string.IsNullOrEmpty(_gameHostId);
+
+            for (int i = 0; i < _observedLobby.players.Count; i++)
+            {
+                var playerId = _observedLobby.players[i]?.id;
+                hasLocalPlayer |= playerId == localPlayerId;
+                hasGameHost |= playerId == _gameHostId;
+
+                if (hasLocalPlayer && hasGameHost)
+                    return;
+            }
+
+            if (!hasLocalPlayer || !hasGameHost)
+                ExitToMenu(GameExitReason.ConnectionLost);
+        }
+
         /// <summary>The player chose to leave. Returns to the menu immediately, with no reconnect.</summary>
-        public void LeaveToMenu() => ExitToMenu(GameExitReason.LeftByChoice);
+        public void LeaveToMenu()
+        {
+            // A listen host owns the game session. Tell observers that it is ending
+            // before stopping the transport; otherwise they interpret the clean
+            // shutdown as a transient disconnect and retry until the timeout.
+            if (_manager && _manager.isServer &&
+                GameOverBroadcaster.TryGet(gameObject.scene, out var broadcaster) &&
+                broadcaster.NotifyHostLeaving())
+            {
+                return;
+            }
+
+            ExitToMenu(GameExitReason.LeftByChoice);
+        }
 
         /// <summary>Invoked on every client by <see cref="GameOverBroadcaster"/> when the server ends the game.</summary>
         public void GameEnded() => ExitToMenu(GameExitReason.GameOver);
+
+        private void OnLobbyDestroyed()
+        {
+            // A kick or destroyed lobby is terminal. The game transport will also
+            // disconnect, but retrying it can only produce repeated auth failures
+            // because this player no longer belongs to the lobby roster.
+            if (_orchestrator && _orchestrator.activeLobby == _observedLobby)
+                _orchestrator.activeLobby = null;
+
+            ExitToMenu(GameExitReason.ConnectionLost);
+        }
+
+        private void OnLobbyPlayerLeft(IPlayer player)
+        {
+            // A player-hosted game cannot recover after its original game host
+            // leaves the backing lobby. This also covers crashes/forced exits,
+            // where the host has no opportunity to send HostLeavingRpc first.
+            if (player != null && !string.IsNullOrEmpty(_gameHostId) && player.id == _gameHostId)
+                ExitToMenu(GameExitReason.ConnectionLost);
+        }
+
+        /// <summary>Invoked by the server before a listen host voluntarily shuts down.</summary>
+        internal void HostLeft(bool wasLocalHost) =>
+            ExitToMenu(wasLocalHost ? GameExitReason.LeftByChoice : GameExitReason.GameOver);
 
         private void OnClientConnectionState(ConnectionState state)
         {

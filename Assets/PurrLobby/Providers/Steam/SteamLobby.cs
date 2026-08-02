@@ -29,6 +29,9 @@ namespace PurrNet.Lobby.Steam
         /// <summary>Reserved lobby-data key holding the display name of the lobby.</summary>
         internal const string NameKey = "purr_name";
 
+        /// <summary>Lobby-data key distinguishing browser-created and matchmaking lobbies.</summary>
+        internal const string MatchmakingKey = "matchmaking";
+
         public override string id => _lobbyId.m_SteamID.ToString();
         public override int maxPlayers => SteamMatchmaking.GetLobbyMemberLimit(_lobbyId);
         public override IMetadata lobbyData => _lobbyMetadata;

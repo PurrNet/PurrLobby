@@ -94,4 +94,11 @@ namespace PurrNet.Lobby.Tests
         public void FailMatchPublic(MatchmakingTicket ticket, string error) => FailMatch(ticket, error);
         public void CancelLocallyPublic(MatchmakingTicket ticket) => CancelLocally(ticket);
     }
+
+    public class TestHostMigrationLobbyConnection : HostMigrationLobbyConnection
+    {
+        public bool hasActiveLobbyConnectionPublic => hasActiveLobbyConnection;
+
+        protected override void ConfigureTransportForHost(ILobby lobby, IPlayer host) { }
+    }
 }
