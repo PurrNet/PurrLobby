@@ -1,3 +1,10 @@
+# [1.0.0-beta.12](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2026-08-02)
+
+
+### Bug Fixes
+
+* cleanup menu scene ([74910d8](https://github.com/PurrNet/PurrLobby/commit/74910d8369d1994cec6d6935594a06ac0a11e7c3))
+
 # [1.0.0-beta.11](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2026-08-02)
 
 
