@@ -1,3 +1,10 @@
+# [1.0.0-beta.11](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2026-08-02)
+
+
+### Bug Fixes
+
+* serializable warning ([0f7ce61](https://github.com/PurrNet/PurrLobby/commit/0f7ce615d687101e971279a602f48bbf316f528b))
+
 # [1.0.0-beta.10](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2026-07-31)
 
 
