@@ -1,3 +1,10 @@
+# [1.0.0-beta.15](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.14...v1.0.0-beta.15) (2026-08-10)
+
+
+### Bug Fixes
+
+* Buttons missing functionality ([63f865e](https://github.com/PurrNet/PurrLobby/commit/63f865eae242b72e7822e67fc6872557ef03b028))
+
 # [1.0.0-beta.14](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.13...v1.0.0-beta.14) (2026-08-02)
 
 
