@@ -1618,6 +1618,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5724596285752213700, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
+      propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value:
+      objectReference: {fileID: 405379373283979540}
+    - target: {fileID: 5724596285752213700, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
@@ -1627,7 +1631,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5724596285752213700, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PurrLobby.CloseParentView, PurrNet.Lobby
+      value: PurrNet.UI.CloseParentView, PurrUI.Runtime
       objectReference: {fileID: 0}
     - target: {fileID: 5724596285752213700, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
