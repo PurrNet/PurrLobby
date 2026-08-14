@@ -39,8 +39,17 @@ namespace PurrNet.Lobby
 #if UNITY_EDITOR
         private static void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange change)
         {
-            if (change == UnityEditor.PlayModeStateChange.ExitingPlayMode)
-                active = null;
+            if (change != UnityEditor.PlayModeStateChange.ExitingPlayMode)
+                return;
+
+            if (active)
+            {
+                active.activeLobby = null;
+                active.lastExitReason = GameExitReason.None;
+                active.menuScene = null;
+            }
+
+            active = null;
         }
 #endif
     }

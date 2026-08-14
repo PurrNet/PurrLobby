@@ -408,10 +408,6 @@ namespace PurrNet.Lobby
         public override void OnPopped()
         {
             UnsubscribeLobbyEvents();
-
-            if (_orchestrator != null && _orchestrator.activeLobby == _lobby)
-                _orchestrator.activeLobby = null;
-
             DisconnectFromLobby();
         }
 
@@ -451,6 +447,7 @@ namespace PurrNet.Lobby
 
             _closingLobby = true;
             var lobby = _lobby;
+            ClearActiveLobby();
             DisconnectFromLobby();
             lobby?.LeaveLobby();
             PopMe();
@@ -462,8 +459,15 @@ namespace PurrNet.Lobby
                 return;
 
             _closingLobby = true;
+            ClearActiveLobby();
             DisconnectFromLobby();
             PopMe();
+        }
+
+        private void ClearActiveLobby()
+        {
+            if (_orchestrator != null && _orchestrator.activeLobby == _lobby)
+                _orchestrator.activeLobby = null;
         }
 
         private readonly Dictionary<IPlayer, PlayerEntry> _uiPlayerEntry = new();
