@@ -1,3 +1,10 @@
+# [1.0.0-beta.16](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.15...v1.0.0-beta.16) (2026-08-14)
+
+
+### Bug Fixes
+
+* don't shut down lobby when lobby view closes (since it also happens ([4aead61](https://github.com/PurrNet/PurrLobby/commit/4aead6118d80e160ce1afa622e6979e67f293ef8))
+
 # [1.0.0-beta.15](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.14...v1.0.0-beta.15) (2026-08-10)
 
 
