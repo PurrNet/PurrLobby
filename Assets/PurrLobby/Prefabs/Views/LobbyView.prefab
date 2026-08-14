@@ -1607,7 +1607,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3157188190545418170, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3266764537261489178, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_text
@@ -1623,7 +1623,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4991617865718884948, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5724596285752213700, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: _clickSounds.Array.size
@@ -2521,7 +2521,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3157188190545418170, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3266764537261489178, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_text
@@ -2533,7 +2533,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4991617865718884948, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5724596285752213700, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: _clickSounds.Array.size
@@ -4237,7 +4237,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3157188190545418170, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3266764537261489178, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_text
@@ -4249,7 +4249,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4991617865718884948, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5724596285752213700, guid: 264df020990aaa647b14ee2c7cbb2ae2, type: 3}
       propertyPath: _clickSounds.Array.size

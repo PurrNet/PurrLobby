@@ -1,6 +1,6 @@
 {
   "name": "dev.purrnet.purrlobby",
-  "version": "1.0.0-beta.13",
+  "version": "1.0.0-beta.15",
   "displayName": "PurrLobby",
   "description": "A drop-in lobby and matchmaking front-end for PurrNet. Ships with ready-made UI for creating lobbies, browsing and joining them, chat, ready-up and game start, plus swappable backends (PurrNet, Nakama, Edgegap).",
   "author": {
