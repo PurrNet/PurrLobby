@@ -1,5 +1,6 @@
 #if NAKAMA
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nakama;
 using UnityEngine;
@@ -7,10 +8,12 @@ using UnityEngine;
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>
-    /// Lobby provider backed by Nakama relayed matches. Only supports create, join-by-id, and
-    /// join-by-code (which maps to the match id). Browse and random-join are unsupported because
-    /// Nakama relayed-match labels are immutable after creation. Use <see cref="NakamaMatchmakingProvider"/>
-    /// for discovery instead.
+    /// Lobby provider backed by Nakama relayed matches. Supports create, join-by-id,
+    /// join-by-code (which maps to the match id), and a minimal lobby browser.
+    /// Browsing is intentionally bare: relayed matches expose no name, metadata, or max size
+    /// without a custom server module (which this provider avoids), so entries show the match id
+    /// as the name and query filters are ignored. Extend QueryLobbies with your own server RPC
+    /// if you need richer listings. Random-join is unsupported; use <see cref="NakamaMatchmakingProvider"/>.
     /// </summary>
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Lobby Provider", order = -202)]
     public class NakamaLobbyProvider : LobbyProvider
@@ -23,10 +26,14 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("How long a joiner waits for the lobby owner's first snapshot before failing the join, in milliseconds.")]
         [SerializeField] private int _snapshotTimeoutMs = 4000;
 
+        [Tooltip("Max matches returned by the lobby browser.")]
+        [SerializeField] private int _queryLimit = 100;
+
         public override int maxPlayer => _maxPlayers;
 
         public override LobbyCapabilities capabilities =>
-            LobbyCapabilities.CreateLobby | LobbyCapabilities.JoinLobbyById | LobbyCapabilities.JoinLobbyByCode;
+            LobbyCapabilities.CreateLobby | LobbyCapabilities.JoinLobbyById | LobbyCapabilities.JoinLobbyByCode |
+            LobbyCapabilities.QueryLobbies;
 
         public override async Task<LobbyResponse> CreateLobby(LobbySettings settings)
         {
@@ -108,8 +115,48 @@ namespace PurrNet.Lobby.Nakama
         public override Task<LobbyResponse> JoinRandom(LobbyQuery query = null) =>
             Task.FromResult(LobbyResponse.Failure("NakamaLobbyProvider does not support random join. Use the matchmaking provider instead."));
 
-        public override Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null) =>
-            Task.FromResult(LobbyCollectionResponse.Failure("NakamaLobbyProvider does not support lobby listing. Discovery requires a custom server module which this provider intentionally avoids."));
+        /// <summary>
+        /// Lists open relayed matches. Without a custom server module Nakama exposes only the
+        /// match id and player count, so <see cref="LobbyQuery"/> filters are ignored, the match id
+        /// doubles as the name/code, and maxPlayers falls back to this provider's default.
+        /// </summary>
+        public override async Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null)
+        {
+            if (!TryGetReadyConnection(out var conn, out var error))
+                return LobbyCollectionResponse.Failure(error);
+
+            IApiMatchList matchList;
+            try
+            {
+                matchList = await conn.client.ListMatchesAsync(conn.session,
+                    0, int.MaxValue, _queryLimit, false, null, null);
+            }
+            catch (Exception ex)
+            {
+                return LobbyCollectionResponse.Failure($"Failed to list Nakama matches: {ex.Message}");
+            }
+
+            var lobbies = new List<LobbyInfo>();
+
+            foreach (var match in matchList.Matches)
+            {
+                if (match.Authoritative)
+                    continue;
+
+                lobbies.Add(new LobbyInfo
+                {
+                    id = match.MatchId,
+                    code = match.MatchId,
+                    name = match.MatchId,
+                    playerCount = match.Size,
+                    maxPlayers = _maxPlayers,
+                    joinable = true,
+                    metadata = new Dictionary<string, string>()
+                });
+            }
+
+            return LobbyCollectionResponse.Success(lobbies);
+        }
 
         private bool TryGetReadyConnection(out NakamaConnection conn, out string error)
         {

@@ -53,7 +53,7 @@ versions used by the sample project.
 | Provider | Lobbies | Lobby Browser | Matchmaking | Game Allocation |
 |----------|---------|---------------|-------------|-----------------|
 | PurrNet Services | yes | yes | via generic lobby matchmaker | PurrTransport |
-| Nakama | create/join by id or code | no | yes | Nakama relayed match |
+| Nakama | create/join by id or code | basic (ids only) | yes | Nakama relayed match |
 | Edgegap | no | no | yes | managed server assignment |
 
 Providers advertise optional lobby actions through `LobbyCapabilities`. The
