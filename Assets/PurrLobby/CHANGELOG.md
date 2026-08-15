@@ -1,3 +1,10 @@
+# [1.0.0-beta.17](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2026-08-15)
+
+
+### Bug Fixes
+
+* Nakama lobby browser ([d63afbe](https://github.com/PurrNet/PurrLobby/commit/d63afbeed045498058c2dcd76dd5f71415c9a81c))
+
 # [1.0.0-beta.16](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.15...v1.0.0-beta.16) (2026-08-14)
 
 
