@@ -14,6 +14,8 @@ namespace PurrNet.Lobby.Nakama
     /// without a custom server module (which this provider avoids), so entries show the match id
     /// as the name and query filters are ignored. Extend QueryLobbies with your own server RPC
     /// if you need richer listings. Random-join is unsupported; use <see cref="NakamaMatchmakingProvider"/>.
+    /// Every relayed match is always listed, so private lobbies are unsupported and
+    /// <see cref="LobbySettings.visibility"/> is ignored.
     /// </summary>
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Lobby Provider", order = -202)]
     public class NakamaLobbyProvider : LobbyProvider

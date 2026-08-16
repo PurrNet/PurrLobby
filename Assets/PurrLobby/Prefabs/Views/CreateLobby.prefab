@@ -134,6 +134,7 @@ MonoBehaviour:
   _slideContent: {fileID: 2745614998433910954}
   _lobbyName: {fileID: 6041622171317757104}
   _publicToggle: {fileID: 5780933904004143131}
+  _visibilityRow: {fileID: 9042951474272309878}
   _playerCountSlider: {fileID: 1851851891228131154}
   _playerCountText: {fileID: 445740482133909631}
   _loadingOverlay: {fileID: 6501075767274370308}
@@ -853,6 +854,11 @@ MonoBehaviour:
 --- !u!224 &6022101647763799392 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9053503786649855572, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
+  m_PrefabInstance: {fileID: 3329932757415123764}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &9042951474272309878 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6001407450152094018, guid: e6b4a48251b05744b8114a5b7d909fc8, type: 3}
   m_PrefabInstance: {fileID: 3329932757415123764}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3838040345016806616

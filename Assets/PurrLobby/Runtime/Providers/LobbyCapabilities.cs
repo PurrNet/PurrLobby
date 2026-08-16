@@ -27,7 +27,10 @@ namespace PurrNet.Lobby
         /// <summary>Provider can list lobbies via <see cref="LobbyProvider.QueryLobbies"/>.</summary>
         QueryLobbies = 1 << 4,
 
-        All = CreateLobby | JoinLobbyById | JoinLobbyByCode | JoinRandom | QueryLobbies,
+        /// <summary>Provider honors <see cref="LobbySettings.visibility"/> when creating lobbies.</summary>
+        PrivateLobbies = 1 << 5,
+
+        All = CreateLobby | JoinLobbyById | JoinLobbyByCode | JoinRandom | QueryLobbies | PrivateLobbies,
     }
 
     public static class LobbyCapabilitiesExtensions

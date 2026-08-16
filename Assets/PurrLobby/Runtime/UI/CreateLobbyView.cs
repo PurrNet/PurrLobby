@@ -11,6 +11,7 @@ namespace PurrNet.Lobby
     {
         [SerializeField] TMP_InputField _lobbyName;
         [SerializeField] ToggleElement _publicToggle;
+        [SerializeField] GameObject _visibilityRow;
         [SerializeField] Slider _playerCountSlider;
         [SerializeField] TMP_Text _playerCountText;
         [Space]
@@ -27,6 +28,10 @@ namespace PurrNet.Lobby
         {
             _orchestrator = provider;
             successfulExit = false;
+
+            if (_visibilityRow)
+                _visibilityRow.SetActive(_orchestrator.lobbyProvider.capabilities.Has(LobbyCapabilities.PrivateLobbies));
+
             _playerCountSlider.minValue = 1;
             _playerCountSlider.maxValue = _orchestrator.lobbyProvider.maxPlayer;
             _playerCountSlider.value = _orchestrator.lobbyProvider.maxPlayer;
@@ -48,10 +53,12 @@ namespace PurrNet.Lobby
 
         private async Task CreateLobbyAsync()
         {
+            var supportsPrivate = _orchestrator.lobbyProvider.capabilities.Has(LobbyCapabilities.PrivateLobbies);
+
             var lobbySettings = new LobbySettings
             {
                 maxPlayers = Mathf.RoundToInt(_playerCountSlider.value),
-                visibility = _publicToggle.value ? LobbyVisibility.Public : LobbyVisibility.Private,
+                visibility = supportsPrivate && !_publicToggle.value ? LobbyVisibility.Private : LobbyVisibility.Public,
                 name = _lobbyName.text
             };
 
