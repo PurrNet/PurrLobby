@@ -1,3 +1,10 @@
+# [1.0.0-beta.18](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.17...v1.0.0-beta.18) (2026-08-16)
+
+
+### Bug Fixes
+
+* hide visibility toggle when its not directly supported ([e3bbb1b](https://github.com/PurrNet/PurrLobby/commit/e3bbb1b4a33e2b4d8cbe7f540b7f518f119a70c9))
+
 # [1.0.0-beta.17](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2026-08-15)
 
 
