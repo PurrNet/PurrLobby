@@ -34,16 +34,13 @@ packages for the backends you actually use.
 
 ## Installing
 
-Download the latest `.unitypackage` from
-[Releases](https://github.com/PurrNet/PurrLobby/releases) and import it into
-your project. This is the recommended route — see [Updating](#updating) below.
+Install through the PurrNet package manager: open **Tools > PurrNet > PurrNet
+Packages** (`Ctrl+Shift+Alt+P`), find **PurrLobby** in the list, and install.
+PurrUI is listed as a dependency and is installed alongside it. The version
+dropdown lets you pick a release or dev build.
 
-Alternatively, in Unity open **Window > Package Manager**, choose **Add package
-from git URL**, and paste:
-
-```text
-https://github.com/PurrNet/PurrLobby.git?path=/Assets/PurrLobby#dev
-```
+The package page is at
+[purrnet.dev/packages/purrlobby](https://purrnet.dev/packages/purrlobby).
 
 For local development, clone the repository and open it with a supported Unity
 version. The checked-in `Packages/manifest.json` points at the dependency
@@ -56,9 +53,10 @@ versions used by the sample project.
 
 Two ways to keep your customizations:
 
-- **Import the `.unitypackage`.** Unity's import window lets you deselect
-  individual files, so you can skip anything you have modified and take only
-  the rest of the update.
+- **Deselect your files during import.** PurrLobby imports into
+  `Assets/PurrLobby`, so updating opens Unity's interactive import window.
+  Uncheck anything you have modified to keep your version and take the rest of
+  the update.
 - **Duplicate before you edit.** Copy any prefab or asset you plan to change
   into your own folder outside `Assets/PurrLobby` and point your scenes at the
   copy. Updates then never touch your version.
