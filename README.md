@@ -62,7 +62,7 @@ Two ways to keep your customizations:
   copy. Updates then never touch your version.
 
 The second approach is worth doing up front if you expect to restyle the UI
-heavily — it keeps your work fully separate from the package.
+heavily, since it keeps your work fully separate from the package.
 
 ## What's Included
 
@@ -89,9 +89,9 @@ menu hides unsupported buttons automatically, so a backend without lobby
 browsing will not show the browser entry point.
 
 **About the Nakama row:** those entries describe this provider, not Nakama.
-Nakama is fully capable of everything in the table — rich lobby listings,
-private lobbies, random join — through a custom server module written against
-its Go, Lua, or TypeScript runtime. This provider deliberately targets a
+Nakama is fully capable of everything in the table, including rich lobby
+listings, private lobbies and random join, through a custom server module
+written against its Go, Lua, or TypeScript runtime. It deliberately targets a
 **stock Nakama server** so it works with no server-side setup and no extra
 dependencies. The trade-off is that relayed matches expose no name, metadata,
 or max size to the browser, every match is publicly listed, and query filters
@@ -112,12 +112,20 @@ matchmaker and allocator agree on transport and port selection.
 3. Choose the session, lobby, matchmaking, and game allocator providers for
    your backend.
 4. Set the allocator's game scene to your gameplay scene.
-5. In the gameplay scene, keep the `NetworkManager` auto-start flags disabled.
-   The allocator starts the host or client after loading the scene.
+5. Make sure the gameplay scene has a `NetworkManager`. The allocator starts
+   the host or client and adds the transport after loading the scene.
+
+Auto-start flags can stay on. PurrLobby suppresses them for the duration of its
+own scene load and restores them afterwards, so your game scene doubles as a
+direct-play testing environment without getting in the lobby's way.
 
 To customize the UI, edit the prefabs under `Assets/PurrLobby/Prefabs/Views`
-and the smaller elements under `Assets/PurrLobby/Prefabs/Elements` — after
+and the smaller elements under `Assets/PurrLobby/Prefabs/Elements`, after
 reading [Updating](#updating).
+
+Full documentation, including scene setup, provider settings, UI customization
+and writing your own backend, is at
+[purrnet.dev/docs](https://purrnet.dev/docs).
 
 ## Writing A Backend
 
