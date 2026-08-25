@@ -90,6 +90,18 @@ Providers advertise optional lobby actions through `LobbyCapabilities`. The
 menu hides unsupported buttons automatically, so a backend without lobby
 browsing will not show the browser entry point.
 
+**About the Nakama row:** those entries describe this provider, not Nakama.
+Nakama is fully capable of everything in the table — rich lobby listings,
+private lobbies, random join — through a custom server module written against
+its Go, Lua, or TypeScript runtime. This provider deliberately targets a
+**stock Nakama server** so it works with no server-side setup and no extra
+dependencies. The trade-off is that relayed matches expose no name, metadata,
+or max size to the browser, every match is publicly listed, and query filters
+are ignored. Add your own server RPC and extend `QueryLobbies` to lift any of
+these limits. Matchmaking is unaffected: `NakamaMatchmakingProvider` runs
+Nakama's real matchmaker with tickets and min/max party size, no server module
+required, and is the supported path for dropping players into a game together.
+
 Edgegap matchmaking forms the match and returns ready-to-use connection info in
 one step. Pair `EdgegapMatchmakingProvider` with `EdgegapGameAllocator` so the
 matchmaker and allocator agree on transport and port selection.
