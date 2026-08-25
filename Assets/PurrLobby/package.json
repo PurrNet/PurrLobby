@@ -8,8 +8,8 @@
     "url": "https://purrnet.dev/"
   },
   "documentationUrl": "https://purrnet.dev/docs",
-  "changelogUrl": "https://github.com/PurrNet/PurrLobby/blob/dev/Assets/Tool/CHANGELOG.md",
-  "licensesUrl": "https://github.com/PurrNet/PurrLobby/blob/dev/Assets/Tool/LICENSE.txt",
+  "changelogUrl": "https://github.com/PurrNet/PurrLobby/blob/dev/Assets/PurrLobby/CHANGELOG.md",
+  "licensesUrl": "https://github.com/PurrNet/PurrLobby/blob/dev/Assets/PurrLobby/LICENSE.txt",
   "hideInEditor": false,
   "keywords": [
     "purrnet",
