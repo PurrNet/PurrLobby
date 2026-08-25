@@ -16,7 +16,7 @@ in depth.
 
 ## Requirements
 
-- Unity `6000.0` or newer.
+- Unity `2022.3` or newer.
 - [PurrNet](https://github.com/PurrNet/PurrNet) and
   [PurrUI](https://github.com/PurrNet/PurrUI).
 - PurrServices when using the PurrNet Services lobby provider or Edgegap game
