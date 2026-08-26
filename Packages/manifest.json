@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.edgegap.unity-servers-plugin": "https://github.com/edgegap/edgegap-unity-plugin.git#partner/purrnet-source",
-    "com.heroiclabs.nakama-unity": "https://github.com/heroiclabs/nakama-unity.git?path=/Packages/Nakama",
     "com.rlabrecque.steamworks.net": "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#2024.8.0",
     "com.unity.ai.navigation": "2.0.10",
     "com.unity.collab-proxy": "2.11.3",
@@ -51,6 +50,7 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
     "dev.purrnet.services": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#v1.0.1-beta.2",
-    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.23.0-beta.2"
+    "dev.purrnet.purrnet": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.23.0-beta.2",
+    "com.heroiclabs.nakama-unity": "https://github.com/heroiclabs/nakama-unity.git?path=/Packages/Nakama"
   }
 }
