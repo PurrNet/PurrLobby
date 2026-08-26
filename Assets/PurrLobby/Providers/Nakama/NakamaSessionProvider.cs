@@ -1,11 +1,16 @@
-#if NAKAMA
-using System;
 using System.Threading.Tasks;
 using PurrNet.UI;
 using UnityEngine;
+#if NAKAMA
+using System;
+#else
+// Serialized fields stay declared so preset assets keep their values without the SDK.
+#pragma warning disable CS0414
+#endif
 
 namespace PurrNet.Lobby.Nakama
 {
+    [ProviderDependency("com.heroiclabs.nakama-unity", "Nakama Unity")]
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Session Provider", order = -202)]
     public class NakamaSessionProvider : SessionProvider
     {
@@ -14,6 +19,9 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("PlayerPrefs key used to cache the auth + refresh tokens when the user opts into 'Remember Me' on the device login view. Leave empty to disable persistence entirely. In the editor the project folder name is appended to the key so MPPM/clone instances do not share a session.")]
         [SerializeField] private string _sessionPlayerPrefKey = "purr_lobby.nakama.session";
 
+        public NakamaConfig config => _config;
+
+#if NAKAMA
         private string scopedPlayerPrefKey
         {
             get
@@ -35,8 +43,6 @@ namespace PurrNet.Lobby.Nakama
         public override string playerId => NakamaConnection.instance.userId;
 
         public override string playerName => NakamaConnection.instance.username;
-
-        public NakamaConfig config => _config;
 
         private TaskCompletionSource<bool> _loggingIn;
         private Task _loggingOut;
@@ -186,6 +192,23 @@ namespace PurrNet.Lobby.Nakama
             PlayerPrefs.DeleteKey(key);
             PlayerPrefs.Save();
         }
+#else
+        private const string NakamaUnavailable =
+            "Nakama Unity is not installed. Install it from the LobbyManager inspector or the PurrNet Packages window.";
+
+        public override bool isLoggedIn => false;
+
+        public override string playerId => null;
+
+        public override string playerName => null;
+
+        public override Task Login(ViewStack stack)
+        {
+            Debug.LogError($"[{name}] {NakamaUnavailable}", this);
+            return Task.CompletedTask;
+        }
+
+        public override Task Logout() => Task.CompletedTask;
+#endif
     }
 }
-#endif

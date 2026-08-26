@@ -1,4 +1,3 @@
-#if NAKAMA
 using UnityEngine;
 
 namespace PurrNet.Lobby.Nakama
@@ -30,4 +29,3 @@ namespace PurrNet.Lobby.Nakama
         public string serverKey => _serverKey;
     }
 }
-#endif

@@ -1,9 +1,14 @@
+using System.Threading.Tasks;
+using UnityEngine;
 #if NAKAMA
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Nakama;
-using UnityEngine;
+#else
+// Serialized fields stay declared so preset assets keep their values without the SDK.
+#pragma warning disable CS0414
+#pragma warning disable CS0169
+#endif
 
 namespace PurrNet.Lobby.Nakama
 {
@@ -17,6 +22,7 @@ namespace PurrNet.Lobby.Nakama
     /// Every relayed match is always listed, so private lobbies are unsupported and
     /// <see cref="LobbySettings.visibility"/> is ignored.
     /// </summary>
+    [ProviderDependency("com.heroiclabs.nakama-unity", "Nakama Unity")]
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Lobby Provider", order = -202)]
     public class NakamaLobbyProvider : LobbyProvider
     {
@@ -33,6 +39,7 @@ namespace PurrNet.Lobby.Nakama
 
         public override int maxPlayer => _maxPlayers;
 
+#if NAKAMA
         public override LobbyCapabilities capabilities =>
             LobbyCapabilities.CreateLobby | LobbyCapabilities.JoinLobbyById | LobbyCapabilities.JoinLobbyByCode |
             LobbyCapabilities.QueryLobbies;
@@ -185,6 +192,26 @@ namespace PurrNet.Lobby.Nakama
             error = null;
             return true;
         }
+#else
+        private const string NakamaUnavailable =
+            "Nakama Unity is not installed. Install it from the LobbyManager inspector or the PurrNet Packages window.";
+
+        public override LobbyCapabilities capabilities => LobbyCapabilities.None;
+
+        public override Task<LobbyResponse> CreateLobby(LobbySettings settings) =>
+            Task.FromResult(LobbyResponse.Failure(NakamaUnavailable));
+
+        public override Task<LobbyResponse> JoinLobby(string lobbyId) =>
+            Task.FromResult(LobbyResponse.Failure(NakamaUnavailable));
+
+        public override Task<LobbyResponse> JoinLobbyByCode(string code) =>
+            Task.FromResult(LobbyResponse.Failure(NakamaUnavailable));
+
+        public override Task<LobbyResponse> JoinRandom(LobbyQuery query = null) =>
+            Task.FromResult(LobbyResponse.Failure(NakamaUnavailable));
+
+        public override Task<LobbyCollectionResponse> QueryLobbies(LobbyQuery query = null) =>
+            Task.FromResult(LobbyCollectionResponse.Failure(NakamaUnavailable));
+#endif
     }
 }
-#endif

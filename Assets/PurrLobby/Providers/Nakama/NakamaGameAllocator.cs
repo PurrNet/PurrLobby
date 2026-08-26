@@ -1,20 +1,31 @@
+using System.Threading.Tasks;
+using UnityEngine;
 #if NAKAMA
 using System;
-using System.Threading.Tasks;
 using PurrNet.Logging;
-using UnityEngine;
+#endif
 
 namespace PurrNet.Lobby.Nakama
 {
     /// <summary>Game allocator using Nakama relayed matches for peer-hosted gameplay.</summary>
+    [ProviderDependency("com.heroiclabs.nakama-unity", "Nakama Unity")]
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Game Allocator", fileName = "Nakama Game Allocator", order = -202)]
     public class NakamaGameAllocator : GameAllocatorProvider
     {
         [SerializeField, PurrScene] private string _gameScene;
 
-        [Tooltip("If true, the host listens for game readiness via the lobby's metadata before connecting. Disabled by default — most flows pre-load the scene and then connect immediately.")]
+        [Tooltip("If true, the host listens for game readiness via the lobby's metadata before connecting. Disabled by default - most flows pre-load the scene and then connect immediately.")]
         [SerializeField] private bool _waitForGameStartFlag = false;
 
+        public override Task LoadGame(ILobby lobby)
+        {
+            if (_waitForGameStartFlag && lobby != null && lobby.isOwner)
+                lobby.lobbyData.SetData(GameStartKeys.Status, "loading");
+
+            return LoadGameScene(_gameScene);
+        }
+
+#if NAKAMA
         public override async Task<GameStartResponse> AllocateGame(ILobby lobby)
         {
             var conn = NakamaConnection.instance;
@@ -44,14 +55,6 @@ namespace PurrNet.Lobby.Nakama
             }
         }
 
-        public override Task LoadGame(ILobby lobby)
-        {
-            if (_waitForGameStartFlag && lobby != null && lobby.isOwner)
-                lobby.lobbyData.SetData(GameStartKeys.Status, "loading");
-
-            return LoadGameScene(_gameScene);
-        }
-
         protected override bool ConfigureTransport(NetworkManager manager, ConnectionInfo connection, bool asHost)
         {
             var conn = NakamaConnection.instance;
@@ -76,6 +79,18 @@ namespace PurrNet.Lobby.Nakama
             nakamaTransport.hostUserId = connection.hostId;
             return true;
         }
+#else
+        private const string NakamaUnavailable =
+            "Nakama Unity is not installed. Install it from the LobbyManager inspector or the PurrNet Packages window.";
+
+        public override Task<GameStartResponse> AllocateGame(ILobby lobby) =>
+            Task.FromResult(GameStartResponse.Failure(NakamaUnavailable));
+
+        protected override bool ConfigureTransport(NetworkManager manager, ConnectionInfo connection, bool asHost)
+        {
+            Debug.LogError($"[{name}] {NakamaUnavailable}", this);
+            return false;
+        }
+#endif
     }
 }
-#endif

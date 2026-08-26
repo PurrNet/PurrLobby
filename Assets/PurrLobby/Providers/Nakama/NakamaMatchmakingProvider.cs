@@ -1,12 +1,17 @@
+using System.Threading.Tasks;
+using UnityEngine;
 #if NAKAMA
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Nakama;
-using UnityEngine;
+#else
+// Serialized fields stay declared so preset assets keep their values without the SDK.
+#pragma warning disable CS0414
+#endif
 
 namespace PurrNet.Lobby.Nakama
 {
+    [ProviderDependency("com.heroiclabs.nakama-unity", "Nakama Unity")]
     [CreateAssetMenu(menuName = "PurrLobby/Nakama/Matchmaker", order = -202)]
     public class NakamaMatchmakingProvider : MatchmakingProvider
     {
@@ -16,6 +21,7 @@ namespace PurrNet.Lobby.Nakama
         [Tooltip("Maximum number of users in a single match.")]
         [SerializeField] private int _maxCount = 4;
 
+#if NAKAMA
         private string _activeNakamaTicketId;
         private bool _matchmakerSubscribed;
 
@@ -248,6 +254,15 @@ namespace PurrNet.Lobby.Nakama
 
             return $"\"{raw.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
         }
+#else
+        private const string NakamaUnavailable =
+            "Nakama Unity is not installed. Install it from the LobbyManager inspector or the PurrNet Packages window.";
+
+        public override Task<MatchmakingTicketResponse> StartMatchmaking(MatchmakingRequest request) =>
+            Task.FromResult(MatchmakingTicketResponse.Failure(NakamaUnavailable));
+
+        public override Task<APIResponse> CancelMatchmaking(MatchmakingTicket ticket) =>
+            Task.FromResult(APIResponse.Failure(NakamaUnavailable));
+#endif
     }
 }
-#endif
