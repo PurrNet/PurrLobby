@@ -1,3 +1,10 @@
+# [1.0.0-beta.19](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.18...v1.0.0-beta.19) (2026-08-26)
+
+
+### Bug Fixes
+
+* nakama installer inspector helper ([e77ed64](https://github.com/PurrNet/PurrLobby/commit/e77ed640d18b47dc3ad9e3691e82e726c69e42d0))
+
 # [1.0.0-beta.18](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.17...v1.0.0-beta.18) (2026-08-16)
 
 
