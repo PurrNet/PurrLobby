@@ -1,0 +1,25 @@
+{
+    "name": "PurrNet.Lobby.PurrNet.Editor",
+    "rootNamespace": "PurrNet.Lobby.PurrNet.Editor",
+    "references": [
+        "GUID:1f6f4d2bec3b4dd47a2c4cf26aa8d7e4",
+        "GUID:629ad64ea20117f43b28b33033f75b88"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "dev.purrnet.services",
+            "expression": "",
+            "define": "PURR_SERVICES"
+        }
+    ],
+    "noEngineReferences": false
+}

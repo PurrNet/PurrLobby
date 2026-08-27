@@ -1,0 +1,30 @@
+{
+    "name": "PurrNet.Lobby.Nakama",
+    "rootNamespace": "PurrNet.Lobby.Nakama",
+    "references": [
+        "GUID:fb5aa70e09e0db742957de215ef97d5b",
+        "GUID:fa956321508a2aa4da8596c3e41eb158",
+        "GUID:a59886bb7efdbe44b830034a4cca4657",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:6e20f757a1bae164fa42750dd2b27dcb",
+        "GUID:69810832b544b46da9804f1af9373521",
+        "GUID:c10f76f339a862543b2845bd765a1c67"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Nakama.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.heroiclabs.nakama-unity",
+            "expression": "",
+            "define": "NAKAMA"
+        }
+    ],
+    "noEngineReferences": false
+}

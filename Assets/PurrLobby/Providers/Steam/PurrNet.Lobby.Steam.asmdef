@@ -1,0 +1,28 @@
+{
+    "name": "PurrNet.Lobby.Steam",
+    "rootNamespace": "PurrNet.Lobby.Steam",
+    "references": [
+        "GUID:fb5aa70e09e0db742957de215ef97d5b",
+        "GUID:fa956321508a2aa4da8596c3e41eb158",
+        "GUID:a59886bb7efdbe44b830034a4cca4657",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:6e20f757a1bae164fa42750dd2b27dcb",
+        "GUID:68bd7fdb68ef2684e982e8a9825b18a5",
+        "GUID:d196712d54624fd4bb3382415adc4d60"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.rlabrecque.steamworks.net",
+            "expression": "",
+            "define": "STEAMWORKS"
+        }
+    ],
+    "noEngineReferences": false
+}
