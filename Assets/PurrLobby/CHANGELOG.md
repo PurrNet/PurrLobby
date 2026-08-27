@@ -1,3 +1,40 @@
+# 1.0.0 (2026-08-27)
+
+
+### Bug Fixes
+
+* auto start was broken ([27385b6](https://github.com/PurrNet/PurrLobby/commit/27385b6f5a590aec8b3df2e8778f829eb9b7548d))
+* Buttons missing functionality ([63f865e](https://github.com/PurrNet/PurrLobby/commit/63f865eae242b72e7822e67fc6872557ef03b028))
+* cleanup menu scene ([74910d8](https://github.com/PurrNet/PurrLobby/commit/74910d8369d1994cec6d6935594a06ac0a11e7c3))
+* Create & Link ([c64b827](https://github.com/PurrNet/PurrLobby/commit/c64b8278cbaa1d86b61c2eefa65dcc173bb07c9a))
+* developer errors ([0609ee1](https://github.com/PurrNet/PurrLobby/commit/0609ee1ba1b2b3427ad64e8c4971460c968a2cd6))
+* don't shut down lobby when lobby view closes (since it also happens ([4aead61](https://github.com/PurrNet/PurrLobby/commit/4aead6118d80e160ce1afa622e6979e67f293ef8))
+* hide visibility toggle when its not directly supported ([e3bbb1b](https://github.com/PurrNet/PurrLobby/commit/e3bbb1b4a33e2b4d8cbe7f540b7f518f119a70c9))
+* include purrservices warning ([77cc9a0](https://github.com/PurrNet/PurrLobby/commit/77cc9a0d18261ed72be7e550af378047e694aa4c))
+* issues ([ba4d997](https://github.com/PurrNet/PurrLobby/commit/ba4d9971bc302a27382005268970053960c679d1))
+* make purrservices optional ([8eb9190](https://github.com/PurrNet/PurrLobby/commit/8eb91904c22a96039a330a88c2a589578bc00e29))
+* nakama installer inspector helper ([e77ed64](https://github.com/PurrNet/PurrLobby/commit/e77ed640d18b47dc3ad9e3691e82e726c69e42d0))
+* Nakama lobby browser ([d63afbe](https://github.com/PurrNet/PurrLobby/commit/d63afbeed045498058c2dcd76dd5f71415c9a81c))
+* Nakama stuff + GameOver ([5234af5](https://github.com/PurrNet/PurrLobby/commit/5234af531f8a8835743f4fb3f98f8acd3e466080))
+* no more "global" free tier thing ([aa2e7a3](https://github.com/PurrNet/PurrLobby/commit/aa2e7a30d1038298fab06351afcb62043bb1cf67))
+* not needed global namespaces ([0bfec23](https://github.com/PurrNet/PurrLobby/commit/0bfec2378780d2140b9e4ee527d4be6d0757fe9d))
+* patching bugs and completing some features ([72ff705](https://github.com/PurrNet/PurrLobby/commit/72ff705eccd71d3ecc1610c32495711a869c7406))
+* refactor folder structure and steam provider ([53b9b07](https://github.com/PurrNet/PurrLobby/commit/53b9b0716b4688f299bfcdac045e54ef00ecb468))
+* releaserc ([05e09bc](https://github.com/PurrNet/PurrLobby/commit/05e09bcf6486bb65f6408ad6e772bab73c419089))
+* releaserc ([4c46518](https://github.com/PurrNet/PurrLobby/commit/4c465188597c33dcb47fc558d660985b25af7284))
+* releaserc ([2bdf7b8](https://github.com/PurrNet/PurrLobby/commit/2bdf7b8a25da2d8dce719495a85d4df3dffe8976))
+* remove meta files ([c8891d2](https://github.com/PurrNet/PurrLobby/commit/c8891d224c137f411aa6cdfb65c677bdf4913ffc))
+* serializable warning ([0f7ce61](https://github.com/PurrNet/PurrLobby/commit/0f7ce615d687101e971279a602f48bbf316f528b))
+* support Unity 6.3 scene handles ([f640496](https://github.com/PurrNet/PurrLobby/commit/f6404961fc949a53aafb9d44c83ac6dd25f3ae29))
+* wtf ([6bf797e](https://github.com/PurrNet/PurrLobby/commit/6bf797e75ac150e8fb05a071f87468fa4e5f4ce8))
+
+
+### Features
+
+* contextmenuview ([69730b7](https://github.com/PurrNet/PurrLobby/commit/69730b7db0bb76933dfe78d9a8961312203eff16))
+* edgegap matchmaking; cleanup etc ([8314235](https://github.com/PurrNet/PurrLobby/commit/831423584c8d8542612bac95a706be613879b111))
+* steam provider + BIG rework ([a5a6aed](https://github.com/PurrNet/PurrLobby/commit/a5a6aed62b814d776506ca4e542d68aab2340f6c))
+
 # [1.0.0-beta.19](https://github.com/PurrNet/PurrLobby/compare/v1.0.0-beta.18...v1.0.0-beta.19) (2026-08-26)
 
 
