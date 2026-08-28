@@ -26,6 +26,7 @@
 
 # Visual Studio cache directory
 .vs/
+.vscode/
 PurrPackages/dev.purrnet.voice*
 
 # Gradle cache directory
