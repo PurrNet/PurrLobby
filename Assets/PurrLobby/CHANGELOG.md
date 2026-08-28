@@ -1,3 +1,10 @@
+## [1.0.1-beta.1](https://github.com/PurrNet/PurrLobby/compare/v1.0.0...v1.0.1-beta.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* edgegap left-overs ([881f881](https://github.com/PurrNet/PurrLobby/commit/881f8810a2a84fb154a2bf1b443fb51d02c6c510))
+
 # 1.0.0 (2026-08-27)
 
 
