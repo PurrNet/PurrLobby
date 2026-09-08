@@ -22,17 +22,27 @@ namespace PurrNet.Lobby
         [SerializeField] private LobbyChat _chat;
         [SerializeField] private TMP_InputField _lobbyCode;
         [Space]
-        [SerializeField] private Color _readyColor;
-        [SerializeField] private Color _readyHover;
-        [SerializeField] private Color _unreadyColor;
-        [SerializeField] private Color _unreadyHover;
+        [SerializeField] private ColorInfo _readyColor = new() { enabled = true, color = ColorType.Surface };
+        [SerializeField] private ColorTone _readyColorTone;
+        [SerializeField] private ColorInfo _readyHover = new() { enabled = true, color = ColorType.Surface };
+        [SerializeField] private ColorTone _readyHoverTone;
+        [SerializeField] private ColorInfo _unreadyColor = new() { enabled = true, color = ColorType.Warning };
+        [SerializeField] private ColorTone _unreadyColorTone;
+        [SerializeField] private ColorInfo _unreadyHover = new() { enabled = true, color = ColorType.Warning };
+        [SerializeField] private ColorTone _unreadyHoverTone;
+        [SerializeField] private ColorInfo _readyTextColor = new() { enabled = true, color = ColorType.Surface, contrast = true };
+        [SerializeField] private ColorInfo _unreadyTextColor = new() { enabled = true, color = ColorType.Background, contrast = true };
         [SerializeField] private TMP_Text _readyButtonText;
         [SerializeField] private ButtonElement _readyButton;
         [Space]
-        [SerializeField] private Color _unmutedColor;
-        [SerializeField] private Color _unmutedHover;
-        [SerializeField] private Color _mutedColor;
-        [SerializeField] private Color _mutedHover;
+        [SerializeField] private ColorInfo _unmutedColor = new() { enabled = true, color = ColorType.Surface };
+        [SerializeField] private ColorTone _unmutedColorTone;
+        [SerializeField] private ColorInfo _unmutedHover = new() { enabled = true, color = ColorType.Surface };
+        [SerializeField] private ColorTone _unmutedHoverTone;
+        [SerializeField] private ColorInfo _mutedColor = new() { enabled = true, color = ColorType.Danger };
+        [SerializeField] private ColorTone _mutedColorTone;
+        [SerializeField] private ColorInfo _mutedHover = new() { enabled = true, color = ColorType.Danger };
+        [SerializeField] private ColorTone _mutedHoverTone;
         [SerializeField] private ButtonElement _microphoneButton;
         [SerializeField] private TMP_Text _microphoneText;
         [SerializeField] private GameObject _microphoneFeature;
@@ -71,6 +81,7 @@ namespace PurrNet.Lobby
 
             _orchestrator = orchestrator;
             _allReadyTimer = _timeToStartGame;
+            _readyStateInitialized = false;
             _lobbyEventsUnsubscribed = false;
             _gameStarted = false;
             _wasAllReady = false;
@@ -297,8 +308,11 @@ namespace PurrNet.Lobby
             var color = _hasLocalMicEnabled ? _unmutedColor : _mutedColor;
             var highlight = _hasLocalMicEnabled ? _unmutedHover : _mutedHover;
 
-            _microphoneButton.backgroundNormal = color;
-            _microphoneButton.backgroundHover = highlight;
+            ThemeColors.Set(_microphoneButton, color, highlight,
+                _hasLocalMicEnabled ? _unmutedColorTone : _mutedColorTone,
+                _hasLocalMicEnabled ? _unmutedHoverTone : _mutedHoverTone);
+            color.contrast = true;
+            ThemeColors.Set(_microphoneText, color);
         }
 
         private void ConnectToLobby(ILobby lobby)
@@ -333,6 +347,7 @@ namespace PurrNet.Lobby
         }
 
         private bool _wasReady = true;
+        private bool _readyStateInitialized;
 
         private void RenderPlayerList(ILobby lobby)
         {
@@ -364,12 +379,17 @@ namespace PurrNet.Lobby
         {
             bool localPlayerReady = lobby.localPlayer?.isReady == true;
 
-            if (_wasReady != localPlayerReady)
+            if (!_readyStateInitialized || _wasReady != localPlayerReady)
             {
                 _readyButtonText.text = localPlayerReady ? "Unready" : "Ready";
-                _readyButton.backgroundNormal = localPlayerReady ? _readyColor : _unreadyColor;
-                _readyButton.backgroundHover = localPlayerReady ? _readyHover : _unreadyHover;
+                var color = localPlayerReady ? _readyColor : _unreadyColor;
+                ThemeColors.Set(_readyButton, color,
+                    localPlayerReady ? _readyHover : _unreadyHover,
+                    localPlayerReady ? _readyColorTone : _unreadyColorTone,
+                    localPlayerReady ? _readyHoverTone : _unreadyHoverTone);
+                ThemeColors.Set(_readyButtonText, localPlayerReady ? _readyTextColor : _unreadyTextColor);
                 _wasReady = localPlayerReady;
+                _readyStateInitialized = true;
             }
         }
 

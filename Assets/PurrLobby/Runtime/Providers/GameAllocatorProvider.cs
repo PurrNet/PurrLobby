@@ -50,7 +50,7 @@ namespace PurrNet.Lobby
         }
 
         /// <summary>
-        /// False for allocators that connect to a dedicated server (e.g. Edgegap):
+        /// False for allocators that connect to a dedicated server:
         /// <see cref="Connect"/> then always starts a client, never a host.
         /// </summary>
         protected virtual bool supportsHosting => true;

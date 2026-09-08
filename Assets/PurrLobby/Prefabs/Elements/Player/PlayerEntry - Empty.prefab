@@ -128,6 +128,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4071312264343879130, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+      propertyPath: _opacity
+      value: 0.5019608
+      objectReference: {fileID: 0}
     - target: {fileID: 4611411306522583218, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -256,6 +260,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5362436243024035419, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+      propertyPath: _coloredInfos.Array.data[0].color
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5362436243024035419, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+      propertyPath: _coloredInfos.Array.data[0].enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5464016470048505509, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -351,5 +363,50 @@ PrefabInstance:
     - {fileID: 8655436869982318912, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
     - {fileID: 527458344618502230, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8260313128606359124, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3775397415554308467}
   m_SourcePrefab: {fileID: 100100000, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+--- !u!114 &1118579109004471301 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5621913713163626870, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+  m_PrefabInstance: {fileID: 4720037913799263603}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3684637733217786663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.RectangleGraphic
+--- !u!1 &3684637733217786663 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8260313128606359124, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+  m_PrefabInstance: {fileID: 4720037913799263603}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3775397415554308467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3684637733217786663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d83035f59de044fc97ddadad4a295e61, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.ThemedGraphicTone
+  _graphic: {fileID: 1118579109004471301}
+  _slot: 0
+  _color:
+    enabled: 1
+    color: 1
+    contrast: 0
+  _tone:
+    shade:
+      enabled: 1
+      color: 1
+      contrast: 1
+    blend: 0.05566523
+  _brightness: 1
+  _opacity: 0.5019608

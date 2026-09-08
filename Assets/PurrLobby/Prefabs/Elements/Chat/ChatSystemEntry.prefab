@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 3924352751808240627}
   - component: {fileID: 3427863856257466220}
   - component: {fileID: 6777810399682289968}
+  - component: {fileID: 7463194329431770488}
+  - component: {fileID: 8723894577479266818}
   m_Layer: 5
   m_Name: ChatSystemEntry
   m_TagString: Untagged
@@ -194,3 +196,48 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &7463194329431770488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9116238023485670450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
+  _graphic: {fileID: 3924352751808240627}
+  _transitionDuration: 0.1
+  _color:
+    enabled: 0
+    color: 3
+    contrast: 0
+  _coloredInfos: []
+--- !u!114 &8723894577479266818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9116238023485670450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d83035f59de044fc97ddadad4a295e61, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.ThemedGraphicTone
+  _graphic: {fileID: 3924352751808240627}
+  _slot: 0
+  _color:
+    enabled: 1
+    color: 3
+    contrast: 0
+  _tone:
+    shade:
+      enabled: 1
+      color: 5
+      contrast: 0
+    blend: 0.2606231
+  _brightness: 1
+  _opacity: 1

@@ -36,8 +36,8 @@ namespace PurrNet.Lobby
         [SerializeField] private TMPro.TMP_Text _username;
         [SerializeField] private TMPro.TMP_Text _status;
         [SerializeField] private GameObject _options;
-        [SerializeField] private Color _statusReady = Color.green;
-        [SerializeField] private Color _statusUnready = Color.gray;
+        [SerializeField] private ColorInfo _statusReady = new() { enabled = true, color = ColorType.Success };
+        [SerializeField] private ColorInfo _statusUnready = new() { enabled = true, color = ColorType.Muted };
         [SerializeField] private Image _phonemeSprite;
 #if PURR_VOICE
         [Space]
@@ -65,7 +65,7 @@ namespace PurrNet.Lobby
                 _options.SetActive(false);
 
 #if PURR_VOICE
-            _phonemeSprite.color = new Color(1, 1, 1, 0);
+            _phonemeSprite.canvasRenderer.SetAlpha(0f);
 #else
             _phonemeSprite.enabled = false;
 #endif
@@ -188,7 +188,7 @@ namespace PurrNet.Lobby
             _outline.outlineWidthNotSelected = isMe ? 1f : 0f;
 
             _status.text = _player.isReady ? "Ready" : "Not Ready";
-            _status.color = _player.isReady ? _statusReady : _statusUnready;
+            ThemeColors.Set(_status, _player.isReady ? _statusReady : _statusUnready);
 
             PlayerAvatarUI.SetupAvatar(_player, _avatarGraphic, _avatarLetter);
         }
@@ -207,11 +207,10 @@ namespace PurrNet.Lobby
         private void UpdatePhonemes()
         {
             bool shouldHide = string.IsNullOrWhiteSpace(_lastPhoneme) && Time.time - _lastPhonemeChangedTime > 1f;
-            Vector4 currentColor = _phonemeSprite.color;
-            var targetColor = shouldHide ? new Vector4(1, 1, 1, 0) : new Vector4(1, 1, 1, 1);
-            var newColor = Vector4.MoveTowards(currentColor, targetColor, Time.deltaTime * 5f);
-            _phonemeSprite.color = newColor;
-            _phonemeSprite.gameObject.SetActive(newColor.w != 0f);
+            float alpha = Mathf.MoveTowards(_phonemeSprite.canvasRenderer.GetAlpha(),
+                shouldHide ? 0f : 1f, Time.deltaTime * 5f);
+            _phonemeSprite.gameObject.SetActive(alpha != 0f);
+            _phonemeSprite.canvasRenderer.SetAlpha(alpha);
         }
 
         public void PhonemeChanged(string phoneme)
