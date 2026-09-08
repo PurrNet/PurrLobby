@@ -168,6 +168,15 @@
         "com.unity.render-pipelines.core": "17.0.3"
       }
     },
+    "com.unity.sdk.linux-x86_64": {
+      "version": "1.1.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot.base": "1.1.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.searcher": {
       "version": "4.9.4",
       "depth": 2,
@@ -183,6 +192,13 @@
         "com.unity.render-pipelines.core": "17.3.0",
         "com.unity.searcher": "4.9.3"
       }
+    },
+    "com.unity.sysroot.base": {
+      "version": "1.1.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
       "version": "1.6.0",
@@ -213,6 +229,15 @@
         "com.unity.modules.director": "1.0.0",
         "com.unity.modules.animation": "1.0.0",
         "com.unity.modules.particlesystem": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.toolchain.linux-x86_64-linux": {
+      "version": "1.1.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot.base": "1.1.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -248,11 +273,11 @@
       "hash": "4bbecf48375fb16805efb9c8246b607ffa826b2c"
     },
     "dev.purrnet.services": {
-      "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#v1.0.1-beta.2",
+      "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#v1.1.2",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "53bd76c2b9c367771745c55ff517ab4d62730da0"
+      "hash": "8ae6a0c75568c77fe3f706e08dc90f8a4384957b"
     },
     "dev.purrnet.ui": {
       "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.5.0-beta.9",
