@@ -1,3 +1,10 @@
+# [1.1.0-beta.1](https://github.com/PurrNet/PurrLobby/compare/v1.0.1...v1.1.0-beta.1) (2026-09-08)
+
+
+### Features
+
+* views actually use the themes ([1213498](https://github.com/PurrNet/PurrLobby/commit/1213498f4a334cf1ac33dfbb82e3650d15dcaf3d))
+
 ## [1.0.1](https://github.com/PurrNet/PurrLobby/compare/v1.0.0...v1.0.1) (2026-08-28)
 
 
