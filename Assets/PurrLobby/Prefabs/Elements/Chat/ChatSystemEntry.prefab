@@ -226,7 +226,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d83035f59de044fc97ddadad4a295e61, type: 3}
   m_Name:
-  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.ThemedGraphicTone
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ThemedGraphicTone
   _graphic: {fileID: 3924352751808240627}
   _slot: 0
   _color:

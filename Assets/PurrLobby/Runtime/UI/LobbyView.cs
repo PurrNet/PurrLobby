@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using PurrNet.UI;
 using TMPro;
 using UnityEngine;
-using PurrNet.UI.HeroUI;
 
 namespace PurrNet.Lobby
 {

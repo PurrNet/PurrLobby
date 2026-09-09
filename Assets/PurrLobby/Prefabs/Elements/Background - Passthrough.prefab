@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Color.a
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4064444047529205251, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 7798970005536736369}
     - target: {fileID: 6043758412650494352, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
       propertyPath: m_Name
       value: Background - Passthrough
@@ -99,15 +103,13 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 5567899316654724681, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
     - {fileID: 3924571055413783024, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+    - {fileID: 5943205836409239787, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6043758412650494352, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8582963066750185613}
-    - targetCorrespondingSourceObject: {fileID: 6043758412650494352, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 167807592986397932}
   m_SourcePrefab: {fileID: 100100000, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
 --- !u!1 &4282839021931429329 stripped
 GameObject:
@@ -128,25 +130,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.CloseParentAndPassthrough
   _closeSounds:
   - {fileID: 8300000, guid: 2c54de40fc105c449bbfd51da9fd7394, type: 3}
---- !u!114 &167807592986397932
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4282839021931429329}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
-  _graphic: {fileID: 7798970005536736369}
-  _transitionDuration: 0.1
-  _color:
-    enabled: 0
-    color: 6
-    contrast: 0
-  _coloredInfos: []
 --- !u!114 &7798970005536736369 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 327510159877816368, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}

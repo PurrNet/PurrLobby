@@ -107,6 +107,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9200757995484744025}
     m_Modifications:
+    - target: {fileID: 144364927656772408, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 8242592270317755252}
     - target: {fileID: 5040737113958996952, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -210,10 +214,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8967047083258821514, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8999900462605809880}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
 --- !u!224 &5576572868784820358 stripped
 RectTransform:
@@ -225,36 +226,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8859756083255496746, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
   m_PrefabInstance: {fileID: 619171044584278878}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8423672047615307988}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
---- !u!1 &8423672047615307988 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8967047083258821514, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
-  m_PrefabInstance: {fileID: 619171044584278878}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &8999900462605809880
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8423672047615307988}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
-  _graphic: {fileID: 8242592270317755252}
-  _transitionDuration: 0.1
-  _color:
-    enabled: 1
-    color: 8
-    contrast: 0
-  _coloredInfos: []
 --- !u!1001 &2544675857535731670
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -263,10 +240,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9200757995484744025}
     m_Modifications:
+    - target: {fileID: 352884101286387523, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 2243378161716859527}
+    - target: {fileID: 352884101286387523, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
+      propertyPath: _coloredInfos.Array.data[0].color
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 352884101286387523, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
+      propertyPath: _coloredInfos.Array.data[3].enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 352884101286387523, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
+      propertyPath: _coloredInfos.Array.data[5].enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2679823264268824624, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
       propertyPath: m_Name
       value: Separator
       objectReference: {fileID: 0}
+    - target: {fileID: 3025128807173825841, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 2243378161716859527}
     - target: {fileID: 4355708409659430225, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
       propertyPath: _graphicColor.a
       value: 1
@@ -351,91 +348,19 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7365824757705119188, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
+    - {fileID: 1303691763570558878, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2679823264268824624, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5204866085535530277}
-    - targetCorrespondingSourceObject: {fileID: 2679823264268824624, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3191069345337105856}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
---- !u!1 &459406996529756134 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2679823264268824624, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
-  m_PrefabInstance: {fileID: 2544675857535731670}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5204866085535530277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 459406996529756134}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
-  _graphic: {fileID: 2243378161716859527}
-  _transitionDuration: 0.1
-  _color:
-    enabled: 0
-    color: 7
-    contrast: 0
-  _coloredInfos:
-  - enabled: 0
-    color: 8
-    contrast: 0
-  - enabled: 1
-    color: 7
-    contrast: 0
-  - enabled: 1
-    color: 5
-    contrast: 0
-  - enabled: 1
-    color: 6
-    contrast: 0
-  - enabled: 1
-    color: 7
-    contrast: 0
-  - enabled: 1
-    color: 6
-    contrast: 0
---- !u!114 &3191069345337105856
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 459406996529756134}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d83035f59de044fc97ddadad4a295e61, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.ThemedGraphicTone
-  _graphic: {fileID: 2243378161716859527}
-  _slot: 0
-  _color:
-    enabled: 1
-    color: 1
-    contrast: 0
-  _tone:
-    shade:
-      enabled: 1
-      color: 1
-      contrast: 1
-    blend: 0.04101581
-  _brightness: 1
-  _opacity: 1
 --- !u!114 &2243378161716859527 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4355708409659430225, guid: 518be3816382db8448322ccb7b1728a6, type: 3}
   m_PrefabInstance: {fileID: 2544675857535731670}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 459406996529756134}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}

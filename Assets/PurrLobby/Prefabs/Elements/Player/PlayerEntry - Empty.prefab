@@ -76,6 +76,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2598560641322056029, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 2050064366557240428}
     - target: {fileID: 2778761603997722902, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -128,6 +132,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4071312264343879130, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 2050064366557240428}
     - target: {fileID: 4071312264343879130, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
       propertyPath: _opacity
       value: 0.5019608
@@ -261,6 +269,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5362436243024035419, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 1118579109004471301}
+    - target: {fileID: 5362436243024035419, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
       propertyPath: _coloredInfos.Array.data[0].color
       value: 1
       objectReference: {fileID: 0}
@@ -379,6 +391,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}
   m_Name:
   m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.RectangleGraphic
+--- !u!114 &2050064366557240428 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6769961186041862431, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
+  m_PrefabInstance: {fileID: 4720037913799263603}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.RectangleGraphic
 --- !u!1 &3684637733217786663 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8260313128606359124, guid: 6ce610b6a2349004c91cd0ceb8d0002c, type: 3}
@@ -395,7 +418,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d83035f59de044fc97ddadad4a295e61, type: 3}
   m_Name:
-  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.ThemedGraphicTone
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ThemedGraphicTone
   _graphic: {fileID: 1118579109004471301}
   _slot: 0
   _color:
