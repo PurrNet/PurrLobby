@@ -1,3 +1,10 @@
+# [1.1.0-beta.2](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.1...v1.1.0-beta.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* use themes and update PurrUI ([c936a87](https://github.com/PurrNet/PurrLobby/commit/c936a876d17826d7baf25abc4ec18818ebd231ad))
+
 # [1.1.0-beta.1](https://github.com/PurrNet/PurrLobby/compare/v1.0.1...v1.1.0-beta.1) (2026-09-08)
 
 
