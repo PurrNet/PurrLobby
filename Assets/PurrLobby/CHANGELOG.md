@@ -1,3 +1,10 @@
+# [1.1.0-beta.5](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.4...v1.1.0-beta.5) (2026-09-12)
+
+
+### Bug Fixes
+
+* enable NAT for lobby by default ([89bc31a](https://github.com/PurrNet/PurrLobby/commit/89bc31a5d19d25bc67be57a098bbe083898657cb))
+
 # [1.1.0-beta.4](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.3...v1.1.0-beta.4) (2026-09-12)
 
 
