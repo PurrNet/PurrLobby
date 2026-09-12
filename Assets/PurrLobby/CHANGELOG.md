@@ -1,3 +1,10 @@
+# [1.1.0-beta.4](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.3...v1.1.0-beta.4) (2026-09-12)
+
+
+### Features
+
+* loading screen + game orchestrator p2p option ([e803f2f](https://github.com/PurrNet/PurrLobby/commit/e803f2fac1301c72a9d2f575ea0bd8dcdac65323))
+
 # [1.1.0-beta.3](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.2...v1.1.0-beta.3) (2026-09-12)
 
 
