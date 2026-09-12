@@ -1,3 +1,10 @@
+# [1.1.0-beta.6](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.5...v1.1.0-beta.6) (2026-09-12)
+
+
+### Bug Fixes
+
+* mark purrtransport rooms with the context they were created in ([f613fed](https://github.com/PurrNet/PurrLobby/commit/f613fed6c7d302e727bf3e4f3b9162c088a72fe7))
+
 # [1.1.0-beta.5](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.4...v1.1.0-beta.5) (2026-09-12)
 
 
