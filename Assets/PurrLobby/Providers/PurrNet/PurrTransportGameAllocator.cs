@@ -8,6 +8,7 @@ namespace PurrNet.Lobby.PurrNet
     public class PurrTransportGameAllocator : GameAllocatorProvider
     {
         [SerializeField, PurrScene] private string _gameScene;
+        [SerializeField] private bool _useP2P = true;
 
         public override Task<GameStartResponse> AllocateGame(ILobby lobby)
         {
@@ -28,6 +29,7 @@ namespace PurrNet.Lobby.PurrNet
             var transport = manager.transport as PurrTransport ?? GetOrAddComponent<PurrTransport>(manager.gameObject);
             manager.transport = transport;
             transport.roomName = connection.serverAddress;
+            transport.useNat = _useP2P;
             return true;
         }
     }
