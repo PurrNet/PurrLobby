@@ -1,3 +1,10 @@
+# [1.1.0-beta.3](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.2...v1.1.0-beta.3) (2026-09-12)
+
+
+### Features
+
+* allow PurrTransportGameAllocator to use P2P ([5226137](https://github.com/PurrNet/PurrLobby/commit/52261379baad7ff7f988f1413002f5246e1a2629))
+
 # [1.1.0-beta.2](https://github.com/PurrNet/PurrLobby/compare/v1.1.0-beta.1...v1.1.0-beta.2) (2026-09-09)
 
 
