@@ -9,7 +9,7 @@ namespace PurrNet.Lobby.PurrNet
 
         protected override void ConfigureTransportForHost(ILobby lobby, IPlayer host)
         {
-            _transport.roomName = $"{lobby.id}_{host.id}";
+            _transport.roomName = $"PURRLOBBY_{lobby.id}_{host.id}";
         }
     }
 }

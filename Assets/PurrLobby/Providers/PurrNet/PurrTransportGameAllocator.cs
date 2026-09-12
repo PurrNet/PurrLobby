@@ -14,7 +14,7 @@ namespace PurrNet.Lobby.PurrNet
         {
             return Task.FromResult(GameStartResponse.Success(new ConnectionInfo
             {
-                serverAddress = lobby.id,
+                serverAddress = "PURRLOBBY_GAME_" + lobby.id,
                 hostId = lobby.owner?.id,
             }));
         }
