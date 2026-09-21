@@ -19,15 +19,12 @@ in depth.
 - Unity `2022.3` or newer.
 - [PurrNet](https://github.com/PurrNet/PurrNet) and
   [PurrUI](https://github.com/PurrNet/PurrUI).
-- PurrServices when using the PurrNet Services lobby provider or Edgegap game
-  allocator.
+- PurrServices when using the PurrNet Services lobby provider.
 - Optional provider packages:
   - [Steamworks.NET](https://github.com/rlabrecque/Steamworks.NET) for Steam
     providers.
   - [Nakama Unity](https://github.com/heroiclabs/nakama-unity) for Nakama
     providers.
-  - [Edgegap Unity plugin](https://github.com/edgegap/edgegap-unity-plugin) for
-    Edgegap workflows.
 
 Provider code is compiled out when its SDK is absent, so you only need the
 packages for the backends you actually use.
@@ -82,7 +79,6 @@ heavily, since it keeps your work fully separate from the package.
 | PurrNet Services | yes | yes | via generic lobby matchmaker | PurrTransport |
 | Steam | yes | yes | via generic lobby matchmaker | Steam sockets |
 | Nakama | create/join by id or code | basic (ids only) | yes | Nakama relayed match |
-| Edgegap | no | no | yes | managed server assignment |
 
 Providers advertise optional lobby actions through `LobbyCapabilities`. The
 menu hides unsupported buttons automatically, so a backend without lobby
@@ -99,10 +95,6 @@ are ignored. Add your own server RPC and extend `QueryLobbies` to lift any of
 these limits. Matchmaking is unaffected: `NakamaMatchmakingProvider` runs
 Nakama's real matchmaker with tickets and min/max party size, no server module
 required, and is the supported path for dropping players into a game together.
-
-Edgegap matchmaking forms the match and returns ready-to-use connection info in
-one step. Pair `EdgegapMatchmakingProvider` with `EdgegapGameAllocator` so the
-matchmaker and allocator agree on transport and port selection.
 
 ## Getting Started
 

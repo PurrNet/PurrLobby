@@ -143,6 +143,7 @@ GameObject:
   - component: {fileID: 6370630251776925699}
   - component: {fileID: 3069021496862515337}
   - component: {fileID: 6884714876633433633}
+  - component: {fileID: 2204835430741724118}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -294,9 +295,47 @@ MonoBehaviour:
   _embossStrength: 0.5
   _embossHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _embossShadowColor: {r: 0, g: 0, b: 0, a: 1}
+  _roundnessRole: 2
   _useMaxRoundness: 0
   _uniformRoundness: 1
   _roundnessInPixels: {x: 16, y: 16, z: 16, w: 16}
+--- !u!114 &2204835430741724118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4321098765432101001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
+  _graphic: {fileID: 6884714876633433633}
+  _transitionDuration: 0.1
+  _color:
+    enabled: 0
+    color: 7
+    contrast: 0
+  _coloredInfos:
+  - enabled: 1
+    color: 1
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 5
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
 --- !u!1001 &4321098765432101010
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -305,6 +344,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 984279629937754095}
     m_Modifications:
+    - target: {fileID: 327510159877816368, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4064444047529205251, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 4574580453967452322}
+    - target: {fileID: 4064444047529205251, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+      propertyPath: _color.enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6043758412650494352, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
       propertyPath: m_Name
       value: Background
@@ -389,11 +440,46 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5943205836409239787, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6043758412650494352, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5087032737162933948}
   m_SourcePrefab: {fileID: 100100000, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+--- !u!114 &4574580453967452322 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 327510159877816368, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101010}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7505281968754008322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!1 &7505281968754008322 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6043758412650494352, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101010}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5087032737162933948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7505281968754008322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2cdbdb91c4540f4aa3df099bf998c39, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.GraphicOpacity
+  _graphic: {fileID: 4574580453967452322}
+  _opacity: 0.69803923
+  _fillOnly: 0
 --- !u!224 &7898234428843694395 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6227222861737132457, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
@@ -407,6 +493,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4321098765432101002}
     m_Modifications:
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 4684743453538076854}
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _color.color
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5040737113958996952, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -504,6 +598,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+--- !u!114 &4684743453538076854 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8859756083255496746, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101020}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!224 &9080360605500752708 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5040737113958996952, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
@@ -520,6 +625,34 @@ PrefabInstance:
     - target: {fileID: 724197742015850025, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
       propertyPath: m_Name
       value: Button-Resume
+      objectReference: {fileID: 0}
+    - target: {fileID: 1276072071564278327, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 5726324624570970424}
+    - target: {fileID: 1276072071564278327, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _coloredInfos.Array.data[3].enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1276072071564278327, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _coloredInfos.Array.data[5].enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3693934584037749335, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 8608294974806025361}
+    - target: {fileID: 4093494571155517460, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _normalTone.blend
+      value: 0.000000049359304
+      objectReference: {fileID: 0}
+    - target: {fileID: 4093494571155517460, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _normalTone.shade.color
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4093494571155517460, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+      propertyPath: _normalTone.shade.enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4093494571155517460, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.size
@@ -661,16 +794,40 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3573453725753455714, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+    - {fileID: 3889679052484201975, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+--- !u!114 &5726324624570970424 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8394812538829302174, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101030}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.RectangleGraphic
 --- !u!224 &6661308024925726814 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7459676452420432120, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
   m_PrefabInstance: {fileID: 4321098765432101030}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8608294974806025361 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5512809213008706615, guid: 6491b392ffebc374e935777cfd3f45a4, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101030}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1001 &4321098765432101040
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -679,6 +836,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4321098765432101002}
     m_Modifications:
+    - target: {fileID: 156512757056907757, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _button
+      value:
+      objectReference: {fileID: 4801486476697328655}
+    - target: {fileID: 156512757056907757, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 1075534147444688261}
     - target: {fileID: 608879758443889416, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
       propertyPath: m_PreferredWidth
       value: 260
@@ -795,6 +960,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Button-Leave
       objectReference: {fileID: 0}
+    - target: {fileID: 5777953094713413276, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 1075534147444688261}
+    - target: {fileID: 5777953094713413276, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _coloredInfos.Array.data[3].enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5777953094713413276, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _coloredInfos.Array.data[5].enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8275804794778027772, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 3957577585071116332}
     - target: {fileID: 8743156949083178175, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.size
       value: 1
@@ -823,16 +1004,51 @@ PrefabInstance:
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8074277145288179913, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+    - {fileID: 8385710265755826524, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+--- !u!114 &1075534147444688261 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3826565399899266357, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101040}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.RectangleGraphic
 --- !u!224 &2155910480320371939 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2746339554120959059, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
   m_PrefabInstance: {fileID: 4321098765432101040}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3957577585071116332 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 944493367419717788, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101040}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &4801486476697328655 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8743156949083178175, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101040}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9c20e29ce9c2744aa74f141b285a2b8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ButtonElement
 --- !u!1001 &4321098765432101050
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -841,6 +1057,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4321098765432101002}
     m_Modifications:
+    - target: {fileID: 156512757056907757, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _button
+      value:
+      objectReference: {fileID: 4801486476697328645}
+    - target: {fileID: 156512757056907757, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 1075534147444688271}
     - target: {fileID: 608879758443889416, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
       propertyPath: m_PreferredWidth
       value: 260
@@ -957,6 +1181,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Button-Quit
       objectReference: {fileID: 0}
+    - target: {fileID: 5777953094713413276, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 1075534147444688271}
+    - target: {fileID: 5777953094713413276, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _coloredInfos.Array.data[3].enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5777953094713413276, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _coloredInfos.Array.data[5].enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8275804794778027772, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 3957577585071116326}
     - target: {fileID: 8743156949083178175, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.size
       value: 1
@@ -985,13 +1225,48 @@ PrefabInstance:
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8074277145288179913, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+    - {fileID: 8385710265755826524, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+--- !u!114 &1075534147444688271 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3826565399899266357, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101050}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.RectangleGraphic
 --- !u!224 &2155910480320371945 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2746339554120959059, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
   m_PrefabInstance: {fileID: 4321098765432101050}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3957577585071116326 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 944493367419717788, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101050}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &4801486476697328645 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8743156949083178175, guid: 22dc86182baa3114d9fbf7e8b5c5b7a0, type: 3}
+  m_PrefabInstance: {fileID: 4321098765432101050}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9c20e29ce9c2744aa74f141b285a2b8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ButtonElement

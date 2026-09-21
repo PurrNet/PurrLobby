@@ -1,5 +1,6 @@
 ﻿using System;
 using TMPro;
+using PurrNet.UI;
 using UnityEngine;
 
 namespace PurrNet.Lobby
@@ -9,8 +10,8 @@ namespace PurrNet.Lobby
         [SerializeField] private TMP_Text _icon;
         [SerializeField] private TMP_Text _name;
         [SerializeField] private TMP_Text _description;
-        [SerializeField] private Color _normalColor;
-        [SerializeField] private Color _dangerousColor;
+        [SerializeField] private ColorInfo _normalColor = new() { enabled = true, color = ColorType.Surface, contrast = true };
+        [SerializeField] private ColorInfo _dangerousColor = new() { enabled = true, color = ColorType.Danger };
 
         private Action<int> _onOptionSelected;
         private int _index;
@@ -24,16 +25,9 @@ namespace PurrNet.Lobby
             _name.text = option.name;
             _description.text = option.description;
 
-            if (option.isDangerous)
-            {
-                _icon.color = _dangerousColor;
-                _name.color = _dangerousColor;
-            }
-            else
-            {
-                _icon.color = _normalColor;
-                _name.color = _normalColor;
-            }
+            var color = option.isDangerous ? _dangerousColor : _normalColor;
+            ThemeColors.Set(_icon, color);
+            ThemeColors.Set(_name, color);
         }
 
         public void Select()

@@ -12,9 +12,13 @@ PrefabInstance:
       propertyPath: m_Color.a
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4064444047529205251, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 7798970005536736369}
     - target: {fileID: 6043758412650494352, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
       propertyPath: m_Name
-      value: Background Variant
+      value: Background - Passthrough
       objectReference: {fileID: 0}
     - target: {fileID: 6227222861737132457, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
       propertyPath: m_Pivot.x
@@ -99,6 +103,7 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 5567899316654724681, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
     - {fileID: 3924571055413783024, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+    - {fileID: 5943205836409239787, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -125,3 +130,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.CloseParentAndPassthrough
   _closeSounds:
   - {fileID: 8300000, guid: 2c54de40fc105c449bbfd51da9fd7394, type: 3}
+--- !u!114 &7798970005536736369 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 327510159877816368, guid: 0eeb8b4303f29854cbf12a1cc87cb9c3, type: 3}
+  m_PrefabInstance: {fileID: 7543543838781523009}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4282839021931429329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image

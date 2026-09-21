@@ -79,6 +79,7 @@ GameObject:
   - component: {fileID: 4085303988042248624}
   - component: {fileID: 4625996993190063810}
   - component: {fileID: 918870956599226710}
+  - component: {fileID: 2064646355804074843}
   m_Layer: 5
   m_Name: ContextMenu-Entry
   m_TagString: Untagged
@@ -168,8 +169,14 @@ MonoBehaviour:
   _icon: {fileID: 3671927847597764420}
   _name: {fileID: 978419265455269839}
   _description: {fileID: 3317027378879828206}
-  _normalColor: {r: 1, g: 1, b: 1, a: 1}
-  _dangerousColor: {r: 0.85882354, g: 0.23137255, b: 0.24313726, a: 1}
+  _normalColor:
+    enabled: 1
+    color: 1
+    contrast: 1
+  _dangerousColor:
+    enabled: 1
+    color: 4
+    contrast: 0
 --- !u!222 &4085303988042248624
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -189,7 +196,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9c20e29ce9c2744aa74f141b285a2b8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.ButtonElement
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ButtonElement
   _graphic: {fileID: 918870956599226710}
   _interactable: 1
   _transitionCurve:
@@ -216,8 +223,33 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _backgroundNormal: {r: 0.15294118, g: 0.15294118, b: 0.15686275, a: 0}
-  _backgroundHover: {r: 0.21568628, g: 0.21568628, b: 0.21960784, a: 1}
+  _normalColor:
+    enabled: 1
+    color: 1
+    contrast: 0
+  _hoverColor:
+    enabled: 1
+    color: 1
+    contrast: 0
+  _normalTone:
+    shade:
+      enabled: 1
+      color: 1
+      contrast: 1
+    blend: 0.065903105
+  _hoverTone:
+    shade:
+      enabled: 1
+      color: 1
+      contrast: 1
+    blend: 0.13617916
+  _normalOpacity: 0
+  _hoverOpacity: 1
+  _normalBrightness: 1
+  _hoverBrightness: 1
+  _useThemeTransition: 1
+  _useThemeDisabledOpacity: 1
+  _useThemePressedScale: 1
   _disabledAlpha: 0.5
   _scaleNormal: 1
   _scaleClicked: 0.99
@@ -315,9 +347,47 @@ MonoBehaviour:
   _embossStrength: 0.5
   _embossHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _embossShadowColor: {r: 0, g: 0, b: 0, a: 1}
+  _roundnessRole: 4
   _useMaxRoundness: 0
   _uniformRoundness: 1
   _roundnessInPixels: {x: 16, y: 16, z: 16, w: 16}
+--- !u!114 &2064646355804074843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6369619708828674389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
+  _graphic: {fileID: 918870956599226710}
+  _transitionDuration: 0.1
+  _color:
+    enabled: 0
+    color: 7
+    contrast: 0
+  _coloredInfos:
+  - enabled: 0
+    color: 1
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 5
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
 --- !u!1001 &5188538039296671598
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -326,6 +396,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3662619501515223880}
     m_Modifications:
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 3671927847597764420}
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _color.color
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5040737113958996952, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -471,6 +549,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 575285658748833183}
     m_Modifications:
+    - target: {fileID: 144364927656772408, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 3317027378879828206}
     - target: {fileID: 5040737113958996952, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -600,6 +682,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 575285658748833183}
     m_Modifications:
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 978419265455269839}
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _color.color
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5040737113958996952, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

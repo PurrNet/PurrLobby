@@ -64,6 +64,7 @@ MonoBehaviour:
   _visibilityRules: {fileID: 11400000, guid: 8f014a5bd8dc68646a2a3c0b18c5bbd8, type: 2}
   _authenticator: {fileID: 3191067112985415783}
   _tickRate: 20
+  _mtuExceededBehaviour: 2
   _patchLingeringProcessBug: 0
 --- !u!114 &3726419721088969349
 MonoBehaviour:
@@ -82,7 +83,8 @@ MonoBehaviour:
   _region: france
   _host: purrtransport-france.purrservers.com
   _timeoutInSeconds: 5
-  _pollEventsInUpdate: 0
+  _useNat: 1
+  _natResolveTimeout: 8
   _networkSimulation:
     includeInBuild: 0
     simulateLatency: 0
@@ -103,8 +105,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PurrLobby.PurrNet::PurrNet.Lobby.PurrTransportLobbyConnection
   _networkManager: {fileID: 8990513008781140962}
-  _transport: {fileID: 3726419721088969349}
   _authenticator: {fileID: 3191067112985415783}
+  _transport: {fileID: 3726419721088969349}
 --- !u!114 &3191067112985415783
 MonoBehaviour:
   m_ObjectHideFlags: 0

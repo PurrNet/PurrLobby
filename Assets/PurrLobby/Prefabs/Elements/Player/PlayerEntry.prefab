@@ -75,6 +75,7 @@ GameObject:
   - component: {fileID: 5434695317734129433}
   - component: {fileID: 8052722413629916396}
   - component: {fileID: 7372288595208745719}
+  - component: {fileID: 8532775654736640948}
   m_Layer: 5
   m_Name: Phoneme
   m_TagString: Untagged
@@ -159,6 +160,25 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &8532775654736640948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900416820126471601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
+  _graphic: {fileID: 8052722413629916396}
+  _transitionDuration: 0.1
+  _color:
+    enabled: 1
+    color: 7
+    contrast: 0
+  _coloredInfos: []
 --- !u!1 &1584768191515367668
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,6 +256,8 @@ GameObject:
   - component: {fileID: 3806786949884999305}
   - component: {fileID: 6489382104225965187}
   - component: {fileID: 2958240284500665547}
+  - component: {fileID: 998484666454787759}
+  - component: {fileID: 5984893101560152633}
   m_Layer: 5
   m_Name: Host
   m_TagString: Untagged
@@ -343,6 +365,7 @@ MonoBehaviour:
   _embossStrength: 0.5
   _embossHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _embossShadowColor: {r: 0, g: 0, b: 0, a: 1}
+  _roundnessRole: 4
   _useMaxRoundness: 0
   _uniformRoundness: 0
   _roundnessInPixels: {x: 16, y: 16, z: 16, w: 16}
@@ -392,6 +415,69 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &998484666454787759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3067839089976535476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
+  _graphic: {fileID: 3806786949884999305}
+  _transitionDuration: 0.1
+  _color:
+    enabled: 0
+    color: 7
+    contrast: 0
+  _coloredInfos:
+  - enabled: 0
+    color: 3
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 5
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
+--- !u!114 &5984893101560152633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3067839089976535476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d83035f59de044fc97ddadad4a295e61, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ThemedGraphicTone
+  _graphic: {fileID: 3806786949884999305}
+  _slot: 0
+  _color:
+    enabled: 1
+    color: 3
+    contrast: 0
+  _tone:
+    shade:
+      enabled: 1
+      color: 5
+      contrast: 0
+    blend: 0.117138594
+  _brightness: 1
+  _opacity: 1
 --- !u!1 &8260313128606359124
 GameObject:
   m_ObjectHideFlags: 0
@@ -404,6 +490,7 @@ GameObject:
   - component: {fileID: 4436651745693688551}
   - component: {fileID: 5621913713163626870}
   - component: {fileID: 3902754385132624351}
+  - component: {fileID: 5362436243024035419}
   m_Layer: 5
   m_Name: Avatar
   m_TagString: Untagged
@@ -512,6 +599,7 @@ MonoBehaviour:
   _embossStrength: 0.5
   _embossHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _embossShadowColor: {r: 0, g: 0, b: 0, a: 1}
+  _roundnessRole: 0
   _useMaxRoundness: 1
   _uniformRoundness: 0
   _roundnessInPixels: {x: 0, y: 0, z: 0, w: 0}
@@ -535,6 +623,43 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &5362436243024035419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8260313128606359124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
+  _graphic: {fileID: 5621913713163626870}
+  _transitionDuration: 0.1
+  _color:
+    enabled: 0
+    color: 7
+    contrast: 0
+  _coloredInfos:
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 5
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
 --- !u!1 &8307696691098019168
 GameObject:
   m_ObjectHideFlags: 0
@@ -550,6 +675,8 @@ GameObject:
   - component: {fileID: 4276117095198545883}
   - component: {fileID: 4877704170111473340}
   - component: {fileID: 5005115316920093660}
+  - component: {fileID: 2598560641322056029}
+  - component: {fileID: 4071312264343879130}
   m_Layer: 5
   m_Name: PlayerEntry
   m_TagString: Untagged
@@ -663,6 +790,7 @@ MonoBehaviour:
   _embossStrength: 0.5
   _embossHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   _embossShadowColor: {r: 0, g: 0, b: 0, a: 1}
+  _roundnessRole: 4
   _useMaxRoundness: 0
   _uniformRoundness: 1
   _roundnessInPixels: {x: 16, y: 16, z: 16, w: 16}
@@ -749,7 +877,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _outlineColor: {r: 0.096, g: 0.096, b: 0.096, a: 1}
+  _outlineColor:
+    enabled: 1
+    color: 1
+    contrast: 0
   _outlineWidth: 2
   _outlineWidthNotSelected: 0
   _transitionDuration: 0.2
@@ -773,9 +904,78 @@ MonoBehaviour:
   _username: {fileID: 3976862944778025737}
   _status: {fileID: 8418477308867016023}
   _options: {fileID: 527458344618502230}
-  _statusReady: {r: 0.29411766, g: 0.7529412, b: 0.3529412, a: 1}
-  _statusUnready: {r: 0.62352943, g: 0.627451, b: 0.63529414, a: 1}
+  _statusReady:
+    enabled: 1
+    color: 2
+    contrast: 0
+  _statusUnready:
+    enabled: 1
+    color: 8
+    contrast: 0
   _phonemeSprite: {fileID: 8052722413629916396}
+--- !u!114 &2598560641322056029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8307696691098019168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb72760b3a784ab0a7cb7240f37f860c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ColoredGraphic
+  _graphic: {fileID: 6769961186041862431}
+  _transitionDuration: 0.1
+  _color:
+    enabled: 0
+    color: 7
+    contrast: 0
+  _coloredInfos:
+  - enabled: 0
+    color: 1
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 1
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
+  - enabled: 1
+    color: 7
+    contrast: 0
+  - enabled: 1
+    color: 6
+    contrast: 0
+--- !u!114 &4071312264343879130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8307696691098019168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d83035f59de044fc97ddadad4a295e61, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.ThemedGraphicTone
+  _graphic: {fileID: 6769961186041862431}
+  _slot: 0
+  _color:
+    enabled: 1
+    color: 1
+    contrast: 0
+  _tone:
+    shade:
+      enabled: 1
+      color: 1
+      contrast: 1
+    blend: 0.05566523
+  _brightness: 1
+  _opacity: 1
 --- !u!1 &8655436869982318912
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,6 +1040,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1017857913991006728}
     m_Modifications:
+    - target: {fileID: 144364927656772408, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 8418477308867016023}
     - target: {fileID: 5040737113958996952, guid: 8e44e060b9566d54faf5cbc7afc93813, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1077,6 +1281,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3110532728764462410, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 1652506047856607096}
+    - target: {fileID: 3110532728764462410, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _color.color
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 3370907101242238404, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
       propertyPath: _graphicColor.b
       value: 0.24313726
@@ -1101,29 +1313,49 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
-      propertyPath: _backgroundHover.b
-      value: 0.42352942
+    - target: {fileID: 6457719766771539080, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 1792602653652835805}
+    - target: {fileID: 6457719766771539080, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _coloredInfos.Array.data[0].color
+      value: 4
       objectReference: {fileID: 0}
-    - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
-      propertyPath: _backgroundHover.g
-      value: 0.4117647
+    - target: {fileID: 6457719766771539080, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _coloredInfos.Array.data[3].enabled
+      value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
-      propertyPath: _backgroundHover.r
+    - target: {fileID: 6457719766771539080, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _coloredInfos.Array.data[5].enabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
-      propertyPath: _backgroundNormal.b
-      value: 0.24313726
+      propertyPath: _hoverTone.blend
+      value: 0.25263974
       objectReference: {fileID: 0}
     - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
-      propertyPath: _backgroundNormal.g
-      value: 0.23137255
+      propertyPath: _hoverColor.color
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
-      propertyPath: _backgroundNormal.r
-      value: 0.85882354
+      propertyPath: _normalTone.blend
+      value: 0.000000070868424
+      objectReference: {fileID: 0}
+    - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _normalColor.color
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _hoverTone.shade.color
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _normalTone.shade.color
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+      propertyPath: _normalTone.shade.contrast
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6545535638871718880, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
       propertyPath: onClickUnity.m_PersistentCalls.m_Calls.Array.size
@@ -1161,11 +1393,35 @@ PrefabInstance:
       propertyPath: m_Name
       value: Icon
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7439484940881354609, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+    - {fileID: 1711944134545136050, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+--- !u!114 &1652506047856607096 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2362601747167938401, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+  m_PrefabInstance: {fileID: 3902163175277393945}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &1792602653652835805 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3370907101242238404, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
+  m_PrefabInstance: {fileID: 3902163175277393945}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9019e8485f71c44cb77ac3cf2487ff1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: PurrUI.Runtime::PurrNet.UI.RectangleGraphic
 --- !u!224 &2048231805715337554 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3047673892661700939, guid: 5809fb624f51eea45b9c293ea3ff56ab, type: 3}
@@ -1179,6 +1435,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1017857913991006728}
     m_Modifications:
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 3976862944778025737}
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _color.color
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5040737113958996952, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1304,6 +1568,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2866328628815354603}
     m_Modifications:
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _graphic
+      value:
+      objectReference: {fileID: 2311842029397836470}
+    - target: {fileID: 375555912367545930, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
+      propertyPath: _color.color
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 5040737113958996952, guid: cde3956384d4b694a83f0fc7898d2ffd, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

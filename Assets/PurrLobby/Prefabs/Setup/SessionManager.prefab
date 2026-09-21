@@ -41,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7943053978182348908}
   - component: {fileID: 8743925738779815200}
+  - component: {fileID: -8260839581811332891}
   - component: {fileID: 7493943172186080671}
   m_Layer: 0
   m_Name: SessionManager
@@ -78,6 +79,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9afc9746e4e2bf7498782bea92b85968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.PushPauseMenu
+  _stack: {fileID: 7493943172186080671}
+  _onPauseOpened:
+    m_PersistentCalls:
+      m_Calls: []
+  _onPauseClosed:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &-8260839581811332891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3820098720286823964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96227110d0d2cf3409c11a7970c0e2b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PurrNet.Lobby::PurrNet.Lobby.WaitConnectionLoadingView
   _stack: {fileID: 7493943172186080671}
 --- !u!114 &7493943172186080671
 MonoBehaviour:

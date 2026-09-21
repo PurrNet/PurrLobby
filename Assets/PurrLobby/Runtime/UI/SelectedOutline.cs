@@ -8,7 +8,7 @@ namespace PurrNet.Lobby
     {
         [SerializeField] private RectangleGraphic _graphic;
         [SerializeField] AnimationCurve _transitionCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-        [SerializeField] private Color _outlineColor = Color.white;
+        [SerializeField] private ColorInfo _outlineColor = new() { enabled = true, color = ColorType.Accent };
         [SerializeField] private float _outlineWidth = 2f;
         [SerializeField] private float _outlineWidthNotSelected = 0f;
         [SerializeField] private float _transitionDuration = 0.2f;
@@ -16,10 +16,14 @@ namespace PurrNet.Lobby
         private float _timeSinceToggle;
         private bool _isSelected;
 
-        public Color outlineColor
+        public ColorInfo outlineColor
         {
             get => _outlineColor;
-            set => _outlineColor = value;
+            set
+            {
+                _outlineColor = value;
+                ThemeColors.Set(_graphic, _outlineColor, 2);
+            }
         }
 
         public float outlineWidthNotSelected
@@ -32,6 +36,8 @@ namespace PurrNet.Lobby
         {
             _timeSinceToggle = _transitionDuration;
         }
+
+        private void OnEnable() => ThemeColors.Set(_graphic, _outlineColor, 2);
 
         public void OnPointerEnter(PointerEventData eventData)
         {
@@ -55,7 +61,6 @@ namespace PurrNet.Lobby
 
             if (_graphic)
             {
-                _graphic.outlineColor = _outlineColor;
                 _graphic.outlineSize = Mathf.Lerp(initialWidth, targetWidth, lerp);
             }
 
