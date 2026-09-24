@@ -1,3 +1,10 @@
+## [1.1.1-beta.1](https://github.com/PurrNet/PurrLobby/compare/v1.1.0...v1.1.1-beta.1) (2026-09-24)
+
+
+### Bug Fixes
+
+* fail Steam lobby join with a clear error when both instances share ([51103d2](https://github.com/PurrNet/PurrLobby/commit/51103d2f09f01e6e7bb9b7f9ad738c403140cb1a))
+
 # [1.1.0](https://github.com/PurrNet/PurrLobby/compare/v1.0.1...v1.1.0) (2026-09-21)
 
 
