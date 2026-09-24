@@ -19,6 +19,16 @@
             "name": "dev.purrnet.services",
             "expression": "",
             "define": "PURR_SERVICES"
+        },
+        {
+            "name": "dev.purrnet.services",
+            "expression": "1.2.1",
+            "define": "PURR_SERVICES_STEAM"
+        },
+        {
+            "name": "com.rlabrecque.steamworks.net",
+            "expression": "",
+            "define": "STEAMWORKS"
         }
     ],
     "noEngineReferences": false

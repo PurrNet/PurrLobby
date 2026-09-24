@@ -7,7 +7,10 @@
         "GUID:fa956321508a2aa4da8596c3e41eb158",
         "GUID:a59886bb7efdbe44b830034a4cca4657",
         "GUID:6055be8ebefd69e48b49212b09b47b2f",
-        "GUID:6e20f757a1bae164fa42750dd2b27dcb"
+        "GUID:6e20f757a1bae164fa42750dd2b27dcb",
+        "GUID:5dc26b74c33649d8a283d8d1f77c1e02",
+        "GUID:68bd7fdb68ef2684e982e8a9825b18a5",
+        "GUID:343a628c29ff890428d625f61239778f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -23,6 +26,16 @@
             "name": "dev.purrnet.services",
             "expression": "",
             "define": "PURR_SERVICES"
+        },
+        {
+            "name": "dev.purrnet.services",
+            "expression": "1.2.1",
+            "define": "PURR_SERVICES_STEAM"
+        },
+        {
+            "name": "com.rlabrecque.steamworks.net",
+            "expression": "",
+            "define": "STEAMWORKS"
         }
     ],
     "noEngineReferences": false

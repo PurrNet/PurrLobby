@@ -261,7 +261,7 @@
       "url": "https://packages.unity.com"
     },
     "dev.purrnet.purrnet": {
-      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.23.0-beta.2",
+      "version": "https://github.com/PurrNet/PurrNet.git?path=/Assets/PurrNet#v1.24.0-beta.15",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -270,14 +270,14 @@
         "com.unity.collections": "2.6.2",
         "com.unity.mathematics": "1.3.2"
       },
-      "hash": "4bbecf48375fb16805efb9c8246b607ffa826b2c"
+      "hash": "f404767a406c8e2afff3bec23a28c47d2d3c3eb4"
     },
     "dev.purrnet.services": {
-      "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#v1.1.2",
+      "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#v1.2.1",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "8ae6a0c75568c77fe3f706e08dc90f8a4384957b"
+      "hash": "83cd197c12ff4fd76266273cf82ae4523885f920"
     },
     "dev.purrnet.ui": {
       "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.6.0-beta.1",

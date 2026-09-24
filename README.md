@@ -80,6 +80,14 @@ heavily, since it keeps your work fully separate from the package.
 | Steam | yes | yes | via generic lobby matchmaker | Steam sockets |
 | Nakama | create/join by id or code | basic (ids only) | yes | Nakama relayed match |
 
+**PurrNet Services with Steam accounts.** `Orchestrator.PurrNetSteam` (under
+`Providers/PurrNet/Preset`) is the PurrNet Services setup with players signed
+in by their Steam account instead of a device id (`PurrNetSteamSessionProvider`).
+It needs Steamworks.NET and PurrServices 1.2.1 or newer, and Steam
+sign-in switched on for your project on purrnet.dev (**Auth → Steam**): either
+verified by Steam (App ID + publisher Web API key) or, for a quick start,
+trusting the game (no setup, but anyone can claim any Steam account).
+
 Providers advertise optional lobby actions through `LobbyCapabilities`. The
 menu hides unsupported buttons automatically, so a backend without lobby
 browsing will not show the browser entry point.
