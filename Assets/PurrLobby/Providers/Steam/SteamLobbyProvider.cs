@@ -116,6 +116,11 @@ namespace PurrNet.Lobby.Steam
                 if (response != EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
                     return LobbyResponse.Failure(DescribeEnterResponse(response));
 
+                if (SteamMatchmaking.GetLobbyOwner(steamLobbyId) == SteamRuntime.localSteamId)
+                    return LobbyResponse.Failure(
+                        "Joined a lobby owned by your own Steam account. Every instance on this machine shares one Steam account, " +
+                        "so Steam lobbies can't be tested with editor Clones; use a second machine and account.");
+
                 return LobbyResponse.Success(new SteamLobby(steamLobbyId));
             }
             catch (Exception e)
