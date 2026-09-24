@@ -1,3 +1,10 @@
+# [1.2.0-beta.1](https://github.com/PurrNet/PurrLobby/compare/v1.1.1-beta.1...v1.2.0-beta.1) (2026-09-24)
+
+
+### Features
+
+* purrnet steam auth ([384a648](https://github.com/PurrNet/PurrLobby/commit/384a648c936b5135deeab8b67fa7b3c7109a414e))
+
 ## [1.1.1-beta.1](https://github.com/PurrNet/PurrLobby/compare/v1.1.0...v1.1.1-beta.1) (2026-09-24)
 
 
