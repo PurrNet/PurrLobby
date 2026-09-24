@@ -1,3 +1,10 @@
+# [1.2.0-beta.2](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.1...v1.2.0-beta.2) (2026-09-24)
+
+
+### Bug Fixes
+
+* undo steam unauth mistake ([6bea082](https://github.com/PurrNet/PurrLobby/commit/6bea082d77be19c9d4b99beee81e7b19f634a742))
+
 # [1.2.0-beta.1](https://github.com/PurrNet/PurrLobby/compare/v1.1.1-beta.1...v1.2.0-beta.1) (2026-09-24)
 
 
