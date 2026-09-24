@@ -62,7 +62,7 @@ namespace PurrNet.Lobby.PurrNet.Editor
 #elif !PURR_SERVICES_STEAM
             GUILayout.Space(10);
             EditorGUILayout.HelpBox(
-                "Steam sign-in needs PurrServices 1.2.1 or newer. Update it in the Package Manager.",
+                "Steam sign-in needs PurrServices 1.2.0 or newer. Update it in the Package Manager.",
                 MessageType.Warning);
             if (GUILayout.Button("Open Package Manager"))
                 PurrPackageQuickInstall.OpenPackagesWindow();
@@ -82,11 +82,9 @@ namespace PurrNet.Lobby.PurrNet.Editor
             EditorGUILayout.HelpBox(
                 "Players sign in to PurrServices with their Steam account (player id steam:<steamid64>). " +
                 "Pair this with the PurrNet lobby provider.\n\n" +
-                "On purrnet.dev open your project → Auth → Steam, choose a mode and switch Steam sign-in on:\n" +
-                "• Verify with Steam: enter your App ID and a publisher Web API key. Valve's test app 480 " +
-                "cannot be verified, so put your own App ID in steam_appid.txt.\n" +
-                "• Trust the game: no setup, but anyone with a modified client can sign in as any Steam " +
-                "account. Fine while starting out; switch to verifying before it matters.",
+                "On purrnet.dev open your project → Auth → Steam, enter your App ID and a publisher Web API " +
+                "key, and switch Steam sign-in on. Valve's test app 480 cannot be verified, so put your own " +
+                "App ID in steam_appid.txt.",
                 MessageType.Info);
 #endif
         }

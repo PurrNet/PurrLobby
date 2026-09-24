@@ -83,10 +83,10 @@ heavily, since it keeps your work fully separate from the package.
 **PurrNet Services with Steam accounts.** `Orchestrator.PurrNetSteam` (under
 `Providers/PurrNet/Preset`) is the PurrNet Services setup with players signed
 in by their Steam account instead of a device id (`PurrNetSteamSessionProvider`).
-It needs Steamworks.NET and PurrServices 1.2.1 or newer, and Steam
-sign-in switched on for your project on purrnet.dev (**Auth → Steam**): either
-verified by Steam (App ID + publisher Web API key) or, for a quick start,
-trusting the game (no setup, but anyone can claim any Steam account).
+It needs Steamworks.NET and PurrServices 1.2.0 or newer, and Steam sign-in
+switched on for your project on purrnet.dev (**Auth → Steam**: your App ID and a
+publisher Web API key). Valve's test app 480 cannot be verified, so use your own
+App ID in `steam_appid.txt`.
 
 Providers advertise optional lobby actions through `LobbyCapabilities`. The
 menu hides unsupported buttons automatically, so a backend without lobby

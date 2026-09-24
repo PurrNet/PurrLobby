@@ -13,11 +13,11 @@ using PurrNet.Services;
 namespace PurrNet.Lobby.PurrNet
 {
     /// <summary>
-    /// Signs players in to PurrServices with their Steam account instead of a device id; the
-    /// player id is <c>steam:&lt;steamid64&gt;</c>. Pair it with the PurrNet lobby provider.
-    /// The project needs Steam sign-in turned on (purrnet.dev → project → Auth → Steam), either
-    /// verified by Steam (App ID + publisher Web API key) or trusting the game (no setup, but
-    /// anyone can claim any Steam account). The game code is the same for both.
+    /// Signs players in to PurrServices with their Steam account instead of a device id:
+    /// Steam vouches for who they are, so the player id is <c>steam:&lt;steamid64&gt;</c> and
+    /// the name is their Steam persona. Pair it with the PurrNet lobby provider.
+    /// The project needs Steam sign-in turned on (purrnet.dev → project → Auth: App ID and
+    /// publisher Web API key).
     /// </summary>
     [ProviderDependency("dev.purrnet.services", "PurrServices")]
     [ProviderDependency("com.rlabrecque.steamworks.net", "Steamworks.NET")]
@@ -91,7 +91,7 @@ namespace PurrNet.Lobby.PurrNet
         public override Task Login(ViewStack stack)
         {
             Debug.LogError(
-                $"[{name}] Steam sign-in needs PurrServices 1.2.1 or newer and Steamworks.NET, " +
+                $"[{name}] Steam sign-in needs PurrServices 1.2.0 or newer and Steamworks.NET, " +
                 "on a Windows, Linux or macOS standalone target. See this provider's inspector.");
             return Task.CompletedTask;
         }

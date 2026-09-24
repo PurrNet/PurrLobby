@@ -22,7 +22,7 @@
         },
         {
             "name": "dev.purrnet.services",
-            "expression": "1.2.1",
+            "expression": "1.2.0",
             "define": "PURR_SERVICES_STEAM"
         },
         {
