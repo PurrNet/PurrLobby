@@ -1,3 +1,10 @@
+# [1.2.0-beta.3](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.2...v1.2.0-beta.3) (2026-10-30)
+
+
+### Features
+
+* integrate competitive service matchmaking ([b93842f](https://github.com/PurrNet/PurrLobby/commit/b93842fac60c158674922e118619b4c86dd472d2))
+
 # Unreleased
 
 - Add PurrServices competitive queues, parties, explicit ready checks, and casual/ranked presets.
