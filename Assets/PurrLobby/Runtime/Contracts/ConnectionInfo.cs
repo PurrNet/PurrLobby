@@ -21,7 +21,7 @@ namespace PurrNet.Lobby
 
         public override string ToString()
         {
-            return $"serverAddress: {serverAddress}, serverPort: {serverPort}, connectionToken: {connectionToken}, hostId: {hostId}";
+            return $"serverAddress: {serverAddress}, serverPort: {serverPort}, connectionToken: {(string.IsNullOrEmpty(connectionToken) ? "none" : "[redacted]")}, hostId: {hostId}";
         }
     }
 }

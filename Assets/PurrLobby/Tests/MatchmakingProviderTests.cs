@@ -111,5 +111,57 @@ namespace PurrNet.Lobby.Tests
             Assert.IsNull(_provider.activeTicketPublic);
             Assert.AreEqual(new[] { "status:Cancelled" }, _sequence);
         }
+
+        [Test]
+        public void LateCompletionFailureAndCancellation_CannotConsumeReplacement()
+        {
+            var old = _provider.BeginTicketPublic("old");
+            var current = _provider.BeginTicketPublic("current");
+            _sequence.Clear();
+
+            _provider.CompleteMatchPublic(old, new MatchResult());
+            _provider.FailMatchPublic(old, "late failure");
+            _provider.CancelLocallyPublic(old);
+
+            Assert.AreEqual(current.ticketId, _provider.activeTicketPublic?.ticketId);
+            Assert.IsEmpty(_sequence);
+        }
+
+        [Test]
+        public void CancellationAfterExplicitConsumption_RemainsCompatibleWithExistingProviders()
+        {
+            var ticket = _provider.BeginTicketPublic();
+            _sequence.Clear();
+
+            Assert.IsTrue(_provider.TryConsumeActiveTicketPublic(ticket));
+            _provider.CancelLocallyPublic(ticket);
+
+            Assert.AreEqual(new[] { "status:Cancelled" }, _sequence);
+        }
+
+        [Test]
+        public void ReadyChecks_OnlyReachTheCurrentTicket_AndCanBeUnsubscribed()
+        {
+            var old = _provider.BeginTicketPublic("old");
+            var current = _provider.BeginTicketPublic("current");
+            var checks = new List<string>();
+            System.Action<MatchmakingTicket, MatchmakingReadyCheck> callback = (ticket, check) => checks.Add(ticket.ticketId + ":" + check.matchId);
+            _provider.onReadyCheckChanged += callback;
+
+            _provider.RaiseReadyCheckPublic(old, new MatchmakingReadyCheck { matchId = "stale" });
+            _provider.RaiseReadyCheckPublic(current, new MatchmakingReadyCheck { matchId = "live" });
+            _provider.onReadyCheckChanged -= callback;
+            _provider.RaiseReadyCheckPublic(current, new MatchmakingReadyCheck { matchId = "unsubscribed" });
+
+            Assert.AreEqual(new[] { "current:live" }, checks);
+        }
+
+        [Test]
+        public async System.Threading.Tasks.Task LegacyProvider_RejectsUnsupportedReadyResponse()
+        {
+            var ticket = _provider.BeginTicketPublic();
+            Assert.IsFalse((await _provider.RespondToReadyCheck(ticket, true)).success);
+            Assert.AreEqual(ticket.ticketId, _provider.activeTicketPublic?.ticketId);
+        }
     }
 }

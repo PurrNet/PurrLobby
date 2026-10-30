@@ -19,7 +19,8 @@ in depth.
 - Unity `2022.3` or newer.
 - [PurrNet](https://github.com/PurrNet/PurrNet) and
   [PurrUI](https://github.com/PurrNet/PurrUI).
-- PurrServices when using the PurrNet Services lobby provider.
+- PurrServices when using the PurrNet Services lobby provider; version 1.3.0+
+  for service matchmaking.
 - Optional provider packages:
   - [Steamworks.NET](https://github.com/rlabrecque/Steamworks.NET) for Steam
     providers.
@@ -76,7 +77,7 @@ heavily, since it keeps your work fully separate from the package.
 
 | Provider | Lobbies | Lobby Browser | Matchmaking | Game Allocation |
 |----------|---------|---------------|-------------|-----------------|
-| PurrNet Services | yes | yes | via generic lobby matchmaker | PurrTransport |
+| PurrNet Services | yes | yes | service queues or generic lobby matchmaker | Relay/NAT or dedicated/direct UDP |
 | Steam | yes | yes | via generic lobby matchmaker | Steam sockets |
 | Nakama | create/join by id or code | basic (ids only) | yes | Nakama relayed match |
 
@@ -87,6 +88,11 @@ It needs Steamworks.NET and PurrServices 1.2.0 or newer, and Steam sign-in
 switched on for your project on purrnet.dev (**Auth → Steam**: your App ID and a
 publisher Web API key). Valve's test app 480 cannot be verified, so use your own
 App ID in `steam_appid.txt`.
+
+[Service matchmaking setup](Assets/PurrLobby/MATCHMAKING.md) covers the casual
+and ranked presets, ready checks, parties, secure game admission, and dedicated
+server integration. The sample project pins the matching PurrServices SDK
+commit, so it can be opened without a sibling source checkout.
 
 Providers advertise optional lobby actions through `LobbyCapabilities`. The
 menu hides unsupported buttons automatically, so a backend without lobby

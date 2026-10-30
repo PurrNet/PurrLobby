@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 055ed9f5a44895943a59f2c8990a4ca7, type: 3}
+  m_Name: Orchestrator.ServiceRanked
+  m_EditorClassIdentifier: PurrLobby.Runtime::PurrLobby.MenuOrchestrator
+  sessionProvider: {fileID: 11400000, guid: cd4f1cfbdc864ee88cfaed132bf04581, type: 2}
+  lobbyProvider: {fileID: 11400000, guid: e65904cd2015fd34d84e7467efb6eb95, type: 2}
+  matchmakingProvider: {fileID: 11400000, guid: f32483a77635bc8448812e03945633fa, type: 2}
+  gameAllocator: {fileID: 11400000, guid: 31b41980a75e37043b699424776ff86b, type: 2}

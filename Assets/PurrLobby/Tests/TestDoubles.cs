@@ -93,6 +93,7 @@ namespace PurrNet.Lobby.Tests
         public void CompleteMatchPublic(MatchmakingTicket ticket, MatchResult result) => CompleteMatch(ticket, result);
         public void FailMatchPublic(MatchmakingTicket ticket, string error) => FailMatch(ticket, error);
         public void CancelLocallyPublic(MatchmakingTicket ticket) => CancelLocally(ticket);
+        public void RaiseReadyCheckPublic(MatchmakingTicket ticket, MatchmakingReadyCheck check) => RaiseReadyCheck(ticket, check);
     }
 
     public class TestHostMigrationLobbyConnection : HostMigrationLobbyConnection

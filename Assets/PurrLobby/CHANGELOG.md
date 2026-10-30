@@ -1,5 +1,10 @@
-# [1.2.0-beta.2](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.1...v1.2.0-beta.2) (2026-09-24)
+# Unreleased
 
+- Add PurrServices competitive queues, parties, explicit ready checks, and casual/ranked presets.
+- Support player-hosted and dedicated matches with verified player admission and claim renewal.
+- Handle cancelled searches, account changes, and interrupted scene/game startup without stale handoffs.
+
+# [1.2.0-beta.2](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.1...v1.2.0-beta.2) (2026-09-24)
 
 ### Bug Fixes
 

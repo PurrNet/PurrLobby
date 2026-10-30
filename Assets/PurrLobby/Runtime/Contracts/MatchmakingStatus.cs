@@ -6,6 +6,9 @@
         Searching,
         Found,
         Cancelled,
-        Failed
+        Failed,
+        Assembling,
+        ReadyCheck,
+        Allocating
     }
 }

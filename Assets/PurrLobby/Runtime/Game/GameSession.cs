@@ -84,7 +84,15 @@ namespace PurrNet.Lobby
         private ILobby _observedLobby;
         private string _gameHostId;
         private bool _exiting;
+        private bool _isPlayerSession;
         private Coroutine _reconnectRoutine;
+
+        /// <summary>
+        /// Marks a game launched by a player's menu. An elected host can be
+        /// server-only while publishing readiness, but must still return to its
+        /// menu if that startup is interrupted.
+        /// </summary>
+        public void ConfigurePlayerSession() => _isPlayerSession = true;
 
         private void Awake()
         {
@@ -324,10 +332,12 @@ namespace PurrNet.Lobby
             if (_orchestrator)
                 _orchestrator.lastExitReason = reason;
 
+            // Exit listeners may stop networking as they cancel admission.
+            // Preserve the hosting role before those callbacks run.
+            bool isDedicatedServer = !_isPlayerSession && _manager && _manager.isServerOnly;
+
             try { onExiting?.Invoke(reason); }
             catch (Exception e) { Debug.LogException(e); }
-
-            bool isDedicatedServer = _manager && _manager.isServerOnly;
 
             if (_manager)
             {

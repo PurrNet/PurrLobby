@@ -50,6 +50,18 @@ namespace PurrNet.Lobby
         }
 
         /// <summary>
+        /// Connects a match after its scene loads. Service allocators override this
+        /// to install admission credentials and acknowledge a listening player host.
+        /// </summary>
+        public virtual Task ConnectMatch(MatchResult result, ConnectionInfo connection)
+        {
+            if (GameSession.TryGet(SceneManager.GetActiveScene(), out var session))
+                session.ConfigurePlayerSession();
+            Connect(connection, result.isHost);
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
         /// False for allocators that connect to a dedicated server:
         /// <see cref="Connect"/> then always starts a client, never a host.
         /// </summary>
@@ -119,12 +131,17 @@ namespace PurrNet.Lobby
             // Start window has passed.
             NetworkManager.DisableFlags();
 
-            var asyncOp = SceneManager.LoadSceneAsync(gameScene);
+            AsyncOperation asyncOp;
+            try { asyncOp = SceneManager.LoadSceneAsync(gameScene); }
+            catch
+            {
+                NetworkManager.EnableFlags();
+                throw;
+            }
             if (asyncOp == null)
             {
                 NetworkManager.EnableFlags();
-                PurrLogger.LogError($"Loading scene `{gameScene}` failed.");
-                return Task.CompletedTask;
+                throw new InvalidOperationException($"Loading scene `{gameScene}` failed.");
             }
 
             var tcs = new TaskCompletionSource<bool>();

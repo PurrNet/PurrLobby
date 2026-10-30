@@ -32,17 +32,22 @@ namespace PurrNet.Lobby
 
         public abstract Task<APIResponse> CancelMatchmaking(MatchmakingTicket ticket);
 
+        /// <summary>Explicitly accepts or declines the active ready check, when supported.</summary>
+        public virtual Task<APIResponse> RespondToReadyCheck(MatchmakingTicket ticket, bool accept) =>
+            Task.FromResult(APIResponse.Failure("This matchmaking provider does not support ready checks."));
+
         public event Action<MatchmakingTicket, MatchResult> onMatchFound;
         public event Action<MatchmakingTicket, MatchmakingStatus> onStatusChanged;
         public event Action<MatchmakingTicket, string> onMatchmakingError;
+        public event Action<MatchmakingTicket, MatchmakingReadyCheck> onReadyCheckChanged;
 
         /// <summary>The ticket currently being matched, if any.</summary>
         protected MatchmakingTicket? activeTicket { get; private set; }
 
         /// <summary>Creates and stores a new active ticket and raises Searching.</summary>
-        protected MatchmakingTicket BeginTicket(string externalId = null)
+        protected MatchmakingTicket BeginTicket(string externalId = null, string inviteCode = null)
         {
-            var ticket = new MatchmakingTicket { ticketId = externalId ?? Guid.NewGuid().ToString("N") };
+            var ticket = new MatchmakingTicket { ticketId = externalId ?? Guid.NewGuid().ToString("N"), inviteCode = inviteCode };
             activeTicket = ticket;
             RaiseStatusChanged(ticket, MatchmakingStatus.Searching);
             return ticket;
@@ -67,6 +72,8 @@ namespace PurrNet.Lobby
         /// <summary>Clears the active ticket, raises Found, then onMatchFound.</summary>
         protected void CompleteMatch(MatchmakingTicket ticket, MatchResult result)
         {
+            if (IsStale(ticket))
+                return;
             activeTicket = null;
             RaiseStatusChanged(ticket, MatchmakingStatus.Found);
             onMatchFound?.Invoke(ticket, result);
@@ -75,6 +82,8 @@ namespace PurrNet.Lobby
         /// <summary>Clears the active ticket, raises onMatchmakingError, then Failed.</summary>
         protected void FailMatch(MatchmakingTicket ticket, string error)
         {
+            if (IsStale(ticket))
+                return;
             activeTicket = null;
             onMatchmakingError?.Invoke(ticket, error);
             RaiseStatusChanged(ticket, MatchmakingStatus.Failed);
@@ -83,11 +92,21 @@ namespace PurrNet.Lobby
         /// <summary>Clears the active ticket and raises Cancelled.</summary>
         protected void CancelLocally(MatchmakingTicket ticket)
         {
+            // Existing providers consume first, then announce cancellation.
+            // That remains valid, but an old completion cannot clear a new ticket.
+            if (activeTicket.HasValue && IsStale(ticket))
+                return;
             activeTicket = null;
             RaiseStatusChanged(ticket, MatchmakingStatus.Cancelled);
         }
 
         protected void RaiseStatusChanged(MatchmakingTicket ticket, MatchmakingStatus status) =>
             onStatusChanged?.Invoke(ticket, status);
+
+        protected void RaiseReadyCheck(MatchmakingTicket ticket, MatchmakingReadyCheck readyCheck)
+        {
+            if (!IsStale(ticket))
+                onReadyCheckChanged?.Invoke(ticket, readyCheck);
+        }
     }
 }
