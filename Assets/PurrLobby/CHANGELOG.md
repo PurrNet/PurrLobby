@@ -1,3 +1,10 @@
+# [1.2.0-beta.5](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.4...v1.2.0-beta.5) (2026-11-11)
+
+
+### Features
+
+* service matchmaking with any number of teams ([bea3fb3](https://github.com/PurrNet/PurrLobby/commit/bea3fb3aafcb5a78913b57524cfe8473e6b31f98))
+
 # [1.2.0-beta.4](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.3...v1.2.0-beta.4) (2026-11-11)
 
 
