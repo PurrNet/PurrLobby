@@ -232,6 +232,20 @@ namespace PurrNet.Lobby.PurrServices.Tests
         }
 
         [UnityTest]
+        public IEnumerator ARedirectedQueueIdMeasuresForTheQueueItNowLeadsTo()
+        {
+            var live = Queue("quick-play", true, "eu-central");
+            live.aliases = new[] { "old-mode" };
+            _client.queues = new[] { Queue("ranked", false, "eu"), live };
+            _provider.relayLatencies = new Dictionary<string, float> { ["eu-central"] = 31f, ["us-east"] = 96f };
+            var start = _provider.StartMatchmaking(new MatchmakingRequest { queueId = "old-mode" });
+            yield return Await(start);
+            Assert.IsTrue(start.Result.success);
+            Assert.AreEqual("old-mode", _client.created.queueId, "the service resolves the redirect; the build keeps sending its own ID");
+            CollectionAssert.AreEquivalent(new[] { "eu-central" }, _client.created.latencies.Keys);
+        }
+
+        [UnityTest]
         public IEnumerator ADedicatedQueueWithoutProbesOrMeasurementsFailsBeforeCreatingATicket()
         {
             _client.queues = new[] { Queue("ranked", false, "eu") };

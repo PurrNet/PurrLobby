@@ -273,11 +273,11 @@
       "hash": "f404767a406c8e2afff3bec23a28c47d2d3c3eb4"
     },
     "dev.purrnet.services": {
-      "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#ca8d16e2f7f0f90cc40f03c8042377953a808aa9",
+      "version": "https://github.com/PurrNet/PurrServices.git?path=Assets/Tool#0095a6c4ec8b7b72e32fe5f04257dad8dc5a69de",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "ca8d16e2f7f0f90cc40f03c8042377953a808aa9"
+      "hash": "0095a6c4ec8b7b72e32fe5f04257dad8dc5a69de"
     },
     "dev.purrnet.ui": {
       "version": "https://github.com/PurrNet/PurrUI.git?path=Assets/PurrUI#v1.6.0-beta.1",

@@ -213,7 +213,8 @@ namespace PurrNet.Lobby.PurrNet
             if (queues.success && queues.data?.queues != null)
             {
                 foreach (var candidate in queues.data.queues)
-                    if (!joiningParty && candidate.id == queueId) queue = candidate;
+                    // An archived ID may redirect: the queue it leads to decides where to measure.
+                    if (!joiningParty && candidate.Serves(queueId)) queue = candidate;
                 // A party invitation does not say which queue it is for. With a
                 // single queue type in the project the answer is the same anyway.
                 if (queue == null && joiningParty) queue = SharedRegionSource(queues.data.queues);
