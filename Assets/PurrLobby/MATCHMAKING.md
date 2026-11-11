@@ -28,10 +28,14 @@ That is the whole integration. The provider asks the service which relay
 regions the queue plays in, pings them, and searches. When a match forms the
 elected host opens the relay room in the matched region and the others join
 it; there is no ready check. Players are free to search again as soon as they
-leave the game, and the match closes by itself when the host leaves. The shape
-(one group or two teams, how many players, whether a match may start short) is
-set on the dashboard, not here; read it from `currentMatch.teams` and
-`currentMatch.teamSize`.
+leave the game, and the match closes by itself when the host leaves.
+
+The shape is set on the dashboard as **teams × players per team** (up to 16
+players), not here: 1 × 4 is four-player co-op, 2 × 5 is 5v5, 8 × 1 is an
+eight-player free-for-all, 4 × 2 is four duos. Whether a match may start with
+fewer or smaller teams after a wait is set there too. In game, read what the
+match actually started with from `currentMatch.teams` (one entry per team),
+and each connection's team index from the authenticator's `TryGetTeam`.
 
 ## Set up the menu
 
@@ -148,12 +152,13 @@ casual queue, if the elected host never starts the game the other players are
 returned to the queue with their wait intact.
 
 A casual game owes the service nothing when it ends. If you want the outcome
-on record, the host can report one with the public player client (a one-group
-match has only team 0):
+on record, the host can report one with the public player client. The winner
+is a team index from `currentMatch.teams`, or null when there is none (a draw,
+or co-op):
 
 ```csharp
 var response = await PurrNet.Services.PurrServices.instance.matchmaking
-    .SubmitResultAsync(matchId, stableResultId, winningTeam); // 0, 1, or null (draw)
+    .SubmitResultAsync(matchId, stableResultId, winningTeam); // team index, or null
 ```
 
 Call this from the game's authoritative outcome logic. Keep the same result ID

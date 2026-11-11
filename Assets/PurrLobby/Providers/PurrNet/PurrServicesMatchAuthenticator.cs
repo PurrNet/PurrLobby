@@ -34,6 +34,8 @@ namespace PurrNet.Lobby.PurrNet
         readonly Dictionary<string, Connection> _players = new();
         readonly Dictionary<Connection, string> _connections = new();
         readonly Dictionary<string, int> _teams = new();
+        /// <summary>A match holds at most 16 players, so at most 16 teams (a free-for-all).</summary>
+        const int MaxTeams = 16;
         CancellationTokenSource _lifetime;
         ITransport _transport;
         VerifyAdmission _verify;
@@ -114,7 +116,7 @@ namespace PurrNet.Lobby.PurrNet
                 if (verification.IsCancellationRequested || generation != _generation
                     || !_pending.TryGetValue(conn, out var current) || current != verification
                     || !response.success || response.data == null || !response.data.valid
-                    || response.data.playerId != payload.playerId || response.data.team is not (0 or 1))
+                    || response.data.playerId != payload.playerId || response.data.team is not (>= 0 and < MaxTeams))
                     return new AuthenticationResponse { success = false };
 
                 _players.Add(payload.playerId, conn);

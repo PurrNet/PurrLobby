@@ -176,7 +176,7 @@ namespace PurrNet.Lobby.Tests
         [TestCase("other-player", 0)]
         [TestCase(PlayerId, null)]
         [TestCase(PlayerId, -1)]
-        [TestCase(PlayerId, 2)]
+        [TestCase(PlayerId, 16)]
         public async Task MismatchedOrIncompleteVerification_DoesNotMapIdentity(string verifiedPlayer, int? team)
         {
             Setup((_, _, _, _) => Task.FromResult(Accepted(verifiedPlayer, team)));
