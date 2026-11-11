@@ -52,7 +52,8 @@ namespace PurrNet.Lobby.PurrNet
         protected virtual string localPlayerId => PurrServices.instance.playerId;
         protected virtual string localSession => PurrServices.instance.sessionToken;
         protected virtual IMatchmakingClient CaptureClient() => PurrServices.instance.matchmaking.CaptureSession();
-        protected virtual Task WaitAsync(TimeSpan delay, CancellationToken cancellationToken) => Task.Delay(delay, cancellationToken);
+        // Not Task.Delay: that never completes in a WebGL build, which would stop polling after the first request.
+        protected virtual Task WaitAsync(TimeSpan delay, CancellationToken cancellationToken) => PurrServicesMatchGameAllocator.DelayAsync(delay, cancellationToken);
 
         public override Task Initialize()
         {

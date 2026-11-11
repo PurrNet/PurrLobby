@@ -296,7 +296,7 @@ namespace PurrNet.Lobby.PurrNet
             // faulted request before the normal await below is reached.
             _ = ObserveRelayLookup(lookup);
             using var deadlineCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var deadline = Task.Delay(TimeSpan.FromSeconds(10), deadlineCancellation.Token);
+            var deadline = DelayAsync(TimeSpan.FromSeconds(10), deadlineCancellation.Token);
             if (await Task.WhenAny(lookup, deadline) != lookup)
             {
                 // The installed lookup API cannot abort its request. Observe
@@ -318,6 +318,26 @@ namespace PurrNet.Lobby.PurrNet
         {
             try { await lookup; }
             catch { /* A cancelled startup must not surface a detached HTTP exception. */ }
+        }
+
+        /// <summary>
+        /// A cancellable wait that also works in a WebGL build. <c>Task.Delay</c>
+        /// needs a timer thread, which the browser does not have, so there the
+        /// wait is counted in frames on the main thread instead.
+        /// </summary>
+        public static async Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken = default)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            double until = Time.realtimeSinceStartupAsDouble + delay.TotalSeconds;
+            while (Time.realtimeSinceStartupAsDouble < until)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Task.Yield();
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+#else
+            await Task.Delay(delay, cancellationToken);
+#endif
         }
 
         internal static void RequireOffline(NetworkManager manager)
@@ -373,7 +393,7 @@ namespace PurrNet.Lobby.PurrNet
         internal static async Task KeepMatchAlive(Func<CancellationToken, Task<HttpResult<MatchmakingMatchData>>> poll,
             TimeSpan interval, CancellationToken cancellation, Func<TimeSpan, CancellationToken, Task> wait = null)
         {
-            wait ??= Task.Delay;
+            wait ??= DelayAsync;
             try
             {
                 while (!cancellation.IsCancellationRequested)
@@ -400,7 +420,7 @@ namespace PurrNet.Lobby.PurrNet
                     || response.statusCode == 429 || response.statusCode >= 500;
                 if (attempt >= 2 || !transient)
                     throw new InvalidOperationException("The match could not publish a ready connection.");
-                await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, response.retryAfterSeconds)), cancellation);
+                await DelayAsync(TimeSpan.FromSeconds(Math.Max(1, response.retryAfterSeconds)), cancellation);
             }
         }
 #endif

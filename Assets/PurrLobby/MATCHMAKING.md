@@ -30,6 +30,12 @@ elected host opens the relay room in the matched region and the others join
 it; there is no ready check. Players are free to search again as soon as they
 leave the game, and the match closes by itself when the host leaves.
 
+A casual player's latency limit relaxes as they wait (250 ms to 400 ms by
+default, set on the dashboard), so a player far from every relay still gets a
+game; only the player who waited accepts the slower region. All of this works
+in WebGL builds: the service and the relays allow cross-origin requests, and
+the provider's waits do not depend on timer threads.
+
 The shape is set on the dashboard as **teams × players per team** (up to 16
 players), not here: 1 × 4 is four-player co-op, 2 × 5 is 5v5, 8 × 1 is an
 eight-player free-for-all, 4 × 2 is four duos. Whether a match may start with
