@@ -1,3 +1,10 @@
+# [1.2.0-beta.7](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.6...v1.2.0-beta.7) (2026-11-11)
+
+
+### Features
+
+* service matchmaking follows redirected queue IDs ([ad620ff](https://github.com/PurrNet/PurrLobby/commit/ad620ff0c76877783f089e2969792b91929f46e4))
+
 # [1.2.0-beta.6](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.5...v1.2.0-beta.6) (2026-11-11)
 
 
