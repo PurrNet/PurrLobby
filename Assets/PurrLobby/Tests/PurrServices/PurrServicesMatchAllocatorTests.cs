@@ -142,9 +142,10 @@ namespace PurrNet.Lobby.Tests
         }
 
         [Test]
-        public void RelaySelection_DefaultQueueAliasUsesEuropeCentral()
+        public void RelaySelection_AMatchedRelayRegionIsUsedAsItIs()
         {
-            var chosen = PurrServicesMatchGameAllocator.SelectRelayServer("eu", new[]
+            Assert.AreEqual("eu", PurrServicesMatchGameAllocator.ResolveRelayRegion(" eu "), "no hidden alias: a region means itself");
+            var chosen = PurrServicesMatchGameAllocator.SelectRelayServer("eu-central", new[]
             {
                 new RelayServer { region = "us-east", host = "us.example.invalid" },
                 new RelayServer { region = "eu-central", host = "eu.example.invalid" }
@@ -169,12 +170,12 @@ namespace PurrNet.Lobby.Tests
         [Test]
         public void RelaySelection_UnavailableMatchedRegionDoesNotChooseAnotherRegion()
         {
-            var error = Assert.Throws<InvalidOperationException>(() => PurrServicesMatchGameAllocator.SelectRelayServer("eu", new[]
+            var error = Assert.Throws<InvalidOperationException>(() => PurrServicesMatchGameAllocator.SelectRelayServer("eu-central", new[]
             {
                 new RelayServer { region = "us-east", host = "us.example.invalid" }
             }));
             StringAssert.Contains("eu-central", error.Message);
-            Assert.Throws<InvalidOperationException>(() => PurrServicesMatchGameAllocator.SelectRelayServer("eu", new[]
+            Assert.Throws<InvalidOperationException>(() => PurrServicesMatchGameAllocator.SelectRelayServer("eu-central", new[]
             {
                 new RelayServer { region = "eu-central", host = " " }
             }));
@@ -203,7 +204,7 @@ namespace PurrNet.Lobby.Tests
             var relay = (PurrTransport)_manager.transport;
             relay.masterServer = "invalid-network-address";
             relay.SetServer(new RelayServer { region = "eu-central", host = "eu.example.invalid" });
-            await PurrServicesMatchGameAllocator.PrepareRelayRegionAsync(_manager, "eu");
+            await PurrServicesMatchGameAllocator.PrepareRelayRegionAsync(_manager, "eu-central");
             Assert.AreEqual("eu-central", relay.region);
             Assert.AreEqual("eu.example.invalid", relay.host);
             Assert.AreEqual(ConnectionState.Disconnected, _manager.serverState);
@@ -220,7 +221,7 @@ namespace PurrNet.Lobby.Tests
             using var cancelled = new CancellationTokenSource();
             cancelled.Cancel();
             Assert.CatchAsync<OperationCanceledException>(async () =>
-                await PurrServicesMatchGameAllocator.PrepareRelayRegionAsync(_manager, "eu", cancellationToken: cancelled.Token));
+                await PurrServicesMatchGameAllocator.PrepareRelayRegionAsync(_manager, "eu-central", cancellationToken: cancelled.Token));
             Assert.AreEqual("us-east", relay.region);
             Assert.AreEqual(ConnectionState.Disconnected, _manager.serverState);
         }

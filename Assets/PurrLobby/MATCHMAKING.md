@@ -1,9 +1,37 @@
 # Service matchmaking
 
-PurrLobby can use PurrServices queues for two-team competitive matchmaking,
-while keeping its existing lobby menus. The service selects players and teams;
-Unity handles explicit ready checks, starts or joins the game, and authenticates
-each connection against the saved match roster.
+PurrLobby can use PurrServices queues for matchmaking while keeping its
+existing lobby menus. A queue is **casual** or **competitive**; the type is
+chosen on the project dashboard and decides how much there is to set up here.
+
+| | Casual | Competitive |
+| --- | --- | --- |
+| Unity setup | Queue Id and a game scene | Queue Id, game scene, sign-in, a result-reporting backend |
+| Hosting | A player hosts over the PurrNet relay | Dedicated server, or a player host over the relay |
+| Regions | The relay's, measured automatically | Automatic when player-hosted; Latency Probes for your own servers |
+| Ready check | None | Accept/Decline prompt |
+| Sign-in | Any, including device sign-in | Steam or username/password |
+| When the game ends | Nothing to report | Your backend reports the result |
+
+## Casual in four steps
+
+1. Link the PurrServices project, enable Matchmaking, and create a **Casual**
+   queue on the dashboard (a name and a player count are enough).
+2. Duplicate `Orchestrator.ServiceCasual` from
+   `Providers/PurrNet/Preset/Matchmaking` and assign it to the menu's
+   `LobbyManager`.
+3. Set the matchmaker's **Queue Id** to the queue's ID.
+4. Set the allocator's game scene, include it in the build, and put a
+   `NetworkManager` in it.
+
+That is the whole integration. The provider asks the service which relay
+regions the queue plays in, pings them, and searches. When a match forms the
+elected host opens the relay room in the matched region and the others join
+it; there is no ready check. Players are free to search again as soon as they
+leave the game, and the match closes by itself when the host leaves. The shape
+(one group or two teams, how many players, whether a match may start short) is
+set on the dashboard, not here; read it from `currentMatch.teams` and
+`currentMatch.teamSize`.
 
 ## Set up the menu
 
@@ -20,15 +48,19 @@ each connection against the saved match roster.
    - `Orchestrator.ServiceRanked`: Steam sign-in, queue `ranked`, dedicated
      games over direct UDP. Requires Steamworks.NET and project Steam auth.
      A custom username/password session provider also works for ranked queues.
-4. Set the matchmaker's **Queue Id** to your actual queue ID. Team sizes,
-   regions, ranked policy, skill windows, and hosting are configured on the
-   service, not in the menu. The presets do not create or enable queues.
-5. Configure **Latency Probes** on the matchmaker: one region ID and HTTP GET
-   endpoint per region, close to the servers that will host games. HTTPS is
-   required except for loopback development; WebGL endpoints need CORS.
-   Up to eight regions are sampled concurrently, twice each, with a three-second
-   timeout per sample. Failed regions are omitted. Alternatively pass measured
-   `request.latencies` from your own probe system. No guessed latency is sent.
+4. Set the matchmaker's **Queue Id** to your actual queue ID. The queue type,
+   team sizes, skill windows, and hosting are configured on the service, not
+   in the menu. The presets do not create or enable queues.
+5. Regions. A **player-hosted** queue (every casual queue) plays in the relay's
+   regions: the matchmaker measures them itself and there is nothing to
+   configure. Only a **dedicated-server** queue with your own regions needs
+   **Latency Probes** on the matchmaker: one region ID and HTTP GET endpoint
+   per region, close to the servers that will host games. HTTPS is required
+   except for loopback development; WebGL endpoints need CORS. Up to eight
+   regions are sampled concurrently, twice each, with a three-second timeout
+   per sample. Alternatively pass measured `request.latencies` from your own
+   probe system. Regions that do not answer are omitted; no guessed latency is
+   ever sent.
 6. Set the game scene and transport on the matchmaking game allocator. Include
    the scene in the build and put a `NetworkManager` in it. The normal menu
    scene loader suppresses auto-start while installing matchmaking admission.
@@ -43,17 +75,21 @@ and the allocated server must agree on transport. Direct player hosts need a
 reachable public address and port configured on the allocator. Direct UDP is
 unavailable in WebGL. Ordinary lobby game starts continue using PurrTransport.
 
-Relay hosts pin their listener to the service-selected region. **Relay Regions**
-maps queue region IDs to relay region IDs (default `eu` to `eu-central`); otherwise
-IDs must match exactly. Configure the same aliases on dedicated relay servers.
-An unavailable region fails allocation instead of silently selecting another
-region. Direct-server workers must claim matches in the region they serve.
+A player host pins its listener to the match's region, which is already a relay
+region: there is no mapping to configure. An unavailable region fails
+allocation instead of silently selecting another region. Only a dedicated
+server that listens through the relay for a queue with its own region names
+needs **Relay Regions** on `PurrServicesDedicatedMatchServer`, mapping each
+queue region to a relay region. Direct-server workers must claim matches in
+the region they serve.
 
 ## Search, parties, and ready checks
 
 The normal Matchmake button uses the selected provider's Queue Id. The shipped
-matchmaking view displays queue/allocation state and an explicit Accept/Decline
-prompt with a deadline and ready count. It never accepts on a player's behalf.
+matchmaking view displays queue/allocation state and, for competitive queues,
+an explicit Accept/Decline prompt with a deadline and ready count. It never
+accepts on a player's behalf. Casual queues have no ready check, so the prompt
+never appears.
 It creates matching ready-check buttons from its existing Cancel button; custom
 views can assign their own buttons in the Inspector.
 
@@ -105,7 +141,15 @@ For relay hosting the service supplies a unique room name. For direct hosting,
 configure the allocator's public host address and port. Host migration is not
 implemented; a lost host ends the game according to your game's policy.
 
-Only a casual host can report an outcome with the public player client:
+While the game runs, the allocator reports in to the service as the host every
+15 seconds. A casual match is closed when its host stops doing so, which is
+how the service learns the game is over without anything being reported. In a
+casual queue, if the elected host never starts the game the other players are
+returned to the queue with their wait intact.
+
+A casual game owes the service nothing when it ends. If you want the outcome
+on record, the host can report one with the public player client (a one-group
+match has only team 0):
 
 ```csharp
 var response = await PurrNet.Services.PurrServices.instance.matchmaking
@@ -113,7 +157,7 @@ var response = await PurrNet.Services.PurrServices.instance.matchmaking
 ```
 
 Call this from the game's authoritative outcome logic. Keep the same result ID
-and winner for retries. Ranked player-hosted games require a separate trusted
+and winner for retries. Competitive player-hosted games require a separate trusted
 backend to validate evidence and report the result; no project secret belongs
 in a player build. The Unity integration does not infer scores or make a peer's
 unverified result authoritative.

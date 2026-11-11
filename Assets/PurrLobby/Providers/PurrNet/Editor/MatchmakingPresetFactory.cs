@@ -17,7 +17,7 @@ namespace PurrNet.Lobby.PurrNet.Editor
             Create("Casual", "casual", "Orchestrator.PurrNet.asset", PurrServicesMatchTransport.Relay);
             Create("Ranked", "ranked", "Orchestrator.PurrNetSteam.asset", PurrServicesMatchTransport.DirectUdp);
             AssetDatabase.SaveAssets();
-            Debug.Log("Service matchmaking presets are ready. Configure queue IDs, regional probes and the game scene before playing.");
+            Debug.Log("Service matchmaking presets are ready. Set each matchmaker's Queue Id and each allocator's game scene before playing. Only a dedicated-server queue needs latency probes.");
         }
 
         static void Create(string label, string queue, string template, PurrServicesMatchTransport transport)

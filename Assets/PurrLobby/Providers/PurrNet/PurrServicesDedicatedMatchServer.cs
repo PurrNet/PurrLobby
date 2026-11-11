@@ -19,11 +19,8 @@ namespace PurrNet.Lobby.PurrNet
     {
         [SerializeField] NetworkManager _manager;
         [SerializeField, Min(5)] float _startupTimeout = 45;
-        [Tooltip("Maps queue region IDs to PurrTransport relay regions when using relay hosting.")]
-        [SerializeField] MatchmakingRelayRegion[] _relayRegions =
-        {
-            new() { matchmakingRegion = "eu", relayRegion = "eu-central" }
-        };
+        [Tooltip("Only when this server listens through the relay: maps the queue's own region IDs to relay regions. Unmapped IDs must be relay regions already.")]
+        [SerializeField] MatchmakingRelayRegion[] _relayRegions = Array.Empty<MatchmakingRelayRegion>();
         CancellationTokenSource _lifetime;
         MatchmakingServerClient _client;
         string _matchId;

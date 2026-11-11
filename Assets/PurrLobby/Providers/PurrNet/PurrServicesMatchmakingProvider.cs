@@ -9,7 +9,11 @@ using PurrNet.Services;
 
 namespace PurrNet.Lobby.PurrNet
 {
-    /// <summary>Durable service queues, explicit ready checks, and party invitations.</summary>
+    /// <summary>
+    /// Service queues and party invitations. A casual queue needs only its queue
+    /// ID here: regions are the relay's and are measured automatically, and the
+    /// service skips the ready check. Competitive queues add explicit ready checks.
+    /// </summary>
     [ProviderDependency("dev.purrnet.services", "PurrServices")]
     [CreateAssetMenu(menuName = "PurrLobby/PurrNet/Service Matchmaker", order = -199)]
     public class PurrServicesMatchmakingProvider : MatchmakingProvider
@@ -17,8 +21,10 @@ namespace PurrNet.Lobby.PurrNet
         [Tooltip("Queue ID configured on the project's Matchmaking dashboard. A request.queueId overrides this.")]
         [SerializeField] private string _queueId = "casual";
         [SerializeField, Range(3, 10)] private float _pollInterval = 3f;
-        [Tooltip("Regional HTTP ping endpoints, used when the request supplies no measured latencies. Never substitutes a guessed latency.")]
+        [Tooltip("Only for dedicated-server queues with your own regions: one HTTP ping endpoint per region. Player-hosted queues (every casual queue) measure the PurrNet relay automatically and ignore this.")]
         [SerializeField] private MatchmakingRegionProbe[] _latencyProbes = Array.Empty<MatchmakingRegionProbe>();
+        [Tooltip("The relay balancer whose regions player-hosted queues match in. Leave as is unless you run your own relay.")]
+        [SerializeField] private string _relayMasterServer = "https://purrtransport.purrservers.com/";
 
 #if PURR_SERVICES_MATCHMAKING
         private IMatchmakingClient _client;
@@ -100,10 +106,11 @@ namespace PurrNet.Lobby.PurrNet
             var cancellation = _pollCancellation.Token;
             try
             {
-                var measurements = await CollectLatenciesAsync(request, cancellation);
+                string queueId = string.IsNullOrEmpty(request.queueId) ? _queueId : request.queueId;
+                var measurements = await CollectLatenciesAsync(request, queueId, client, cancellation);
                 cancellation.ThrowIfCancellationRequested();
                 if (measurements == null || measurements.Count == 0)
-                    return MatchmakingTicketResponse.Failure("No region measurements are available. Configure reachable latency probes or supply measured request.latencies.");
+                    return MatchmakingTicketResponse.Failure("No region could be measured. Check the connection; for a dedicated-server queue, configure the matchmaker's Latency Probes or supply request.latencies.");
                 // Keep the create/join request alive when the UI closes. Its
                 // response supplies the ID needed to clean up a server-side
                 // mutation, using the original captured session, not a new login.
@@ -119,7 +126,7 @@ namespace PurrNet.Lobby.PurrNet
                 {
                     var createRequest = new MatchmakingTicketRequest
                     {
-                        queueId = string.IsNullOrEmpty(request.queueId) ? _queueId : request.queueId,
+                        queueId = queueId,
                         partySize = request.partySize == 0 ? 1 : request.partySize,
                         requestId = Guid.NewGuid().ToString("N"),
                         latencies = measurements
@@ -180,7 +187,16 @@ namespace PurrNet.Lobby.PurrNet
             return response;
         }
 
-        protected virtual async Task<Dictionary<string, float>> CollectLatenciesAsync(MatchmakingRequest request, CancellationToken cancellationToken)
+        /// <summary>
+        /// The player's latency per region the queue matches in. Measurements the
+        /// request supplies are used as they are. Otherwise the service says where
+        /// the queue plays: a player-hosted queue (every casual queue) plays in the
+        /// relay's regions, which are measured here with nothing to configure; a
+        /// dedicated-server queue uses the configured probes. A party member
+        /// joining by invitation has no queue ID, so both are tried.
+        /// </summary>
+        protected virtual async Task<Dictionary<string, float>> CollectLatenciesAsync(MatchmakingRequest request, string queueId,
+            IMatchmakingClient client, CancellationToken cancellationToken)
         {
             if (request.latencies != null && request.latencies.Count > 0)
             {
@@ -188,7 +204,62 @@ namespace PurrNet.Lobby.PurrNet
                 foreach (var pair in request.latencies) supplied.Add(pair.Key, pair.Value);
                 return supplied;
             }
+
+            MatchmakingQueue queue = null;
+            bool joiningParty = !string.IsNullOrEmpty(request.partyTicketId);
+            var queues = await client.ListQueuesAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (queues.success && queues.data?.queues != null)
+            {
+                foreach (var candidate in queues.data.queues)
+                    if (!joiningParty && candidate.id == queueId) queue = candidate;
+                // A party invitation does not say which queue it is for. With a
+                // single queue type in the project the answer is the same anyway.
+                if (queue == null && joiningParty) queue = SharedRegionSource(queues.data.queues);
+            }
+
+            if (queue != null && queue.usesRelayRegions)
+                return await MeasureRelayRegionsAsync(queue.regions, cancellationToken);
+            if (queue == null && (_latencyProbes == null || _latencyProbes.Length == 0))
+                return await MeasureRelayRegionsAsync(null, cancellationToken);
             return await MatchmakingRegionProbe.MeasureAsync(_latencyProbes, cancellationToken);
+        }
+
+        /// <summary>Any queue, when every queue measures the same way; otherwise unknown.</summary>
+        static MatchmakingQueue SharedRegionSource(MatchmakingQueue[] queues)
+        {
+            MatchmakingQueue first = null;
+            foreach (var queue in queues)
+            {
+                if (first == null) first = queue;
+                else if (queue.usesRelayRegions != first.usesRelayRegions) return null;
+            }
+            return first;
+        }
+
+        /// <summary>
+        /// Ping every relay region, keeping those the queue lists (all of them when
+        /// <paramref name="regions"/> is empty). Regions that do not answer are
+        /// omitted; a latency is never guessed.
+        /// </summary>
+        protected virtual async Task<Dictionary<string, float>> MeasureRelayRegionsAsync(string[] regions, CancellationToken cancellationToken)
+        {
+            var result = new Dictionary<string, float>();
+            List<global::PurrNet.Transports.PurrTransportUtils.RelayMeasurement> measurements;
+            try { measurements = await global::PurrNet.Transports.PurrTransportUtils.MeasureRelayServersAsync(_relayMasterServer); }
+            catch (OperationCanceledException) { throw; }
+            // An unreachable balancer is "nothing measured", which the caller reports plainly.
+            catch (Exception) { return result; }
+            cancellationToken.ThrowIfCancellationRequested();
+            foreach (var measurement in measurements)
+            {
+                string region = measurement.server.region;
+                if (measurement.error != null || string.IsNullOrEmpty(region)) continue;
+                if (regions != null && regions.Length > 0 && Array.IndexOf(regions, region) < 0) continue;
+                if (!result.TryGetValue(region, out var best) || measurement.milliseconds < best)
+                    result[region] = measurement.milliseconds;
+            }
+            return result;
         }
 
         private async Task PollAsync(MatchmakingTicket ticket, IMatchmakingClient client, int generation, CancellationToken cancellationToken)
@@ -308,7 +379,7 @@ namespace PurrNet.Lobby.PurrNet
             if (hostReady) { _handedOffTicket = ticket; _handoffClient = _client; }
             CompleteMatch(ticket, new MatchResult
             {
-                matchId = match.id, playerId = _playerId, region = match.region, ranked = match.ranked,
+                matchId = match.id, playerId = _playerId, region = match.region, ranked = match.mode == MatchmakingModes.Competitive,
                 isHost = match.isHost, requiresHostReady = hostReady,
                 connection = new ConnectionInfo
                 {

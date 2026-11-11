@@ -28,6 +28,17 @@ namespace PurrNet.Lobby.PurrServices.Tests
         protected override string localPlayerId => player;
         protected override string localSession => session;
         protected override IMatchmakingClient CaptureClient() => client;
+        /// <summary>What pinging the relay fleet would return; the regions asked for are recorded.</summary>
+        public Dictionary<string, float> relayLatencies = new();
+        public readonly List<string[]> relayMeasurements = new();
+        protected override Task<Dictionary<string, float>> MeasureRelayRegionsAsync(string[] regions, CancellationToken cancellationToken)
+        {
+            relayMeasurements.Add(regions);
+            var result = new Dictionary<string, float>();
+            foreach (var pair in relayLatencies)
+                if (regions == null || regions.Length == 0 || Array.IndexOf(regions, pair.Key) >= 0) result[pair.Key] = pair.Value;
+            return Task.FromResult(result);
+        }
         public override Task Initialize() => Task.CompletedTask;
         protected override Task WaitAsync(TimeSpan delay, CancellationToken cancellationToken)
         {
@@ -77,7 +88,10 @@ namespace PurrNet.Lobby.PurrServices.Tests
             public Func<Task<HttpResult<MatchmakingTicketData>>> cancel;
             public Func<bool, Task<HttpResult<MatchmakingMatchData>>> accept;
 
-            public Task<HttpResult<MatchmakingQueueList>> ListQueuesAsync(CancellationToken cancellationToken = default) => Task.FromResult(Ok(new MatchmakingQueueList()));
+            public MatchmakingQueue[] queues;
+            public int queueReads;
+            public Task<HttpResult<MatchmakingQueueList>> ListQueuesAsync(CancellationToken cancellationToken = default)
+            { queueReads++; return Task.FromResult(Ok(new MatchmakingQueueList { queues = queues })); }
             public Task<HttpResult<MatchmakingTicketData>> CreateTicketAsync(MatchmakingTicketRequest request, CancellationToken cancellationToken = default)
             { createCalls++; created = request; createRequests.Add(request); mutationTokens.Add(cancellationToken); return create?.Invoke() ?? Task.FromResult(Ok(remote)); }
             public Task<HttpResult<MatchmakingTicketData>> JoinTicketAsync(string ticketId, string inviteCode, Dictionary<string, float> latencies, CancellationToken cancellationToken = default)
@@ -133,7 +147,7 @@ namespace PurrNet.Lobby.PurrServices.Tests
         { id = id, state = state, matchId = matchId, leaderId = "steam:local", partySize = 1, players = Array.Empty<MatchmakingPlayer>() };
         static MatchmakingMatchData Match(string id, string state, bool host = false) => new()
         {
-            id = id, state = state, hosting = host ? "player-hosted" : "dedicated", ranked = true, isHost = host,
+            id = id, state = state, hosting = host ? "player-hosted" : "dedicated", mode = MatchmakingModes.Competitive, isHost = host,
             hostPlayerId = host ? "steam:local" : null, deadline = "2030-01-01T00:00:00Z",
             teams = new[] { new[] { new MatchmakingTeamMember { playerId = "steam:local", accepted = false } }, new[] { new MatchmakingTeamMember { playerId = "steam:other", accepted = false } } },
             connection = state == "active" || (host && state == "allocating")
@@ -186,6 +200,57 @@ namespace PurrNet.Lobby.PurrServices.Tests
             yield return Until(() => _provider.delays.Count > 0);
             Assert.Contains(MatchmakingStatus.Assembling, _statuses);
             Assert.IsEmpty(_found);
+        }
+
+        static MatchmakingQueue Queue(string id, bool relay, params string[] regions) => new()
+        {
+            id = id, name = id, regions = regions, regionSource = relay ? "relay" : "queue",
+            config = new MatchmakingQueueConfig { mode = relay ? MatchmakingModes.Casual : MatchmakingModes.Competitive, hosting = relay ? "player-hosted" : "dedicated" }
+        };
+
+        [UnityTest]
+        public IEnumerator MeasuredLatenciesFromTheGameAreSentWithoutAskingTheService()
+        {
+            var start = _provider.StartMatchmaking(Request());
+            yield return Await(start);
+            Assert.IsTrue(start.Result.success);
+            Assert.AreEqual(0, _client.queueReads);
+            Assert.IsEmpty(_provider.relayMeasurements);
+        }
+
+        [UnityTest]
+        public IEnumerator ACasualQueueNeedsOnlyItsIdBecauseRelayRegionsAreMeasuredAutomatically()
+        {
+            _client.queues = new[] { Queue("ranked", false, "eu"), Queue("quick-play", true, "eu-central", "us-east") };
+            _provider.relayLatencies = new Dictionary<string, float> { ["eu-central"] = 31f, ["us-east"] = 96f, ["brazil"] = 210f };
+            var start = _provider.StartMatchmaking(new MatchmakingRequest { queueId = "quick-play" });
+            yield return Await(start);
+            Assert.IsTrue(start.Result.success);
+            Assert.AreEqual("quick-play", _client.created.queueId);
+            CollectionAssert.AreEquivalent(new[] { "eu-central", "us-east" }, _client.created.latencies.Keys, "only the regions the queue lists");
+            Assert.AreEqual(31f, _client.created.latencies["eu-central"]);
+        }
+
+        [UnityTest]
+        public IEnumerator ADedicatedQueueWithoutProbesOrMeasurementsFailsBeforeCreatingATicket()
+        {
+            _client.queues = new[] { Queue("ranked", false, "eu") };
+            _provider.relayLatencies = new Dictionary<string, float> { ["eu-central"] = 31f };
+            var start = _provider.StartMatchmaking(new MatchmakingRequest { queueId = "ranked" });
+            yield return Await(start);
+            Assert.IsFalse(start.Result.success);
+            Assert.AreEqual(0, _client.createCalls);
+            Assert.IsEmpty(_provider.relayMeasurements, "relay latency says nothing about a game's own servers");
+        }
+
+        [UnityTest]
+        public IEnumerator AnUnreachableRelayFailsTheSearchInsteadOfGuessingALatency()
+        {
+            _client.queues = new[] { Queue("quick-play", true, "eu-central") };
+            var start = _provider.StartMatchmaking(new MatchmakingRequest { queueId = "quick-play" });
+            yield return Await(start);
+            Assert.IsFalse(start.Result.success);
+            Assert.AreEqual(0, _client.createCalls);
         }
 
         [UnityTest]

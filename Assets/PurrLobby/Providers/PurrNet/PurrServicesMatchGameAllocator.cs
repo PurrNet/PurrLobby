@@ -11,6 +11,7 @@ namespace PurrNet.Lobby.PurrNet
 {
     public enum PurrServicesMatchTransport { Relay, DirectUdp }
 
+    /// <summary>Dedicated-server queues only: one of the queue's own region IDs and the relay region its servers listen in.</summary>
     [Serializable]
     public struct MatchmakingRelayRegion
     {
@@ -26,11 +27,6 @@ namespace PurrNet.Lobby.PurrNet
         [SerializeField, PurrScene] string _gameScene;
         [SerializeField] PurrServicesMatchTransport _transport = PurrServicesMatchTransport.Relay;
         [SerializeField] bool _useP2P = true;
-        [Tooltip("Maps queue region IDs to PurrTransport relay regions. Unmapped IDs must match a relay region exactly.")]
-        [SerializeField] MatchmakingRelayRegion[] _relayRegions =
-        {
-            new() { matchmakingRegion = "eu", relayRegion = "eu-central" }
-        };
         [Tooltip("Maximum time to start a listener or finish game admission.")]
         [SerializeField, Min(5)] float _connectTimeout = 30;
         [Tooltip("For a direct player host, a publicly reachable address. Relay hosts do not need this.")]
@@ -124,8 +120,9 @@ namespace PurrNet.Lobby.PurrNet
                 {
                     if (!result.requiresHostReady)
                         throw new InvalidOperationException("This player-hosted match has already started; host replacement is not supported.");
+                    // A player-hosted match's region is the relay region itself.
                     if (manager.transport is PurrTransport)
-                        await PrepareRelayRegionAsync(manager, result.region, _relayRegions, cancellation);
+                        await PrepareRelayRegionAsync(manager, result.region, null, cancellation);
                     cancellation.ThrowIfCancellationRequested();
                     // Start the listener first. Starting a host here would send
                     // its own admission request while the match is allocating.
@@ -144,6 +141,10 @@ namespace PurrNet.Lobby.PurrNet
                 // token must not disconnect a healthy game 30 seconds later.
                 cancellation.ThrowIfCancellationRequested();
                 attempt.CancelAfter(Timeout.Infinite);
+                // The service closes a casual match whose host stops reporting
+                // in. The same token ends this loop when the game is left.
+                if (result.isHost)
+                    _ = KeepMatchAlive(ct => matchmaking.GetMatchAsync(result.matchId, ct), TimeSpan.FromSeconds(HostKeepAliveSeconds), cancellation);
             }
             catch
             {
@@ -236,15 +237,18 @@ namespace PurrNet.Lobby.PurrNet
             }
         }
 
-        /// <summary>Resolve project queue region names without choosing a different geographic region.</summary>
+        /// <summary>
+        /// The relay region a match plays in. A player-hosted match is already
+        /// assigned a relay region, so without aliases this is the identity. Aliases
+        /// exist for a dedicated-server queue with its own region names whose
+        /// servers listen through the relay.
+        /// </summary>
         public static string ResolveRelayRegion(string matchRegion, MatchmakingRelayRegion[] aliases = null)
         {
             if (string.IsNullOrWhiteSpace(matchRegion))
                 throw new ArgumentException("The match has no assigned region.", nameof(matchRegion));
             matchRegion = matchRegion.Trim();
-            // This is the service's default queue region. Supplying an explicit
-            // alias array (including an empty one) replaces the default mapping.
-            if (aliases == null) return matchRegion == "eu" ? "eu-central" : matchRegion;
+            if (aliases == null) return matchRegion;
             string mapped = null;
             foreach (var alias in aliases)
             {
@@ -358,6 +362,32 @@ namespace PurrNet.Lobby.PurrNet
         }
 
 #if PURR_SERVICES_MATCHMAKING
+        /// <summary>How often a player host reports in. The service allows at least 45 seconds of silence.</summary>
+        internal const float HostKeepAliveSeconds = 15;
+
+        /// <summary>
+        /// Poll the running match as its host until the game is left (the token)
+        /// or the service says the match is over. A failed poll is simply retried
+        /// on the next beat: one bad request must not end a healthy game.
+        /// </summary>
+        internal static async Task KeepMatchAlive(Func<CancellationToken, Task<HttpResult<MatchmakingMatchData>>> poll,
+            TimeSpan interval, CancellationToken cancellation, Func<TimeSpan, CancellationToken, Task> wait = null)
+        {
+            wait ??= Task.Delay;
+            try
+            {
+                while (!cancellation.IsCancellationRequested)
+                {
+                    await wait(interval, cancellation);
+                    var response = await poll(cancellation);
+                    if (response.statusCode == 403 || response.statusCode == 404) return;
+                    if (response.success && response.data != null && response.data.state != "active") return;
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception) { /* Never surface a background heartbeat failure into gameplay. */ }
+        }
+
         internal static async Task PublishReady(Func<CancellationToken, Task<HttpResult<MatchmakingMatchData>>> publish,
             CancellationToken cancellation)
         {
