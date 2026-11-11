@@ -1,3 +1,10 @@
+# [1.2.0-beta.4](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.3...v1.2.0-beta.4) (2026-11-11)
+
+
+### Features
+
+* casual and competitive service matchmaking with automatic relay regions ([56abb5a](https://github.com/PurrNet/PurrLobby/commit/56abb5a09a25ab9fdd0d3f5ca0c36b22ba28b149))
+
 # [1.2.0-beta.3](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.2...v1.2.0-beta.3) (2026-10-30)
 
 
