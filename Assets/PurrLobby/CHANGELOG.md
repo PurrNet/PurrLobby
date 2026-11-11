@@ -1,3 +1,10 @@
+# [1.2.0-beta.6](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.5...v1.2.0-beta.6) (2026-11-11)
+
+
+### Bug Fixes
+
+* service matchmaking polling in WebGL builds ([414c6a2](https://github.com/PurrNet/PurrLobby/commit/414c6a288c4f1b5432c3e679b2d8808c0b3f222f))
+
 # [1.2.0-beta.5](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.4...v1.2.0-beta.5) (2026-11-11)
 
 
