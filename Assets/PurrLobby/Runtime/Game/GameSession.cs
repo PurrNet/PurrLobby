@@ -35,6 +35,31 @@ namespace PurrNet.Lobby
         [Tooltip("Delay between reconnect attempts.")]
         [SerializeField] private float _reconnectInterval = 2f;
 
+        /// <summary>
+        /// Optional host migration (for example the PurrNet Host Migration package), set by the game. With one, a
+        /// host leaving or getting lost doesn't end the game: a leaving listen host hands it over instead of
+        /// ending it, and clients let the migration move them to the new host instead of reconnecting to the old
+        /// one. Without one (the default), a host leaving ends the game for everyone, as before.
+        /// </summary>
+        public interface IHostMigration
+        {
+            /// <summary>A migration owns the connection right now: don't reconnect, don't exit.</summary>
+            bool isMigrating { get; }
+
+            /// <summary>
+            /// On a listen host that is leaving: starts handing the game to another player. Returns false when it
+            /// can't (nobody to hand it to), and the game ends as without migration. Otherwise
+            /// <paramref name="onDone"/> runs once this host may leave, whether the handoff worked or not.
+            /// </summary>
+            bool TryHandOff(Action onDone);
+        }
+
+        /// <summary>The game's host migration, if it has one. See <see cref="IHostMigration"/>.</summary>
+        public static IHostMigration hostMigration { get; set; }
+
+        /// <summary>How long a client waits for a migration to start after losing the host.</summary>
+        private const float HostMigrationStartWait = 1.5f;
+
         /// <summary>The most recently registered <see cref="GameSession"/>. For the common single-session case; prefer <see cref="TryGet"/> when the scene is known.</summary>
         public static GameSession instance { get; private set; }
 
@@ -66,6 +91,7 @@ namespace PurrNet.Lobby
         {
             _byScene.Clear();
             instance = null;
+            hostMigration = null;
         }
 
         /// <summary>True while reconnect attempts are in progress after an unexpected disconnect.</summary>
@@ -86,6 +112,7 @@ namespace PurrNet.Lobby
         private bool _exiting;
         private bool _isPlayerSession;
         private Coroutine _reconnectRoutine;
+        private bool _handingOff;
 
         /// <summary>
         /// Marks a game launched by a player's menu. An elected host can be
@@ -185,7 +212,8 @@ namespace PurrNet.Lobby
             // cannot fall between the snapshot check and registering the callbacks.
             var localPlayerId = _observedLobby.localPlayer?.id;
             bool hasLocalPlayer = string.IsNullOrEmpty(localPlayerId);
-            bool hasGameHost = string.IsNullOrEmpty(_gameHostId);
+            // With host migration the game can outlive the host that started it.
+            bool hasGameHost = string.IsNullOrEmpty(_gameHostId) || hostMigration != null;
 
             for (int i = 0; i < _observedLobby.players.Count; i++)
             {
@@ -207,6 +235,17 @@ namespace PurrNet.Lobby
             // A listen host owns the game session. Tell observers that it is ending
             // before stopping the transport; otherwise they interpret the clean
             // shutdown as a transient disconnect and retry until the timeout.
+            if (_handingOff)
+                return;
+
+            // With host migration, a leaving listen host hands the game to another player instead of ending it.
+            if (_manager && _manager.isServer && _manager.isClient && hostMigration != null &&
+                hostMigration.TryHandOff(() => ExitToMenu(GameExitReason.LeftByChoice)))
+            {
+                _handingOff = true;
+                return;
+            }
+
             if (_manager && _manager.isServer &&
                 GameOverBroadcaster.TryGet(gameObject.scene, out var broadcaster) &&
                 broadcaster.NotifyHostLeaving())
@@ -236,7 +275,8 @@ namespace PurrNet.Lobby
             // A player-hosted game cannot recover after its original game host
             // leaves the backing lobby. This also covers crashes/forced exits,
             // where the host has no opportunity to send HostLeavingRpc first.
-            if (player != null && !string.IsNullOrEmpty(_gameHostId) && player.id == _gameHostId)
+            // With host migration it doesn't end the game: the connection tells whether the game goes on.
+            if (player != null && !string.IsNullOrEmpty(_gameHostId) && player.id == _gameHostId && hostMigration == null)
                 ExitToMenu(GameExitReason.ConnectionLost);
         }
 
@@ -246,8 +286,16 @@ namespace PurrNet.Lobby
 
         private void OnClientConnectionState(ConnectionState state)
         {
-            if (_exiting || state != ConnectionState.Disconnected)
+            if (_exiting || _handingOff || state != ConnectionState.Disconnected)
                 return;
+
+            if (hostMigration != null)
+            {
+                // The host may be gone: give the migration the connection first, reconnect only if it doesn't run.
+                if (_reconnectRoutine == null)
+                    _reconnectRoutine = StartCoroutine(HostMigrationRoutine());
+                return;
+            }
 
             if (_manager.isServer)
             {
@@ -264,10 +312,44 @@ namespace PurrNet.Lobby
 
         private void OnServerConnectionState(ConnectionState state)
         {
-            if (_exiting || state != ConnectionState.Disconnected)
+            if (_exiting || _handingOff || state != ConnectionState.Disconnected)
+                return;
+
+            // A promotion restarts the server role; the migration decides how it ends.
+            if (hostMigration != null && hostMigration.isMigrating)
                 return;
 
             ExitToMenu(GameExitReason.ConnectionLost);
+        }
+
+        private IEnumerator HostMigrationRoutine()
+        {
+            SetReconnecting(true);
+
+            // The migration starts a moment after the disconnect: wait for it, then for it to finish.
+            float waited = 0f;
+            while (!hostMigration.isMigrating && waited < HostMigrationStartWait &&
+                   _manager.clientState != ConnectionState.Connected)
+            {
+                yield return null;
+                waited += Time.unscaledDeltaTime;
+            }
+
+            while (hostMigration != null && hostMigration.isMigrating)
+                yield return null;
+
+            _reconnectRoutine = null;
+            if (_exiting)
+                yield break;
+
+            if (_manager.clientState == ConnectionState.Connected || (_manager.isServer && _manager.isClient))
+            {
+                SetReconnecting(false);
+                yield break;
+            }
+
+            // No migration (or it failed): the usual reconnect, then the menu.
+            _reconnectRoutine = StartCoroutine(ReconnectRoutine());
         }
 
         private IEnumerator ReconnectRoutine()
