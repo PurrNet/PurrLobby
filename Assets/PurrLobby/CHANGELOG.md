@@ -1,3 +1,10 @@
+# [1.2.0-beta.9](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.8...v1.2.0-beta.9) (2026-11-12)
+
+
+### Features
+
+* optional host migration hook in GameSession ([6320252](https://github.com/PurrNet/PurrLobby/commit/63202524b5c0534d20a84c826b788678dfaf94c7))
+
 # [1.2.0-beta.8](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.7...v1.2.0-beta.8) (2026-11-12)
 
 
