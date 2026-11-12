@@ -1,3 +1,10 @@
+# [1.2.0-beta.8](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.7...v1.2.0-beta.8) (2026-11-12)
+
+
+### Bug Fixes
+
+* copying the lobby code in WebGL builds ([5215efb](https://github.com/PurrNet/PurrLobby/commit/5215efbd79dcd1b1cbdb9c2b2339ededf5b9605b))
+
 # [1.2.0-beta.7](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.6...v1.2.0-beta.7) (2026-11-11)
 
 
