@@ -341,7 +341,7 @@ namespace PurrNet.Lobby
 
         public void CopyLobbyCodeToClipboard()
         {
-            GUIUtility.systemCopyBuffer = _lobby.joinCode;
+            LobbyClipboard.Copy(_lobby.joinCode);
             Toaster.Push("Lobby Code", "Code copied to clipboard!");
         }
 
