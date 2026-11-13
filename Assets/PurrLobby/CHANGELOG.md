@@ -1,3 +1,10 @@
+# [1.2.0-beta.10](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.9...v1.2.0-beta.10) (2026-11-13)
+
+
+### Features
+
+* bind game connections to their lobby players in GameSession ([27c4797](https://github.com/PurrNet/PurrLobby/commit/27c4797612b443bcda75c05f64ca5bbd37daa6fa))
+
 # [1.2.0-beta.9](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.8...v1.2.0-beta.9) (2026-11-12)
 
 
