@@ -106,8 +106,40 @@ namespace PurrNet.Lobby
         /// <summary>Raised once when the session begins exiting, with the reason for the exit.</summary>
         public event Action<GameExitReason> onExiting;
 
+        /// <summary>
+        /// On the game server: the lobby player a game connection belongs to. A connection is bound once it has
+        /// proven its lobby player (see <see cref="LobbyPlayerBindings"/>), usually within a second of joining;
+        /// a client's own claim is never taken on its word. The listen host's own connection is bound directly.
+        /// False on clients, for connections that haven't proven anything (yet), and without a lobby.
+        /// </summary>
+        public bool TryGetLobbyPlayer(PlayerID player, out IPlayer lobbyPlayer)
+        {
+            lobbyPlayer = null;
+            return _lobbyPlayers != null && _lobbyPlayers.TryGetLobbyPlayer(player, out lobbyPlayer);
+        }
+
+        /// <summary>On the game server: the game connection of a lobby player, once it has proven itself.</summary>
+        public bool TryGetPlayerID(IPlayer lobbyPlayer, out PlayerID player)
+        {
+            player = default;
+            return lobbyPlayer != null && _lobbyPlayers != null && _lobbyPlayers.TryGetPlayerID(lobbyPlayer.id, out player);
+        }
+
+        /// <summary>On the game server: a game connection was bound to its lobby player.</summary>
+        public event Action<PlayerID, IPlayer> onLobbyPlayerBound;
+
+        /// <summary>
+        /// On the game server: a binding ended because the connection left, the member left the lobby, or the
+        /// member reconnected on another connection. Bound members that drop out of the game show up here.
+        /// </summary>
+        public event Action<PlayerID, IPlayer> onLobbyPlayerUnbound;
+
+        /// <summary>On the game server: a connection didn't prove its lobby player in time. Carries its claim, if any.</summary>
+        public event Action<PlayerID, string> onLobbyPlayerBindingFailed;
+
         private NetworkManager _manager;
         private ILobby _observedLobby;
+        private LobbyPlayerBindings _lobbyPlayers;
         private string _gameHostId;
         private bool _exiting;
         private bool _isPlayerSession;
@@ -151,6 +183,11 @@ namespace PurrNet.Lobby
             {
                 _manager.onClientConnectionState += OnClientConnectionState;
                 _manager.onServerConnectionState += OnServerConnectionState;
+                _manager.onPlayerJoined += OnGamePlayerJoined;
+                _manager.onPlayerLeft += OnGamePlayerLeft;
+                _manager.onLocalPlayerReceivedID += OnLocalGamePlayerReceivedID;
+                _manager.Subscribe<LobbyPlayerChallenge>(OnLobbyPlayerChallenge, false);
+                _manager.Subscribe<LobbyPlayerClaim>(OnLobbyPlayerClaim, true);
             }
 
             if (!_orchestrator)
@@ -175,6 +212,19 @@ namespace PurrNet.Lobby
             {
                 _manager.onClientConnectionState -= OnClientConnectionState;
                 _manager.onServerConnectionState -= OnServerConnectionState;
+                _manager.onPlayerJoined -= OnGamePlayerJoined;
+                _manager.onPlayerLeft -= OnGamePlayerLeft;
+                _manager.onLocalPlayerReceivedID -= OnLocalGamePlayerReceivedID;
+                _manager.Unsubscribe<LobbyPlayerChallenge>(OnLobbyPlayerChallenge, false);
+                _manager.Unsubscribe<LobbyPlayerClaim>(OnLobbyPlayerClaim, true);
+            }
+
+            if (_lobbyPlayers != null)
+            {
+                _lobbyPlayers.onBound -= RaiseLobbyPlayerBound;
+                _lobbyPlayers.onUnbound -= RaiseLobbyPlayerUnbound;
+                _lobbyPlayers.onBindingFailed -= RaiseLobbyPlayerBindingFailed;
+                _lobbyPlayers = null;
             }
 
             var sceneHandle = GetSceneKey(gameObject.scene);
@@ -192,6 +242,11 @@ namespace PurrNet.Lobby
             _observedLobby = lobby;
             if (_observedLobby == null)
                 return;
+
+            _lobbyPlayers = new LobbyPlayerBindings(_observedLobby);
+            _lobbyPlayers.onBound += RaiseLobbyPlayerBound;
+            _lobbyPlayers.onUnbound += RaiseLobbyPlayerUnbound;
+            _lobbyPlayers.onBindingFailed += RaiseLobbyPlayerBindingFailed;
 
             if (_observedLobby.lobbyData.TryGetData(GameStartKeys.ConnInfo, out var rawConnection) &&
                 GameStartKeys.TryReadConnectionInfo(rawConnection, out var connection))
@@ -272,6 +327,8 @@ namespace PurrNet.Lobby
 
         private void OnLobbyPlayerLeft(IPlayer player)
         {
+            _lobbyPlayers?.OnLobbyPlayerLeft(player);
+
             // A player-hosted game cannot recover after its original game host
             // leaves the backing lobby. This also covers crashes/forced exits,
             // where the host has no opportunity to send HostLeavingRpc first.
@@ -283,6 +340,72 @@ namespace PurrNet.Lobby
         /// <summary>Invoked by the server before a listen host voluntarily shuts down.</summary>
         internal void HostLeft(bool wasLocalHost) =>
             ExitToMenu(wasLocalHost ? GameExitReason.LeftByChoice : GameExitReason.GameOver);
+
+        private void Update()
+        {
+            if (_lobbyPlayers != null && _manager && _manager.isServer)
+                _lobbyPlayers.Update(Time.unscaledTime);
+        }
+
+        private void OnGamePlayerJoined(PlayerID player, bool isReconnect, bool asServer)
+        {
+            if (!asServer || _lobbyPlayers == null || player.isBot)
+                return;
+
+            // The listen host's own connection is the server's member; nothing to prove.
+            if (_manager.isClient && _manager.localPlayer.Equals(player))
+            {
+                _lobbyPlayers.BindLocal(player);
+                return;
+            }
+
+            var nonce = _lobbyPlayers.Challenge(player, Time.unscaledTime);
+            _manager.Send(player, new LobbyPlayerChallenge { nonce = nonce });
+        }
+
+        private void OnLocalGamePlayerReceivedID(PlayerID player)
+        {
+            // On a listen host the server can see its own client join before that client has its id.
+            if (_lobbyPlayers != null && _manager.isServer)
+                _lobbyPlayers.BindLocal(player);
+        }
+
+        private void OnGamePlayerLeft(PlayerID player, bool asServer)
+        {
+            if (asServer)
+                _lobbyPlayers?.Remove(player);
+        }
+
+        private void OnLobbyPlayerChallenge(PlayerID sender, LobbyPlayerChallenge challenge, bool asServer)
+        {
+            // Client: prove which lobby player we are by writing the nonce to our own member data, then claim it.
+            if (_manager.isServer || _observedLobby == null)
+                return;
+
+            var localPlayer = _observedLobby.localPlayer;
+            if (localPlayer == null || !LobbyPlayerBindings.Answer(_observedLobby, challenge.nonce))
+                return;
+
+            _manager.SendToServer(new LobbyPlayerClaim { lobbyPlayerId = localPlayer.id });
+        }
+
+        private void OnLobbyPlayerClaim(PlayerID player, LobbyPlayerClaim claim, bool asServer)
+        {
+            if (_lobbyPlayers == null)
+                return;
+
+            _lobbyPlayers.Claim(player, claim.lobbyPlayerId);
+            _lobbyPlayers.Update(Time.unscaledTime);
+        }
+
+        private void RaiseLobbyPlayerBound(PlayerID player, IPlayer lobbyPlayer) =>
+            onLobbyPlayerBound?.Invoke(player, lobbyPlayer);
+
+        private void RaiseLobbyPlayerUnbound(PlayerID player, IPlayer lobbyPlayer) =>
+            onLobbyPlayerUnbound?.Invoke(player, lobbyPlayer);
+
+        private void RaiseLobbyPlayerBindingFailed(PlayerID player, string claimedId) =>
+            onLobbyPlayerBindingFailed?.Invoke(player, claimedId);
 
         private void OnClientConnectionState(ConnectionState state)
         {
