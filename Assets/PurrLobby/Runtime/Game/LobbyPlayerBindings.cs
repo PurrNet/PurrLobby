@@ -30,6 +30,13 @@ namespace PurrNet.Lobby
     /// A nonce is only good for the connection it was sent to, so copying another member's nonce or replaying an
     /// old one binds nothing.
     /// </para>
+    /// <para>
+    /// This is only as strong as the lobby provider's rule that members write their own data alone. PurrServices
+    /// and Steam enforce it on their servers. Nakama does not: member data travels as relayed match state, and
+    /// receivers don't check the sender (<c>NakamaLobby.ApplyPlayerMetadataPatch</c> trusts the payload's user id,
+    /// and <c>ApplySnapshot</c> accepts snapshots from any member), so on Nakama a modified client can still
+    /// forge a binding.
+    /// </para>
     /// <see cref="GameSession"/> drives this over the game connection; use
     /// <see cref="GameSession.TryGetLobbyPlayer"/> and <see cref="GameSession.TryGetPlayerID"/> to read it.
     /// </summary>
