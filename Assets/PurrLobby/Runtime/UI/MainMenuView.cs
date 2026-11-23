@@ -20,6 +20,13 @@ namespace PurrNet.Lobby
         private GameOrchestrator _orchestrator;
         private bool _loggingOut;
 
+        public override void OnPushed()
+        {
+            // The game may have locked the cursor; returning here by any path (leave,
+            // kick, host left) must give the player a usable cursor.
+            CursorScope.Release();
+        }
+
         protected override IEnumerator OnEnterTransition() => ViewTransitions.FadeIn(this);
 
         protected override IEnumerator OnExitTransition() => ViewTransitions.FadeOut(this);

@@ -10,6 +10,22 @@ namespace PurrNet.Lobby
     /// </summary>
     public static class CursorScope
     {
+        /// <summary>Cursor access, swappable in tests (batchmode can't hold a locked cursor).</summary>
+        internal interface ICursor
+        {
+            CursorLockMode lockState { get; set; }
+            bool visible { get; set; }
+        }
+
+        sealed class UnityCursor : ICursor
+        {
+            public CursorLockMode lockState { get => Cursor.lockState; set => Cursor.lockState = value; }
+            public bool visible { get => Cursor.visible; set => Cursor.visible = value; }
+        }
+
+        internal static readonly ICursor unityCursor = new UnityCursor();
+        internal static ICursor cursor = unityCursor;
+
         static int _depth;
         static CursorLockMode _savedLock;
         static bool _savedVisible;
@@ -24,12 +40,12 @@ namespace PurrNet.Lobby
         {
             if (_depth++ == 0)
             {
-                _savedLock = Cursor.lockState;
-                _savedVisible = Cursor.visible;
+                _savedLock = cursor.lockState;
+                _savedVisible = cursor.visible;
             }
 
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            cursor.lockState = CursorLockMode.None;
+            cursor.visible = true;
         }
 
         /// <summary>
@@ -44,10 +60,10 @@ namespace PurrNet.Lobby
             if (--_depth > 0)
                 return;
 
-            if (Cursor.lockState == CursorLockMode.None && Cursor.visible)
+            if (cursor.lockState == CursorLockMode.None && cursor.visible)
             {
-                Cursor.lockState = _savedLock;
-                Cursor.visible = _savedVisible;
+                cursor.lockState = _savedLock;
+                cursor.visible = _savedVisible;
             }
         }
 
@@ -59,6 +75,18 @@ namespace PurrNet.Lobby
         {
             if (_depth > 0)
                 _depth--;
+        }
+
+        /// <summary>
+        /// Unlock and show the cursor unconditionally and forget any open scopes — used
+        /// by the main menu, which always needs a free cursor no matter how the player
+        /// got there (left, kicked, host gone). Scopes still closing afterwards are no-ops.
+        /// </summary>
+        public static void Release()
+        {
+            _depth = 0;
+            cursor.lockState = CursorLockMode.None;
+            cursor.visible = true;
         }
     }
 }
