@@ -1,3 +1,10 @@
+# [1.2.0-beta.11](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.10...v1.2.0-beta.11) (2026-11-23)
+
+
+### Bug Fixes
+
+* unlock the cursor when returning to the main menu ([1cc3250](https://github.com/PurrNet/PurrLobby/commit/1cc3250072566ef1bc0dad833a0b488d74ce5311))
+
 # [1.2.0-beta.10](https://github.com/PurrNet/PurrLobby/compare/v1.2.0-beta.9...v1.2.0-beta.10) (2026-11-13)
 
 
